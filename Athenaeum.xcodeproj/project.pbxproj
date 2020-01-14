@@ -1,0 +1,619 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511220323CDB05E0063FB32 /* AppDelegate.swift */; };
+		A511220623CDB05E0063FB32 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511220523CDB05E0063FB32 /* ContentView.swift */; };
+		A511220923CDB05E0063FB32 /* Athenaeum.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */; };
+		A511220B23CDB0620063FB32 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A511220A23CDB0620063FB32 /* Assets.xcassets */; };
+		A511220E23CDB0620063FB32 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A511220D23CDB0620063FB32 /* Preview Assets.xcassets */; };
+		A511221123CDB0620063FB32 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A511220F23CDB0620063FB32 /* Main.storyboard */; };
+		A511221D23CDB0620063FB32 /* AthenaeumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511221C23CDB0620063FB32 /* AthenaeumTests.swift */; };
+		A511222823CDB0620063FB32 /* AthenaeumUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511222723CDB0620063FB32 /* AthenaeumUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A511221923CDB0620063FB32 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51121F823CDB05E0063FB32 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A51121FF23CDB05E0063FB32;
+			remoteInfo = Athenaeum;
+		};
+		A511222423CDB0620063FB32 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51121F823CDB05E0063FB32 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A51121FF23CDB05E0063FB32;
+			remoteInfo = Athenaeum;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A511220023CDB05E0063FB32 /* Athenaeum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Athenaeum.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A511220323CDB05E0063FB32 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A511220523CDB05E0063FB32 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A511220823CDB05E0063FB32 /* Athenaeum.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Athenaeum.xcdatamodel; sourceTree = "<group>"; };
+		A511220A23CDB0620063FB32 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A511220D23CDB0620063FB32 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		A511221023CDB0620063FB32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		A511221223CDB0620063FB32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A511221323CDB0620063FB32 /* Athenaeum.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Athenaeum.entitlements; sourceTree = "<group>"; };
+		A511221823CDB0620063FB32 /* AthenaeumTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AthenaeumTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A511221C23CDB0620063FB32 /* AthenaeumTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthenaeumTests.swift; sourceTree = "<group>"; };
+		A511221E23CDB0620063FB32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A511222323CDB0620063FB32 /* AthenaeumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AthenaeumUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A511222723CDB0620063FB32 /* AthenaeumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthenaeumUITests.swift; sourceTree = "<group>"; };
+		A511222923CDB0620063FB32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A51121FD23CDB05E0063FB32 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A511221523CDB0620063FB32 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A511222023CDB0620063FB32 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A51121F723CDB05E0063FB32 = {
+			isa = PBXGroup;
+			children = (
+				A511220223CDB05E0063FB32 /* Athenaeum */,
+				A511221B23CDB0620063FB32 /* AthenaeumTests */,
+				A511222623CDB0620063FB32 /* AthenaeumUITests */,
+				A511220123CDB05E0063FB32 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A511220123CDB05E0063FB32 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A511220023CDB05E0063FB32 /* Athenaeum.app */,
+				A511221823CDB0620063FB32 /* AthenaeumTests.xctest */,
+				A511222323CDB0620063FB32 /* AthenaeumUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A511220223CDB05E0063FB32 /* Athenaeum */ = {
+			isa = PBXGroup;
+			children = (
+				A511220323CDB05E0063FB32 /* AppDelegate.swift */,
+				A511220523CDB05E0063FB32 /* ContentView.swift */,
+				A511220A23CDB0620063FB32 /* Assets.xcassets */,
+				A511220F23CDB0620063FB32 /* Main.storyboard */,
+				A511221223CDB0620063FB32 /* Info.plist */,
+				A511221323CDB0620063FB32 /* Athenaeum.entitlements */,
+				A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */,
+				A511220C23CDB0620063FB32 /* Preview Content */,
+			);
+			path = Athenaeum;
+			sourceTree = "<group>";
+		};
+		A511220C23CDB0620063FB32 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				A511220D23CDB0620063FB32 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		A511221B23CDB0620063FB32 /* AthenaeumTests */ = {
+			isa = PBXGroup;
+			children = (
+				A511221C23CDB0620063FB32 /* AthenaeumTests.swift */,
+				A511221E23CDB0620063FB32 /* Info.plist */,
+			);
+			path = AthenaeumTests;
+			sourceTree = "<group>";
+		};
+		A511222623CDB0620063FB32 /* AthenaeumUITests */ = {
+			isa = PBXGroup;
+			children = (
+				A511222723CDB0620063FB32 /* AthenaeumUITests.swift */,
+				A511222923CDB0620063FB32 /* Info.plist */,
+			);
+			path = AthenaeumUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A51121FF23CDB05E0063FB32 /* Athenaeum */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A511222C23CDB0620063FB32 /* Build configuration list for PBXNativeTarget "Athenaeum" */;
+			buildPhases = (
+				A51121FC23CDB05E0063FB32 /* Sources */,
+				A51121FD23CDB05E0063FB32 /* Frameworks */,
+				A51121FE23CDB05E0063FB32 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Athenaeum;
+			productName = Athenaeum;
+			productReference = A511220023CDB05E0063FB32 /* Athenaeum.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A511221723CDB0620063FB32 /* AthenaeumTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A511222F23CDB0620063FB32 /* Build configuration list for PBXNativeTarget "AthenaeumTests" */;
+			buildPhases = (
+				A511221423CDB0620063FB32 /* Sources */,
+				A511221523CDB0620063FB32 /* Frameworks */,
+				A511221623CDB0620063FB32 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A511221A23CDB0620063FB32 /* PBXTargetDependency */,
+			);
+			name = AthenaeumTests;
+			productName = AthenaeumTests;
+			productReference = A511221823CDB0620063FB32 /* AthenaeumTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A511222223CDB0620063FB32 /* AthenaeumUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A511223223CDB0620063FB32 /* Build configuration list for PBXNativeTarget "AthenaeumUITests" */;
+			buildPhases = (
+				A511221F23CDB0620063FB32 /* Sources */,
+				A511222023CDB0620063FB32 /* Frameworks */,
+				A511222123CDB0620063FB32 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A511222523CDB0620063FB32 /* PBXTargetDependency */,
+			);
+			name = AthenaeumUITests;
+			productName = AthenaeumUITests;
+			productReference = A511222323CDB0620063FB32 /* AthenaeumUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A51121F823CDB05E0063FB32 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1130;
+				LastUpgradeCheck = 1130;
+				ORGANIZATIONNAME = "Callum Kerson";
+				TargetAttributes = {
+					A51121FF23CDB05E0063FB32 = {
+						CreatedOnToolsVersion = 11.3;
+					};
+					A511221723CDB0620063FB32 = {
+						CreatedOnToolsVersion = 11.3;
+						TestTargetID = A51121FF23CDB05E0063FB32;
+					};
+					A511222223CDB0620063FB32 = {
+						CreatedOnToolsVersion = 11.3;
+						TestTargetID = A51121FF23CDB05E0063FB32;
+					};
+				};
+			};
+			buildConfigurationList = A51121FB23CDB05E0063FB32 /* Build configuration list for PBXProject "Athenaeum" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A51121F723CDB05E0063FB32;
+			productRefGroup = A511220123CDB05E0063FB32 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A51121FF23CDB05E0063FB32 /* Athenaeum */,
+				A511221723CDB0620063FB32 /* AthenaeumTests */,
+				A511222223CDB0620063FB32 /* AthenaeumUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A51121FE23CDB05E0063FB32 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A511221123CDB0620063FB32 /* Main.storyboard in Resources */,
+				A511220E23CDB0620063FB32 /* Preview Assets.xcassets in Resources */,
+				A511220B23CDB0620063FB32 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A511221623CDB0620063FB32 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A511222123CDB0620063FB32 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A51121FC23CDB05E0063FB32 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A511220623CDB05E0063FB32 /* ContentView.swift in Sources */,
+				A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */,
+				A511220923CDB05E0063FB32 /* Athenaeum.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A511221423CDB0620063FB32 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A511221D23CDB0620063FB32 /* AthenaeumTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A511221F23CDB0620063FB32 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A511222823CDB0620063FB32 /* AthenaeumUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A511221A23CDB0620063FB32 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A51121FF23CDB05E0063FB32 /* Athenaeum */;
+			targetProxy = A511221923CDB0620063FB32 /* PBXContainerItemProxy */;
+		};
+		A511222523CDB0620063FB32 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A51121FF23CDB05E0063FB32 /* Athenaeum */;
+			targetProxy = A511222423CDB0620063FB32 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		A511220F23CDB0620063FB32 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A511221023CDB0620063FB32 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		A511222A23CDB0620063FB32 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A511222B23CDB0620063FB32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		A511222D23CDB0620063FB32 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Athenaeum/Athenaeum.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"Athenaeum/Preview Content\"";
+				DEVELOPMENT_TEAM = 57GAEYX88Q;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Athenaeum/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.umbra.Athenaeum;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A511222E23CDB0620063FB32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Athenaeum/Athenaeum.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"Athenaeum/Preview Content\"";
+				DEVELOPMENT_TEAM = 57GAEYX88Q;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Athenaeum/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.umbra.Athenaeum;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A511223023CDB0620063FB32 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 57GAEYX88Q;
+				INFOPLIST_FILE = AthenaeumTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.umbra.AthenaeumTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Athenaeum.app/Contents/MacOS/Athenaeum";
+			};
+			name = Debug;
+		};
+		A511223123CDB0620063FB32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 57GAEYX88Q;
+				INFOPLIST_FILE = AthenaeumTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.umbra.AthenaeumTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Athenaeum.app/Contents/MacOS/Athenaeum";
+			};
+			name = Release;
+		};
+		A511223323CDB0620063FB32 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 57GAEYX88Q;
+				INFOPLIST_FILE = AthenaeumUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.umbra.AthenaeumUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Athenaeum;
+			};
+			name = Debug;
+		};
+		A511223423CDB0620063FB32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 57GAEYX88Q;
+				INFOPLIST_FILE = AthenaeumUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.umbra.AthenaeumUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Athenaeum;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A51121FB23CDB05E0063FB32 /* Build configuration list for PBXProject "Athenaeum" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A511222A23CDB0620063FB32 /* Debug */,
+				A511222B23CDB0620063FB32 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A511222C23CDB0620063FB32 /* Build configuration list for PBXNativeTarget "Athenaeum" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A511222D23CDB0620063FB32 /* Debug */,
+				A511222E23CDB0620063FB32 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A511222F23CDB0620063FB32 /* Build configuration list for PBXNativeTarget "AthenaeumTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A511223023CDB0620063FB32 /* Debug */,
+				A511223123CDB0620063FB32 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A511223223CDB0620063FB32 /* Build configuration list for PBXNativeTarget "AthenaeumUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A511223323CDB0620063FB32 /* Debug */,
+				A511223423CDB0620063FB32 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				A511220823CDB05E0063FB32 /* Athenaeum.xcdatamodel */,
+			);
+			currentVersion = A511220823CDB05E0063FB32 /* Athenaeum.xcdatamodel */;
+			path = Athenaeum.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = A51121F823CDB05E0063FB32 /* Project object */;
+}
