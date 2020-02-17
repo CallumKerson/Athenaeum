@@ -13,6 +13,7 @@ class Preferences {
         static let libraryPath = Key(rawValue: "libraryPath")
         static let importPath = Key(rawValue: "importPath")
         static let useImport = Key(rawValue: "useImport")
+        static let goodReadsAPIKey = Key(rawValue: "goodReadsAPIKey")
     }
 
     static var defaultLibraryPath: URL {
@@ -56,12 +57,14 @@ class Preferences {
     }
 
     static func libraryPath() -> URL {
+        log.debug("Getting library path")
         if isTestEnvironment() {
             let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("Athenaeum_test")
             createDirectoryAt(url)
             return url
         } else {
             let libraryPath = Preferences.getURL(for: .libraryPath) ?? defaultLibraryPath
+            log.debug("Library path is \(libraryPath.path)")
             createDirectoryAt(libraryPath)
             return libraryPath
         }
@@ -74,18 +77,20 @@ class Preferences {
             return url
         } else {
             let importPath = Preferences.getURL(for: .importPath) ?? defaultImportPath
+            log.debug("Import path is \(importPath.path)")
             createDirectoryAt(importPath)
             return importPath
         }
     }
 
-    static func createDirectoryAt(_ url: URL) {
+    private static func createDirectoryAt(_ url: URL) {
         var isDir = ObjCBool(true)
         if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) == false {
+            log.debug("Creating directory \(url.path)")
             do {
                 try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                print("Failed to create directory \(error)")
+                log.error("Failed to create directory \(error)")
             }
         }
     }

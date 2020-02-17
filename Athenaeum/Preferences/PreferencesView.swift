@@ -11,6 +11,7 @@ struct PreferencesView: View {
     @State var libraryPathSelection = 0
     @State var useImport: Bool = Preferences.getBool(for: .useImport) ?? false
     @State var importPathSelection = 0
+    @State var goodReadsAPIKey = Preferences.getString(for: .goodReadsAPIKey) ?? ""
 
     var body: some View {
         Form {
@@ -41,6 +42,14 @@ struct PreferencesView: View {
             })
             }
             .disabled(!useImport)
+            .padding(.bottom)
+            Section {
+                TextField("GoodReads API Key", text: $goodReadsAPIKey)
+            }
+            .onReceive([self.goodReadsAPIKey].publisher.first()) { newAPIKey in
+                log.debug("Updating GoodReads API Key to \(newAPIKey)")
+                Preferences.set(newAPIKey, for: .goodReadsAPIKey)
+            }
         }
         .frame(minWidth: 600, maxWidth: 600, minHeight: 160, maxHeight: 160)
         .padding()
@@ -77,19 +86,5 @@ struct PreferencesView: View {
 struct PrefsView_Previews: PreviewProvider {
     static var previews: some View {
         PreferencesView()
-    }
-}
-
-extension NSWindow {
-    static func createStandardWindow(withTitle title: String,
-                                     width: CGFloat = 800, height: CGFloat = 600) -> NSWindow {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: width, height: height),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
-            backing: .buffered, defer: false
-        )
-        window.center()
-        window.title = title
-        return window
     }
 }

@@ -10,8 +10,8 @@ struct AudiobookCellView: View {
     let book: Audiobook
     var body: some View {
         HStack {
-            if book.cover != nil {
-                SmallCover(data: book.cover!)
+            if book.getCover() != nil {
+                SmallCover(data: book.getCover()!)
             }
             VStack(alignment: .leading) {
                 Text(book.title).font(.subheadline)

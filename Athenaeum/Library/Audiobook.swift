@@ -4,66 +4,65 @@
  Licensed under the MIT license.
  */
 
-import AVFoundation
 import Foundation
-import RealmSwift
 
-class Audiobook: Object, Identifiable {
-    @objc dynamic let id = UUID().uuidString
-    @objc dynamic var title: String
-    @objc dynamic var author: String
-    @objc dynamic var date: String?
-    @objc dynamic var cover: Data?
-    @objc dynamic var location: String?
+class Audiobook {
+    var title: String
+    var author: String
+    var file: URL
+    var narrator: String?
+    var publicationDate: String?
+    var isbn: String?
+    var summary: String?
+    var entry: String?
+    var series: Series?
 
-    public required init() {
-        title = "title"
-        author = "author"
-        super.init()
-    }
-
-    static func getBookFromFile(fileURL: URL) -> Audiobook {
-        let asset = AVURLAsset(url: fileURL)
-
-        let metadata = asset.commonMetadata
-
-        var title: String?
-        if let item = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierTitle).first {
-            title = item.stringValue
-        }
-
-        var author: String?
-        if let item = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtist).first {
-            author = item.stringValue
-        }
-
-        var image: Data?
-        if let artworkItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtwork).first {
-            // Coerce the value to an NSData using its dataValue property
-            if let imageData = artworkItem.dataValue {
-                image = imageData
-            }
-        }
-
-        var date: String?
-        if let item = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierCreationDate).first {
-            date = item.stringValue
-        }
-
-        let book = Audiobook()
-        book.title = title!
-        book.author = author!
-        book.date = date
-        book.cover = image
-        book.location = fileURL.path
-        return book
-    }
-
-    static func getBookFromFile(path: String) -> Audiobook {
-        Audiobook.getBookFromFile(fileURL: URL(fileURLWithPath: path))
+    init(title: String,
+         author: String,
+         file: URL,
+         narrator: String? = nil,
+         publicationDate: String? = nil,
+         isbn: String? = nil,
+         summary: String? = nil,
+         entry: String? = nil,
+         series: Series? = nil) {
+        self.title = title
+        self.author = author
+        self.file = file
+        self.narrator = narrator
+        self.publicationDate = publicationDate
+        self.isbn = isbn
+        self.summary = summary
+        self.entry = entry
+        self.series = series
     }
 }
 
-enum AudiobookError: Error {
-    case fileMissingMetadata(filepath: String)
+extension Audiobook: Identifiable {
+//    let id = UUID()
+}
+
+extension Audiobook: CustomStringConvertible {
+    var description: String {
+        "Audiobook (\(title) by \(author))"
+    }
+}
+
+extension Audiobook: Equatable {
+    static func == (lhs: Audiobook, rhs: Audiobook) -> Bool {
+        guard lhs.title == rhs.title else {
+            return false
+        }
+        guard lhs.author == rhs.author else {
+            return false
+        }
+        return true
+    }
+}
+
+extension Audiobook: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(title)
+        hasher.combine(author)
+    }
 }

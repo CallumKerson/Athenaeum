@@ -11,17 +11,17 @@ struct AudiobookView: View {
 
     var body: some View {
         VStack {
-            if book.cover != nil {
-                Cover(data: book.cover!)
+            if book.getCover() != nil {
+                Cover(data: book.getCover()!)
             }
             VStack(alignment: .leading) {
-                Text(book.title)
+                Text(book.author)
                     .font(.headline)
                 Text(book.author)
                     .font(.subheadline)
 
-                if book.date != nil {
-                    Text(book.date!)
+                if book.publicationDate != nil {
+                    Text(book.publicationDate!)
                         .font(.subheadline)
                 }
             }

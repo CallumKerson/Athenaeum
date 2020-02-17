@@ -19,7 +19,7 @@ func openImportAudiobookDialog() {
     openPanel.begin { response in
         if response == .OK {
             for url in openPanel.urls {
-                print(url.path)
+                log.debug("User opening file \(url.path)")
                 DispatchQueue.main.async {
                     Library.global.importAudiobook(fileURL: url)
                 }

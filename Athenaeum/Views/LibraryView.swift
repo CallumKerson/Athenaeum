@@ -8,7 +8,7 @@ import RealmSwift
 import SwiftUI
 
 struct LibraryView: View {
-    @State private var books: Results<Audiobook> = Library.global.audiobooks
+    @State private var books: [Audiobook] = []
 
     var body: some View {
         NavigationView {
@@ -25,14 +25,14 @@ struct LibraryView: View {
         }
         .listStyle(SidebarListStyle())
         .frame(minWidth: 400, maxWidth: .infinity, minHeight: 400, maxHeight: .infinity)
-//        .onAppear {
-//            self.loadBooks()
-//        }
+        .onAppear {
+            self.loadBooks()
+        }
     }
 
-//    func loadBooks() {
-//        books = Library.global.audiobooks
-//    }
+    func loadBooks() {
+        books = Library.global.audiobooks
+    }
 }
 
 struct HeaderView: View {

@@ -6,6 +6,9 @@
 
 import Cocoa
 import SwiftUI
+import SwiftyBeaver
+
+let log = SwiftyBeaver.self
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -13,12 +16,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var prefsView: PreferencesView?
 
     func applicationDidFinishLaunching(_: Notification) {
+        // MARK: Logging
+
+        log.addDestination(ConsoleDestination())
+
+        // MARK: Preferences
+
+        log.info("Registering default preferences")
         UserDefaults.standard.register(defaults: Preferences.defaultPreferences)
+
+        // MARK: Menus
+
+        log.info("Setting up menu items")
         manageMenus()
 
-        // Create the SwiftUI view that provides the window contents.
-        let contentView = LibraryView()
+        // MARK: Main View
 
+        log.info("Creating main view")
+
+        let contentView = LibraryView()
         // Create the window and set the content view.
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
@@ -29,19 +45,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.setFrameAutosaveName("Main Window")
         window.contentView = NSHostingView(rootView: contentView)
         window.makeKeyAndOrderFront(nil)
-
-//        let connected = Library.global.connect()
-//
-//        if !connected {
-//            abort()
-//        }
     }
 
     func applicationWillTerminate(_: Notification) {
-        // Insert code here to tear down your application
+        log.info("Exiting app")
     }
 
     private final func manageMenus() {
+        log.debug("Setting up preferences menu item")
         guard let appMenu = NSApplication.shared.mainMenu?.item(at: 0)?.submenu else { return }
         let i: Int = appMenu.indexOfItem(withTitle: "Preferences…")
         guard let preferencesMenuItem = appMenu.item(at: i) else { return }
@@ -49,6 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         preferencesMenuItem.action = #selector(preferencesMenuItemActionHandler(_:))
         appMenu.addItem(preferencesMenuItem)
 
+        log.debug("Setting up import menu item")
         guard let fileMenu = NSApplication.shared.mainMenu?.item(at: 1)?.submenu else { return }
         let importItem = NSMenuItem()
         importItem.title = "Import"
@@ -56,7 +68,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         importItem.keyEquivalentModifierMask = [.command]
         importItem.isEnabled = true
         importItem.action = #selector(importMenuItemActionHandler(_:))
-
         fileMenu.addItem(importItem)
     }
 
