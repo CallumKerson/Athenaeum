@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,9 +12,22 @@
 		A511220923CDB05E0063FB32 /* Athenaeum.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */; };
 		A511220B23CDB0620063FB32 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A511220A23CDB0620063FB32 /* Assets.xcassets */; };
 		A511220E23CDB0620063FB32 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A511220D23CDB0620063FB32 /* Preview Assets.xcassets */; };
-		A511221123CDB0620063FB32 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A511220F23CDB0620063FB32 /* Main.storyboard */; };
 		A511221D23CDB0620063FB32 /* AthenaeumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511221C23CDB0620063FB32 /* AthenaeumTests.swift */; };
 		A511222823CDB0620063FB32 /* AthenaeumUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511222723CDB0620063FB32 /* AthenaeumUITests.swift */; };
+		A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */; };
+		A5193DBC23F8106900EFF01D /* AudiobookListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBB23F8106900EFF01D /* AudiobookListView.swift */; };
+		A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBD23F8234100EFF01D /* LibraryView.swift */; };
+		A5193DC023F992D600EFF01D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A5193DBF23F992D600EFF01D /* Main.storyboard */; };
+		A5193DC223F9952C00EFF01D /* Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DC123F9952C00EFF01D /* Import.swift */; };
+		A5193DC523F99D4A00EFF01D /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A5193DC423F99D4A00EFF01D /* RealmSwift */; };
+		A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */; };
+		A5429DB923EDB25600B1DF81 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429DB823EDB25600B1DF81 /* Preferences.swift */; };
+		A5429E3523EDBAB100B1DF81 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3423EDBAB100B1DF81 /* Library.swift */; };
+		A5429E3823EDC37000B1DF81 /* URL+Desandbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3723EDC37000B1DF81 /* URL+Desandbox.swift */; };
+		A5429E3B23EDC50900B1DF81 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = A5429E3A23EDC50900B1DF81 /* Preferences */; };
+		A54A03A723F6EDE000C8305A /* Audiobook.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A623F6EDE000C8305A /* Audiobook.swift */; };
+		A54A03AA23F6EE2B00C8305A /* AudiobookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A923F6EE2B00C8305A /* AudiobookView.swift */; };
+		A57CD5D523F16DF300CF6BA2 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = A57CD5D423F16DF300CF6BA2 /* GRDB */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,7 +54,6 @@
 		A511220823CDB05E0063FB32 /* Athenaeum.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Athenaeum.xcdatamodel; sourceTree = "<group>"; };
 		A511220A23CDB0620063FB32 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A511220D23CDB0620063FB32 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		A511221023CDB0620063FB32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A511221223CDB0620063FB32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A511221323CDB0620063FB32 /* Athenaeum.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Athenaeum.entitlements; sourceTree = "<group>"; };
 		A511221823CDB0620063FB32 /* AthenaeumTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AthenaeumTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -50,6 +62,17 @@
 		A511222323CDB0620063FB32 /* AthenaeumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AthenaeumUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A511222723CDB0620063FB32 /* AthenaeumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthenaeumUITests.swift; sourceTree = "<group>"; };
 		A511222923CDB0620063FB32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookCellView.swift; sourceTree = "<group>"; };
+		A5193DBB23F8106900EFF01D /* AudiobookListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookListView.swift; sourceTree = "<group>"; };
+		A5193DBD23F8234100EFF01D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		A5193DBF23F992D600EFF01D /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		A5193DC123F9952C00EFF01D /* Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Import.swift; sourceTree = "<group>"; };
+		A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		A5429DB823EDB25600B1DF81 /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
+		A5429E3423EDBAB100B1DF81 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
+		A5429E3723EDC37000B1DF81 /* URL+Desandbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Desandbox.swift"; sourceTree = "<group>"; };
+		A54A03A623F6EDE000C8305A /* Audiobook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audiobook.swift; sourceTree = "<group>"; };
+		A54A03A923F6EE2B00C8305A /* AudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +80,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5193DC523F99D4A00EFF01D /* RealmSwift in Frameworks */,
+				A5429E3B23EDC50900B1DF81 /* Preferences in Frameworks */,
+				A57CD5D523F16DF300CF6BA2 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,10 +126,14 @@
 		A511220223CDB05E0063FB32 /* Athenaeum */ = {
 			isa = PBXGroup;
 			children = (
+				A5429E3623EDC28D00B1DF81 /* Extensions */,
+				A5429E3323EDBA9F00B1DF81 /* Library */,
+				A5429DB523EDB19900B1DF81 /* Preferences */,
+				A54A03A823F6EE0400C8305A /* Views */,
 				A511220323CDB05E0063FB32 /* AppDelegate.swift */,
 				A511220523CDB05E0063FB32 /* ContentView.swift */,
 				A511220A23CDB0620063FB32 /* Assets.xcassets */,
-				A511220F23CDB0620063FB32 /* Main.storyboard */,
+				A5193DBF23F992D600EFF01D /* Main.storyboard */,
 				A511221223CDB0620063FB32 /* Info.plist */,
 				A511221323CDB0620063FB32 /* Athenaeum.entitlements */,
 				A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */,
@@ -138,6 +168,44 @@
 			path = AthenaeumUITests;
 			sourceTree = "<group>";
 		};
+		A5429DB523EDB19900B1DF81 /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */,
+				A5429DB823EDB25600B1DF81 /* Preferences.swift */,
+			);
+			path = Preferences;
+			sourceTree = "<group>";
+		};
+		A5429E3323EDBA9F00B1DF81 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				A5429E3423EDBAB100B1DF81 /* Library.swift */,
+				A54A03A623F6EDE000C8305A /* Audiobook.swift */,
+				A5193DC123F9952C00EFF01D /* Import.swift */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		A5429E3623EDC28D00B1DF81 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				A5429E3723EDC37000B1DF81 /* URL+Desandbox.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		A54A03A823F6EE0400C8305A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A54A03A923F6EE2B00C8305A /* AudiobookView.swift */,
+				A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */,
+				A5193DBB23F8106900EFF01D /* AudiobookListView.swift */,
+				A5193DBD23F8234100EFF01D /* LibraryView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -154,6 +222,11 @@
 			dependencies = (
 			);
 			name = Athenaeum;
+			packageProductDependencies = (
+				A5429E3A23EDC50900B1DF81 /* Preferences */,
+				A57CD5D423F16DF300CF6BA2 /* GRDB */,
+				A5193DC423F99D4A00EFF01D /* RealmSwift */,
+			);
 			productName = Athenaeum;
 			productReference = A511220023CDB05E0063FB32 /* Athenaeum.app */;
 			productType = "com.apple.product-type.application";
@@ -226,6 +299,11 @@
 				Base,
 			);
 			mainGroup = A51121F723CDB05E0063FB32;
+			packageReferences = (
+				A5429E3923EDC50900B1DF81 /* XCRemoteSwiftPackageReference "Preferences" */,
+				A57CD5D323F16DF300CF6BA2 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				A5193DC323F99D4A00EFF01D /* XCRemoteSwiftPackageReference "realm-cocoa" */,
+			);
 			productRefGroup = A511220123CDB05E0063FB32 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -242,7 +320,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A511221123CDB0620063FB32 /* Main.storyboard in Resources */,
+				A5193DC023F992D600EFF01D /* Main.storyboard in Resources */,
 				A511220E23CDB0620063FB32 /* Preview Assets.xcassets in Resources */,
 				A511220B23CDB0620063FB32 /* Assets.xcassets in Resources */,
 			);
@@ -269,9 +347,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */,
+				A5193DC223F9952C00EFF01D /* Import.swift in Sources */,
 				A511220623CDB05E0063FB32 /* ContentView.swift in Sources */,
+				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
+				A5429DB923EDB25600B1DF81 /* Preferences.swift in Sources */,
+				A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */,
+				A54A03AA23F6EE2B00C8305A /* AudiobookView.swift in Sources */,
 				A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */,
+				A5193DBC23F8106900EFF01D /* AudiobookListView.swift in Sources */,
 				A511220923CDB05E0063FB32 /* Athenaeum.xcdatamodeld in Sources */,
+				A5429E3523EDBAB100B1DF81 /* Library.swift in Sources */,
+				A5429E3823EDC37000B1DF81 /* URL+Desandbox.swift in Sources */,
+				A54A03A723F6EDE000C8305A /* Audiobook.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,17 +393,6 @@
 			targetProxy = A511222423CDB0620063FB32 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		A511220F23CDB0620063FB32 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A511221023CDB0620063FB32 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		A511222A23CDB0620063FB32 /* Debug */ = {
@@ -368,7 +445,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -422,7 +499,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -436,6 +513,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Athenaeum/Athenaeum.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Athenaeum/Preview Content\"";
@@ -459,6 +537,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Athenaeum/Athenaeum.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Athenaeum/Preview Content\"";
@@ -601,6 +680,51 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A5193DC323F99D4A00EFF01D /* XCRemoteSwiftPackageReference "realm-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.3.2;
+			};
+		};
+		A5429E3923EDC50900B1DF81 /* XCRemoteSwiftPackageReference "Preferences" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Preferences";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
+		A57CD5D323F16DF300CF6BA2 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A5193DC423F99D4A00EFF01D /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5193DC323F99D4A00EFF01D /* XCRemoteSwiftPackageReference "realm-cocoa" */;
+			productName = RealmSwift;
+		};
+		A5429E3A23EDC50900B1DF81 /* Preferences */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5429E3923EDC50900B1DF81 /* XCRemoteSwiftPackageReference "Preferences" */;
+			productName = Preferences;
+		};
+		A57CD5D423F16DF300CF6BA2 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A57CD5D323F16DF300CF6BA2 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */ = {

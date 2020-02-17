@@ -1,15 +1,12 @@
-//
-//  AthenaeumUITests.swift
-//  AthenaeumUITests
-//
-//  Created by Callum Kerson on 14/01/2020.
-//  Copyright © 2020 Callum Kerson. All rights reserved.
-//
+/**
+ AthenaeumUITests.swift
+ Copyright (c) 2020 Callum Kerr-Edwards
+ Licensed under the MIT license.
+ */
 
 import XCTest
 
 class AthenaeumUITests: XCTestCase {
-
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
 
