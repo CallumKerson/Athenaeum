@@ -11,7 +11,21 @@ struct PreferencesView: View {
     @State var libraryPathSelection = 0
     @State var importPathSelection = 0
 
-    @ObservedObject var preferences = PreferencesStore.global
+    @ObservedObject var preferences: PreferencesStore
+    
+    var window: NSWindow!
+    init(withPreferences preferences: PreferencesStore = PreferencesStore.global) {
+        self.preferences = preferences
+        window = NSWindow.createStandardWindow(withTitle: "Preferences",
+                                               width: 600,
+                                               height: 160)
+        window.contentView = NSHostingView(rootView: self)
+        window.delegate = prefsWindowDelegate
+        window.tabbingMode = .disallowed
+        prefsWindowDelegate.windowIsOpen = true
+        window.makeKeyAndOrderFront(nil)
+    }
+
 
     var body: some View {
         Form {
@@ -49,18 +63,6 @@ struct PreferencesView: View {
         return Text("")
     }
 
-    var window: NSWindow!
-    init() {
-        window = NSWindow.createStandardWindow(withTitle: "Preferences",
-                                               width: 600,
-                                               height: 160)
-        window.contentView = NSHostingView(rootView: self)
-        window.delegate = prefsWindowDelegate
-        window.tabbingMode = .disallowed
-        prefsWindowDelegate.windowIsOpen = true
-        window.makeKeyAndOrderFront(nil)
-    }
-
     class PrefsWindowDelegate: NSObject, NSWindowDelegate {
         var windowIsOpen = false
 
@@ -72,6 +74,6 @@ struct PreferencesView: View {
 
 struct PrefsView_Previews: PreviewProvider {
     static var previews: some View {
-        PreferencesView().body
+        PreferencesView()
     }
 }

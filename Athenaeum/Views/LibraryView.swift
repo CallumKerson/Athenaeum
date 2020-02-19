@@ -8,13 +8,18 @@ import RealmSwift
 import SwiftUI
 
 struct LibraryView: View {
-    @State var books: [Audiobook]
+    
+    @ObservedObject var library: Library
+    
+    init(withLibrary library: Library = Library.global) {
+        self.library = library
+    }
 
     var body: some View {
         NavigationView {
             List {
                 Section(header: HeaderView()) {
-                    ForEach(books) { book in
+                    ForEach(library.🎧📚.sorted(by: { $0.author < $1.author } )) { book in
                         NavigationLink(destination: AudiobookView(book: book)) {
                             AudiobookCellView(book: book)
                         }
@@ -25,14 +30,7 @@ struct LibraryView: View {
         }
         .listStyle(SidebarListStyle())
         .frame(minWidth: 850, maxWidth: 850, minHeight: 400, maxHeight: .infinity)
-//        .onAppear {
-//            self.loadBooks()
-//        }
     }
-
-//    func loadBooks() {
-//        books = Library.global.audiobooks
-//    }
 }
 
 struct HeaderView: View {
@@ -50,10 +48,6 @@ struct HeaderView: View {
 
 struct LibraryView_Previews: PreviewProvider {
     static var previews: some View {
-        LibraryView(books: [
-            Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"),
-            Audiobook(fromFileWithPath: "/Users/ckerson/Music/In the Labyrinth of Drakes.m4b"),
-            Audiobook(fromFileWithPath: "/Users/ckerson/Music/Smarter Faster Better.m4b"),
-        ])
+        LibraryView()
     }
 }

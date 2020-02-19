@@ -5,10 +5,13 @@
  */
 
 import Foundation
+import Combine
 
 protocol Repository {
     associatedtype EntityObject: Entity
 
+    var publisher: AnyPublisher<DatabaseAction, Never> { get }
+    
     func getAll(where predicate: NSPredicate?) -> [EntityObject]
     func insert(item: EntityObject) throws
     func update(item: EntityObject) throws
@@ -32,4 +35,10 @@ public protocol Storable {
 
     var model: EntityObject { get }
     var uuid: String { get }
+}
+
+public enum DatabaseAction: String {
+    case insert
+    case update
+    case delete
 }

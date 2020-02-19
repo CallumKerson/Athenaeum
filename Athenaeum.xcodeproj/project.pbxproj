@@ -43,6 +43,7 @@
 		A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */; };
 		A5BDF5E023FD50CE00DB6170 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */; };
 		A5BDF5E323FD602700DB6170 /* Resolver in Frameworks */ = {isa = PBXBuildFile; productRef = A5BDF5E223FD602700DB6170 /* Resolver */; };
+		A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +102,7 @@
 		A54A03A923F6EE2B00C8305A /* AudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookView.swift; sourceTree = "<group>"; };
 		A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
 		A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
+		A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+Indexed.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -237,6 +239,7 @@
 				A52A223023FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift */,
 				A52A224523FBDED600F34A17 /* String+Utils.swift */,
 				A5429E3723EDC37000B1DF81 /* URL+Utils.swift */,
+				A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -440,6 +443,7 @@
 				A52A223823FABA4200F34A17 /* Series.swift in Sources */,
 				A52A224023FAF84F00F34A17 /* Repository.swift in Sources */,
 				A52A223123FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift in Sources */,
+				A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */,
 				A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */,
 				A54A03AA23F6EE2B00C8305A /* AudiobookView.swift in Sources */,
 				A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */,

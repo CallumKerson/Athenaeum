@@ -65,10 +65,6 @@ struct Cover: View {
         static var previews: some View {
             Group {
                 AudiobookView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"))
-
-                AudiobookView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/In the Labyrinth of Drakes.m4b"))
-
-                AudiobookView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/Smarter Faster Better.m4b"))
             }
         }
     }

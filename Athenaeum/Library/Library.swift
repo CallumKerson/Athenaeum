@@ -5,21 +5,28 @@
  */
 
 import Foundation
+import Combine
 
-class Library {
+final class Library: ObservableObject {
+    
     static var global = Library()
-
-    let libraryURL: URL
-    var audiobooks: [Audiobook] {
-        getRepository().getAll()
-    }
-
+    
+    @Published var 🎧📚: [Audiobook] = []
+    
+    let repository = getRepository()
+    
+    private var didChangeCancellable: AnyCancellable?
+    
     init() {
-        log.info("Initialising library")
-        libraryURL = PreferencesStore.global.libraryPath
+        log.info("Initialising Library")
+        self.🎧📚 = self.repository.getAll()
+        didChangeCancellable = repository.publisher.sink(receiveValue: { action in
+            log.debug("Refreshing library due to reciving persistence action \(action.rawValue)")
+            self.🎧📚 = self.repository.getAll()
+        })
     }
 
-    private func getRepository() -> RealmRepository<Audiobook> {
+    private static func getRepository() -> RealmRepository<Audiobook> {
         RealmRepository()
     }
 }
