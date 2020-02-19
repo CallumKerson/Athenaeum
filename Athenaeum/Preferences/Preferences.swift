@@ -6,18 +6,18 @@
 
 import Foundation
 
-class Preferences {
-    struct Key: RawRepresentable {
-        let rawValue: String
-
-        static let libraryPath = Key(rawValue: "libraryPath")
-        static let importPath = Key(rawValue: "importPath")
-        static let useImport = Key(rawValue: "useImport")
-        static let goodReadsAPIKey = Key(rawValue: "goodReadsAPIKey")
-    }
+class PreferencesDeprecated {
+//    struct Key: RawRepresentable {
+//        let rawValue: String
+//
+//        static let libraryPath = Key(rawValue: "libraryPath")
+//        static let importPath = Key(rawValue: "importPath")
+//        static let useImport = Key(rawValue: "useImport")
+//        static let goodReadsAPIKey = Key(rawValue: "goodReadsAPIKey")
+//    }
 
     static var defaultLibraryPath: URL {
-        Preferences.userMusicPath().appendingPathComponent("Athanaeum")
+        PreferencesDeprecated.userMusicPath().appendingPathComponent("Athanaeum")
     }
 
     static var defaultImportPath: URL {
@@ -63,7 +63,7 @@ class Preferences {
             createDirectoryAt(url)
             return url
         } else {
-            let libraryPath = Preferences.getURL(for: .libraryPath) ?? defaultLibraryPath
+            let libraryPath = PreferencesDeprecated.getURL(for: .libraryPath) ?? defaultLibraryPath
             log.debug("Library path is \(libraryPath.path)")
             createDirectoryAt(libraryPath)
             return libraryPath
@@ -76,7 +76,7 @@ class Preferences {
             createDirectoryAt(url)
             return url
         } else {
-            let importPath = Preferences.getURL(for: .importPath) ?? defaultImportPath
+            let importPath = PreferencesDeprecated.getURL(for: .importPath) ?? defaultImportPath
             log.debug("Import path is \(importPath.path)")
             createDirectoryAt(importPath)
             return importPath

@@ -20,11 +20,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         log.addDestination(ConsoleDestination())
 
-        // MARK: Preferences
-
-        log.info("Registering default preferences")
-        UserDefaults.standard.register(defaults: Preferences.defaultPreferences)
-
         // MARK: Menus
 
         log.info("Setting up menu items")

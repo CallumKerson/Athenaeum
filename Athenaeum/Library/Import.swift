@@ -32,7 +32,7 @@ func openImportAudiobookDialog() {
 func importAudiobook(fileURL: URL) {
     log.info("Importing audiobook file from \(fileURL.path)")
     let newBook = Audiobook(fromFile: fileURL)
-    var destination = Preferences.libraryPath()
+    var destination = PreferencesStore.global.libraryPath
         .appendingPathComponent(newBook.author, isDirectory: true)
     if let series = newBook.series {
         destination = destination

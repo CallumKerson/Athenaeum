@@ -28,11 +28,11 @@ extension Audiobook {
         if let item = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtist).first {
             author = item.stringValue!.removeIllegalCharacters
         }
-        if !Preferences.getString(for: .goodReadsAPIKey).isBlank {
+        if !PreferencesStore.global.goodReadsAPIKey.isBlank {
             log.debug("Getting audiobook metadata from GoodReads API")
 
             do {
-                let fetchedBook = try GoodReads(apiKey: Preferences.getString(for: .goodReadsAPIKey)!)
+                let fetchedBook = try GoodReads(apiKey: PreferencesStore.global.goodReadsAPIKey)
                     .getBook(title: title!, author: author!)
                 var series: (title: String, entry: String)?
                 if let seriesTitle = fetchedBook.seriesTitle, let seriesEntry = fetchedBook.seriesEntry {

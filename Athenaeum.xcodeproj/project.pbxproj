@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511220323CDB05E0063FB32 /* AppDelegate.swift */; };
-		A511220623CDB05E0063FB32 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511220523CDB05E0063FB32 /* ContentView.swift */; };
 		A511220923CDB05E0063FB32 /* Athenaeum.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */; };
 		A511220B23CDB0620063FB32 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A511220A23CDB0620063FB32 /* Assets.xcassets */; };
 		A511220E23CDB0620063FB32 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A511220D23CDB0620063FB32 /* Preview Assets.xcassets */; };
@@ -42,6 +41,9 @@
 		A5429E3B23EDC50900B1DF81 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = A5429E3A23EDC50900B1DF81 /* Preferences */; };
 		A54A03A723F6EDE000C8305A /* Audiobook.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A623F6EDE000C8305A /* Audiobook.swift */; };
 		A54A03AA23F6EE2B00C8305A /* AudiobookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A923F6EE2B00C8305A /* AudiobookView.swift */; };
+		A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */; };
+		A5BDF5E023FD50CE00DB6170 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */; };
+		A5BDF5E323FD602700DB6170 /* Resolver in Frameworks */ = {isa = PBXBuildFile; productRef = A5BDF5E223FD602700DB6170 /* Resolver */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +66,6 @@
 /* Begin PBXFileReference section */
 		A511220023CDB05E0063FB32 /* Athenaeum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Athenaeum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A511220323CDB05E0063FB32 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		A511220523CDB05E0063FB32 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A511220823CDB05E0063FB32 /* Athenaeum.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Athenaeum.xcdatamodel; sourceTree = "<group>"; };
 		A511220A23CDB0620063FB32 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A511220D23CDB0620063FB32 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -100,6 +101,8 @@
 		A5429E3723EDC37000B1DF81 /* URL+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Utils.swift"; sourceTree = "<group>"; };
 		A54A03A623F6EDE000C8305A /* Audiobook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audiobook.swift; sourceTree = "<group>"; };
 		A54A03A923F6EE2B00C8305A /* AudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookView.swift; sourceTree = "<group>"; };
+		A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
+		A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +113,7 @@
 				A5193DC823FA995E00EFF01D /* GoodReadsKit in Frameworks */,
 				A5193DC523F99D4A00EFF01D /* RealmSwift in Frameworks */,
 				A5429E3B23EDC50900B1DF81 /* Preferences in Frameworks */,
+				A5BDF5E323FD602700DB6170 /* Resolver in Frameworks */,
 				A5193DCB23FAA16E00EFF01D /* SwiftyBeaver in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -154,15 +158,9 @@
 		A511220223CDB05E0063FB32 /* Athenaeum */ = {
 			isa = PBXGroup;
 			children = (
-				A511220323CDB05E0063FB32 /* AppDelegate.swift */,
-				A511220A23CDB0620063FB32 /* Assets.xcassets */,
-				A511221323CDB0620063FB32 /* Athenaeum.entitlements */,
-				A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */,
-				A511220523CDB05E0063FB32 /* ContentView.swift */,
+				A5BDF5E423FD60E600DB6170 /* System */,
 				A5429E3623EDC28D00B1DF81 /* Extensions */,
-				A511221223CDB0620063FB32 /* Info.plist */,
 				A5429E3323EDBA9F00B1DF81 /* Library */,
-				A5193DBF23F992D600EFF01D /* Main.storyboard */,
 				A5DC1E0823FD38F0009D061F /* Model */,
 				A5429DB523EDB19900B1DF81 /* Preferences */,
 				A511220C23CDB0620063FB32 /* Preview Content */,
@@ -214,6 +212,8 @@
 			children = (
 				A5429DB823EDB25600B1DF81 /* Preferences.swift */,
 				A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */,
+				A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */,
+				A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -256,6 +256,19 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		A5BDF5E423FD60E600DB6170 /* System */ = {
+			isa = PBXGroup;
+			children = (
+				A511220323CDB05E0063FB32 /* AppDelegate.swift */,
+				A511220A23CDB0620063FB32 /* Assets.xcassets */,
+				A511221323CDB0620063FB32 /* Athenaeum.entitlements */,
+				A511220723CDB05E0063FB32 /* Athenaeum.xcdatamodeld */,
+				A511221223CDB0620063FB32 /* Info.plist */,
+				A5193DBF23F992D600EFF01D /* Main.storyboard */,
+			);
+			path = System;
+			sourceTree = "<group>";
+		};
 		A5DC1E0723FD2D4F009D061F /* Realm */ = {
 			isa = PBXGroup;
 			children = (
@@ -292,6 +305,7 @@
 				A5193DC423F99D4A00EFF01D /* RealmSwift */,
 				A5193DC723FA995E00EFF01D /* GoodReadsKit */,
 				A5193DCA23FAA16E00EFF01D /* SwiftyBeaver */,
+				A5BDF5E223FD602700DB6170 /* Resolver */,
 			);
 			productName = Athenaeum;
 			productReference = A511220023CDB05E0063FB32 /* Athenaeum.app */;
@@ -370,6 +384,7 @@
 				A5193DC323F99D4A00EFF01D /* XCRemoteSwiftPackageReference "realm-cocoa" */,
 				A5193DC623FA995E00EFF01D /* XCRemoteSwiftPackageReference "GoodReadsKit" */,
 				A5193DC923FAA16E00EFF01D /* XCRemoteSwiftPackageReference "SwiftyBeaver" */,
+				A5BDF5E123FD602700DB6170 /* XCRemoteSwiftPackageReference "Resolver" */,
 			);
 			productRefGroup = A511220123CDB05E0063FB32 /* Products */;
 			projectDirPath = "";
@@ -416,10 +431,11 @@
 			files = (
 				A52A224423FBDE8A00F34A17 /* Audiobook+Equitable.swift in Sources */,
 				A52A224623FBDED600F34A17 /* String+Utils.swift in Sources */,
+				A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */,
 				A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */,
 				A5193DC223F9952C00EFF01D /* Import.swift in Sources */,
+				A5BDF5E023FD50CE00DB6170 /* PreferencesStore.swift in Sources */,
 				A52A224223FAF89A00F34A17 /* Audiobook+Storable.swift in Sources */,
-				A511220623CDB05E0063FB32 /* ContentView.swift in Sources */,
 				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
 				A52A224A23FBE2A200F34A17 /* RealmRepository.swift in Sources */,
 				A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */,
@@ -592,7 +608,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Athenaeum/Athenaeum.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Athenaeum/System/Athenaeum.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -600,7 +616,7 @@
 				DEVELOPMENT_TEAM = 57GAEYX88Q;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = Athenaeum/Info.plist;
+				INFOPLIST_FILE = Athenaeum/System/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -616,7 +632,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Athenaeum/Athenaeum.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Athenaeum/System/Athenaeum.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -624,7 +640,7 @@
 				DEVELOPMENT_TEAM = 57GAEYX88Q;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = Athenaeum/Info.plist;
+				INFOPLIST_FILE = Athenaeum/System/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -794,6 +810,14 @@
 				minimumVersion = 1.0.1;
 			};
 		};
+		A5BDF5E123FD602700DB6170 /* XCRemoteSwiftPackageReference "Resolver" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Resolver";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -816,6 +840,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5429E3923EDC50900B1DF81 /* XCRemoteSwiftPackageReference "Preferences" */;
 			productName = Preferences;
+		};
+		A5BDF5E223FD602700DB6170 /* Resolver */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5BDF5E123FD602700DB6170 /* XCRemoteSwiftPackageReference "Resolver" */;
+			productName = Resolver;
 		};
 /* End XCSwiftPackageProductDependency section */
 

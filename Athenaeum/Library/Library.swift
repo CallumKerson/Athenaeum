@@ -16,7 +16,7 @@ class Library {
 
     init() {
         log.info("Initialising library")
-        libraryURL = Preferences.libraryPath()
+        libraryURL = PreferencesStore.global.libraryPath
     }
 
     private func getRepository() -> RealmRepository<Audiobook> {
