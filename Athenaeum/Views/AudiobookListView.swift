@@ -19,9 +19,9 @@ struct AudiobookListView: View {
 struct AudiobookList_Previews: PreviewProvider {
     static var previews: some View {
         AudiobookListView(books: [
-            Audiobook.getBookFromFile(path: "/Users/ckerson/Music/TWoK.m4b"),
-            Audiobook.getBookFromFile(path: "/Users/ckerson/Music/The Gift.m4b"),
-            Audiobook.getBookFromFile(path: "/Users/ckerson/Music/Gothe F--ktoSleep_ep6.m4b"),
+            Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"),
+            Audiobook(fromFileWithPath: "/Users/ckerson/Music/In the Labyrinth of Drakes.m4b"),
+            Audiobook(fromFileWithPath: "/Users/ckerson/Music/Smarter Faster Better.m4b"),
         ])
     }
 }

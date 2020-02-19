@@ -8,7 +8,7 @@ import RealmSwift
 import SwiftUI
 
 struct LibraryView: View {
-    @State private var books: [Audiobook] = []
+    @State var books: [Audiobook]
 
     var body: some View {
         NavigationView {
@@ -21,33 +21,39 @@ struct LibraryView: View {
                     }
                 }
             }
-            .frame(minWidth: 250, maxWidth: 350)
+            .frame(minWidth: 425, maxWidth: 425)
         }
         .listStyle(SidebarListStyle())
-        .frame(minWidth: 400, maxWidth: .infinity, minHeight: 400, maxHeight: .infinity)
-        .onAppear {
-            self.loadBooks()
-        }
+        .frame(minWidth: 850, maxWidth: 850, minHeight: 400, maxHeight: .infinity)
+//        .onAppear {
+//            self.loadBooks()
+//        }
     }
 
-    func loadBooks() {
-        books = Library.global.audiobooks
-    }
+//    func loadBooks() {
+//        books = Library.global.audiobooks
+//    }
 }
 
 struct HeaderView: View {
     var body: some View {
-        HStack(spacing: 20) {
-            Text("Library")
-                .layoutPriority(1)
-                .font(.largeTitle)
-            Spacer()
-        }
+        VStack {
+            HStack(spacing: 20) {
+                Text("Library")
+                    .layoutPriority(1)
+                    .font(.largeTitle)
+                Spacer()
+            }
+        }.padding(.bottom)
     }
 }
 
 struct LibraryView_Previews: PreviewProvider {
     static var previews: some View {
-        LibraryView()
+        LibraryView(books: [
+            Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"),
+            Audiobook(fromFileWithPath: "/Users/ckerson/Music/In the Labyrinth of Drakes.m4b"),
+            Audiobook(fromFileWithPath: "/Users/ckerson/Music/Smarter Faster Better.m4b"),
+        ])
     }
 }

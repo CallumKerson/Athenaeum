@@ -15,17 +15,34 @@ struct AudiobookView: View {
                 Cover(data: book.getCover()!)
             }
             VStack(alignment: .leading) {
-                Text(book.author)
-                    .font(.headline)
-                Text(book.author)
-                    .font(.subheadline)
-
-                if book.publicationDate != nil {
-                    Text(book.publicationDate!)
+                if book.title.contains(":") {
+                    ForEach(book.title.components(separatedBy: ":"), id: \.self) { title in
+                        Text(title.trimmed)
+                            .font(.headline)
+                    }
+                } else {
+                    Text(book.title)
+                        .font(.headline)
+                }
+                HStack {
+                    Text(book.author)
                         .font(.subheadline)
+                    if book.publicationDate != nil {
+                        Spacer()
+                        Text(book.publicationDate!)
+                            .font(.subheadline)
+                    }
                 }
             }
+            if book.summary != nil {
+                Divider()
+                ScrollView {
+                    SummaryView(summary: book.summary!)
+                }
+                .frame(minHeight: 50)
+            }
         }
+        .frame(idealWidth: 200, maxWidth: 400)
         .padding()
     }
 }
@@ -46,7 +63,13 @@ struct Cover: View {
 #if DEBUG
     struct AudiobookView_Previews: PreviewProvider {
         static var previews: some View {
-            AudiobookView(book: Audiobook.getBookFromFile(path: "/Users/ckerson/Music/TWoK.m4b"))
+            Group {
+                AudiobookView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"))
+
+                AudiobookView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/In the Labyrinth of Drakes.m4b"))
+
+                AudiobookView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/Smarter Faster Better.m4b"))
+            }
         }
     }
 #endif

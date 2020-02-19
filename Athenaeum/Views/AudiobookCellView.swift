@@ -19,7 +19,6 @@ struct AudiobookCellView: View {
                 Text(book.author).font(.footnote)
             }
         }
-        .padding()
     }
 }
 
@@ -30,6 +29,7 @@ struct SmallCover: View {
         Image(nsImage: NSImage(data: data)!)
             .resizable()
             .scaledToFit()
+            .aspectRatio(contentMode: .fit)
             .frame(width: 50, height: 50).clipShape(RoundedRectangle(cornerRadius: 5))
             .shadow(radius: 10)
     }
@@ -37,6 +37,6 @@ struct SmallCover: View {
 
 struct AudiobookCellView_Previews: PreviewProvider {
     static var previews: some View {
-        AudiobookCellView(book: Audiobook.getBookFromFile(path: "/Users/ckerson/Music/TWoK.m4b"))
+        AudiobookCellView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"))
     }
 }

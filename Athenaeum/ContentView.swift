@@ -23,9 +23,9 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static let books = [
-        Audiobook.getBookFromFile(path: "/Users/ckerson/Music/TWoK.m4b"),
-        Audiobook.getBookFromFile(path: "/Users/ckerson/Music/The Gift.m4b"),
-        Audiobook.getBookFromFile(path: "/Users/ckerson/Music/Gothe F--ktoSleep_ep6.m4b"),
+        Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"),
+        Audiobook(fromFileWithPath: "/Users/ckerson/Music/The Gift.m4b"),
+        Audiobook(fromFileWithPath: "/Users/ckerson/Music/Gothe F--ktoSleep_ep6.m4b"),
     ]
     static var previews: some View {
         ContentView(books: books)

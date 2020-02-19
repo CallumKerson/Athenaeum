@@ -1,20 +1,14 @@
-//
-//  Audiobook+Persistable.swift
-//  Athenaeum
-//
-//  Created by Callum Kerson on 17/02/2020.
-//  Copyright © 2020 Callum Kerson. All rights reserved.
-//
+/**
+ Audiobook+Storable.swift
+ Copyright (c) 2020 Callum Kerr-Edwards
+ Licensed under the MIT license.
+ */
 
 import Foundation
-
-import Foundation
-//import RealmSwift
 
 extension Audiobook: Entity {
-    
-    private var storableAudiobook: PersistableAudiobook {
-        let realmAudiobook = PersistableAudiobook()
+    private var storableAudiobook: StorableAudiobook {
+        let realmAudiobook = StorableAudiobook()
         realmAudiobook.uuid = file.sha256HashOfContents
         realmAudiobook.title = title
         realmAudiobook.author = author
@@ -25,10 +19,8 @@ extension Audiobook: Entity {
         realmAudiobook.seriesEntry = series?.entry
         return realmAudiobook
     }
-    
-    func toStorable() -> PersistableAudiobook {
-        return storableAudiobook
+
+    func toStorable() -> StorableAudiobook {
+        storableAudiobook
     }
-    
-    
 }

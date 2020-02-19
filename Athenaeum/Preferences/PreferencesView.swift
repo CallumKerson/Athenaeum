@@ -19,7 +19,7 @@ struct PreferencesView: View {
                 Picker(selection: $libraryPathSelection, label:
                     Text("Audiobook Library Path:"),
                        content: {
-                        Text(Preferences.libraryPath().deSandboxedPath()).tag(0)
+                        Text(Preferences.libraryPath().deSandboxedPath).tag(0)
             })
             }.padding(.bottom)
 
@@ -57,7 +57,7 @@ struct PreferencesView: View {
 
     func getImportPath() -> Text {
         if useImport {
-            return Text(Preferences.importPath().deSandboxedPath())
+            return Text(Preferences.importPath().deSandboxedPath)
         }
         return Text("")
     }

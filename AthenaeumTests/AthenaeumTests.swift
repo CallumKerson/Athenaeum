@@ -17,21 +17,5 @@ class AthenaeumTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() {
-//        let audiobook = Audiobook(fileURL: URL(string: "/Users/ckerson/Music/TWoK.m4b")!)
-
-        let newBook = Audiobook.getBookFromFile(path: "/Users/ckerson/Music/TWoK.m4b")
-        let destination = Library.global.libraryURL
-            .appendingPathComponent(newBook.author, isDirectory: true)
-            .appendingPathComponent(newBook.title)
-            .appendingPathExtension("m4b")
-        print(destination)
-    }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
+    func test_something() {}
 }

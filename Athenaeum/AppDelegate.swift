@@ -34,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         log.info("Creating main view")
 
-        let contentView = LibraryView()
+        let contentView = LibraryView(books: [])
         // Create the window and set the content view.
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
