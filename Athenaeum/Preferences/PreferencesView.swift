@@ -10,7 +10,7 @@ struct PreferencesView: View {
     @State var prefsWindowDelegate = PrefsWindowDelegate()
     @State var libraryPathSelection = 0
     @State var importPathSelection = 0
-    
+
     @ObservedObject var preferences = PreferencesStore.global
 
     var body: some View {
@@ -71,7 +71,6 @@ struct PreferencesView: View {
 }
 
 struct PrefsView_Previews: PreviewProvider {
-    
     static var previews: some View {
         PreferencesView().body
     }
