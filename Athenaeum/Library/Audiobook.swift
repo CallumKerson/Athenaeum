@@ -41,6 +41,6 @@ extension Audiobook: Identifiable {
 
 extension Audiobook: CustomStringConvertible {
     var description: String {
-        "Audiobook (\(title) by \(author))"
+        "\(title) by \(author)"
     }
 }

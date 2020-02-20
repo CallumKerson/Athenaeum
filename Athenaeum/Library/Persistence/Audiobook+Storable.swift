@@ -13,6 +13,7 @@ extension Audiobook: Entity {
         realmAudiobook.title = title
         realmAudiobook.author = author
         realmAudiobook.filePath = file.path
+        realmAudiobook.publicationDate = publicationDate
         realmAudiobook.narrator = narrator
         realmAudiobook.summary = summary
         realmAudiobook.seriesTitle = series?.title
