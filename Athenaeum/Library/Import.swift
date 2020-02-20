@@ -32,9 +32,8 @@ struct Import {
             if response == .OK {
                 ///TODO Thread properly - this freezes the import window until import is complete
                 for url in openPanel.urls {
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .userInitiated).async {
                         log.debug("User opening file \(url.path)")
-                        
                         self.importAudiobook(fileURL: url)
                     }
                 }
@@ -61,12 +60,9 @@ struct Import {
         log.debug("Moving audiobook file to \(destination.path)")
         try! FileManager.default.moveItemCreatingIntermediaryDirectories(at: fileURL, to: destination)
         newBook.file = destination
-        do {
-            log.info("Adding audiobook \(newBook) to library")
-            try self.library.repository.insert(item: newBook)
-        } catch {
-            log.error("Cannot add audiobook \(newBook) to library")
-        }
+        log.info("Adding audiobook \(newBook) to library")
+        self.library.shelve(book: newBook)
+        
     }
 }
 

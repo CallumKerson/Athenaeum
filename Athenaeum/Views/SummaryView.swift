@@ -20,7 +20,6 @@ struct SummaryView: View {
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-//        .frame(maxHeight: 600)
     }
 
     func getLine(line: String) -> Text {

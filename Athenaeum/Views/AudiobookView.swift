@@ -11,8 +11,8 @@ struct AudiobookView: View {
 
     var body: some View {
         VStack {
-            if book.getCover() != nil {
-                Cover(data: book.getCover()!)
+            Unwrap(book.getCover()) { cover in
+                Cover(data: cover)
             }
             VStack(alignment: .leading) {
                 if book.title.contains(":") {
@@ -34,10 +34,10 @@ struct AudiobookView: View {
                     }
                 }
             }
-            if book.summary != nil {
+            Unwrap(book.summary) { summary in
                 Divider()
                 ScrollView {
-                    SummaryView(summary: book.summary!)
+                    SummaryView(summary: summary)
                 }
                 .frame(minHeight: 50)
             }

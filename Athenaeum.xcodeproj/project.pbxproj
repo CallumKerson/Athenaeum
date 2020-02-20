@@ -21,6 +21,7 @@
 		A5193DC523F99D4A00EFF01D /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A5193DC423F99D4A00EFF01D /* RealmSwift */; };
 		A5193DC823FA995E00EFF01D /* GoodReadsKit in Frameworks */ = {isa = PBXBuildFile; productRef = A5193DC723FA995E00EFF01D /* GoodReadsKit */; };
 		A5193DCB23FAA16E00EFF01D /* SwiftyBeaver in Frameworks */ = {isa = PBXBuildFile; productRef = A5193DCA23FAA16E00EFF01D /* SwiftyBeaver */; };
+		A519E33223FEAD3B0033A6E8 /* Unwrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = A519E33123FEAD3B0033A6E8 /* Unwrap.swift */; };
 		A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A222E23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift */; };
 		A52A223123FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A223023FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift */; };
 		A52A223423FAB6DE00F34A17 /* Audiobook+Construction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A223323FAB6DE00F34A17 /* Audiobook+Construction.swift */; };
@@ -82,6 +83,7 @@
 		A5193DBD23F8234100EFF01D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		A5193DBF23F992D600EFF01D /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		A5193DC123F9952C00EFF01D /* Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Import.swift; sourceTree = "<group>"; };
+		A519E33123FEAD3B0033A6E8 /* Unwrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unwrap.swift; sourceTree = "<group>"; };
 		A52A222E23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+MoveCreatingIntermediaryDirectories.swift"; sourceTree = "<group>"; };
 		A52A223023FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+CreateStandardWindow.swift"; sourceTree = "<group>"; };
 		A52A223323FAB6DE00F34A17 /* Audiobook+Construction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Audiobook+Construction.swift"; sourceTree = "<group>"; };
@@ -252,6 +254,7 @@
 				A54A03A923F6EE2B00C8305A /* AudiobookView.swift */,
 				A5193DBD23F8234100EFF01D /* LibraryView.swift */,
 				A52A224D23FBFCAF00F34A17 /* SummaryView.swift */,
+				A519E33123FEAD3B0033A6E8 /* Unwrap.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -447,6 +450,7 @@
 				A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */,
 				A54A03AA23F6EE2B00C8305A /* AudiobookView.swift in Sources */,
 				A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */,
+				A519E33223FEAD3B0033A6E8 /* Unwrap.swift in Sources */,
 				A52A223423FAB6DE00F34A17 /* Audiobook+Construction.swift in Sources */,
 				A5193DBC23F8106900EFF01D /* AudiobookListView.swift in Sources */,
 				A511220923CDB05E0063FB32 /* Athenaeum.xcdatamodeld in Sources */,

@@ -10,7 +10,7 @@ import Foundation
 final class PreferencesStore: ObservableObject {
     static var global = PreferencesStore()
 
-    let objectWillChange = PassthroughSubject<Void, Never>()
+    let objectWillChange = ObservableObjectPublisher()
 
     private static var defaultLibraryPath: URL {
         PreferencesStore.userMusicPath().appendingPathComponent("Athanaeum")
@@ -21,16 +21,24 @@ final class PreferencesStore: ObservableObject {
     }
 
     @UserDefault(key: .libraryPath, defaultValue: defaultLibraryPath)
-    var libraryPath: URL
+    var libraryPath: URL {
+      willSet { self.objectWillChange.send() }
+    }
 
     @UserDefault(key: .useImport, defaultValue: false)
-    var useImportDirectory: Bool
+    var useImportDirectory: Bool {
+      willSet { self.objectWillChange.send() }
+    }
 
     @UserDefault(key: .importPath, defaultValue: defaultImportPath)
-    var importPath: URL
+    var importPath: URL {
+      willSet { self.objectWillChange.send() }
+    }
 
     @UserDefault(key: .goodReadsAPIKey, defaultValue: "")
-    var goodReadsAPIKey: String
+    var goodReadsAPIKey: String {
+      willSet { self.objectWillChange.send() }
+    }
 
     private var didChangeCancellable: AnyCancellable?
 
@@ -39,7 +47,8 @@ final class PreferencesStore: ObservableObject {
             .publisher(for: UserDefaults.didChangeNotification)
             .map { _ in () }
             .receive(on: DispatchQueue.main)
-            .subscribe(objectWillChange)
+            .sink(receiveValue: { _ in self.objectWillChange.send()})
+//            .subscribe(objectWillChange.)
     }
 
     private static func userMusicPath() -> URL {
