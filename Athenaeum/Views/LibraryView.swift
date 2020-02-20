@@ -8,9 +8,8 @@ import RealmSwift
 import SwiftUI
 
 struct LibraryView: View {
-    
     @ObservedObject var library: Library
-    
+
     init(withLibrary library: Library = Library.global) {
         self.library = library
     }
@@ -19,7 +18,7 @@ struct LibraryView: View {
         NavigationView {
             List {
                 Section(header: HeaderView()) {
-                    ForEach(library.🎧📚.sorted(by: { $0.author < $1.author } )) { book in
+                    ForEach(library.🎧📚.sorted(by: { $0.author < $1.author })) { book in
                         NavigationLink(destination: AudiobookView(book: book)) {
                             AudiobookCellView(book: book)
                         }
@@ -29,7 +28,10 @@ struct LibraryView: View {
             .frame(minWidth: 425, maxWidth: 425)
         }
         .listStyle(SidebarListStyle())
-        .frame(minWidth: 850, maxWidth: 850, minHeight: 400, maxHeight: .infinity)
+        .frame(minWidth: 850,
+               maxWidth: 850,
+               minHeight: 400,
+               maxHeight: .infinity)
     }
 }
 

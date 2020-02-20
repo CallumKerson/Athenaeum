@@ -1,10 +1,8 @@
-//
-//  Unwrap.swift
-//  Athenaeum
-//
-//  Created by Callum Kerson on 20/02/2020.
-//  Copyright © 2020 Callum Kerson. All rights reserved.
-//
+/**
+ Unwrap.swift
+ Copyright (c) 2020 Callum Kerr-Edwards
+ Licensed under the MIT license.
+ */
 
 import Foundation
 import SwiftUI
@@ -16,7 +14,7 @@ struct Unwrap<Value, Content: View>: View {
     init(_ value: Value?,
          @ViewBuilder content: @escaping (Value) -> Content) {
         self.value = value
-        self.contentProvider = content
+        contentProvider = content
     }
 
     var body: some View {

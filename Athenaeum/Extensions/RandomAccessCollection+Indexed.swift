@@ -1,10 +1,8 @@
-//
-//  RandomAccessCollection+Indexed.swift
-//  Athenaeum
-//
-//  Created by Callum Kerson on 19/02/2020.
-//  Copyright © 2020 Callum Kerson. All rights reserved.
-//
+/**
+ RandomAccessCollection+Indexed.swift
+ Copyright (c) 2020 Callum Kerr-Edwards
+ Licensed under the MIT license.
+ */
 
 import Foundation
 

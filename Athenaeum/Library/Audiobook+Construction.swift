@@ -9,8 +9,6 @@ import Foundation
 import GoodReadsKit
 
 extension Audiobook {
-
-    
     convenience init(fromFileWithPath path: String, withGoodReads goodReads: GoodReads? = PreferencesStore.global.goodReadsAPI) {
         self.init(fromFile: URL(fileURLWithPath: path), withGoodReads: goodReads)
     }
@@ -30,7 +28,7 @@ extension Audiobook {
         if let item = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtist).first {
             author = item.stringValue!.removeIllegalCharacters
         }
-        
+
         if let goodReads = goodReads {
             log.debug("Getting audiobook metadata from GoodReads API")
 
@@ -54,7 +52,7 @@ extension Audiobook {
                 log.error(error)
             }
         }
-        
+
         var date: String?
         if let item = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierCreationDate).first {
             date = item.stringValue

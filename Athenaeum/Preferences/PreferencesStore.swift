@@ -22,7 +22,7 @@ final class PreferencesStore: ObservableObject {
 
     @UserDefault(key: .libraryPath, defaultValue: defaultLibraryPath)
     var libraryPath: URL {
-      willSet { self.objectWillChange.send() }
+        willSet { objectWillChange.send() }
     }
 
     @UserDefault(key: .useImport, defaultValue: false)
@@ -32,12 +32,12 @@ final class PreferencesStore: ObservableObject {
 
     @UserDefault(key: .importPath, defaultValue: defaultImportPath)
     var importPath: URL {
-      willSet { self.objectWillChange.send() }
+        willSet { objectWillChange.send() }
     }
 
     @UserDefault(key: .goodReadsAPIKey, defaultValue: "")
     var goodReadsAPIKey: String {
-      willSet { self.objectWillChange.send() }
+        willSet { objectWillChange.send() }
     }
 
     private var didChangeCancellable: AnyCancellable?
@@ -47,8 +47,7 @@ final class PreferencesStore: ObservableObject {
             .publisher(for: UserDefaults.didChangeNotification)
             .map { _ in () }
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { _ in self.objectWillChange.send()})
-//            .subscribe(objectWillChange.)
+            .sink(receiveValue: { _ in self.objectWillChange.send() })
     }
 
     private static func userMusicPath() -> URL {

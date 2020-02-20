@@ -7,18 +7,16 @@
 import Cocoa
 import Foundation
 
-
 struct Import {
-    
     let preferences: PreferencesStore
     let library: Library
-    
+
     init(withPreferences preferences: PreferencesStore = PreferencesStore.global,
          withLibrary library: Library = Library.global) {
         self.preferences = preferences
         self.library = library
     }
-    
+
     func openImportAudiobookDialog() {
         let openPanel = NSOpenPanel()
         openPanel.canChooseFiles = true
@@ -27,10 +25,10 @@ struct Import {
         openPanel.canCreateDirectories = false
         openPanel.title = "Import Audiobooks"
         openPanel.allowedFileTypes = ["m4b"]
-        
+
         openPanel.begin { response in
             if response == .OK {
-                ///TODO Thread properly - this freezes the import window until import is complete
+                // TODO: Thread properly - this freezes the import window until import is complete
                 for url in openPanel.urls {
                     DispatchQueue.global(qos: .userInitiated).async {
                         log.debug("User opening file \(url.path)")
@@ -41,11 +39,11 @@ struct Import {
             openPanel.close()
         }
     }
-    
+
     func importAudiobook(fileURL: URL) {
         log.info("Importing audiobook file from \(fileURL.path)")
         let newBook = Audiobook(fromFile: fileURL)
-        var destination = self.preferences.libraryPath
+        var destination = preferences.libraryPath
             .appendingPathComponent(newBook.author, isDirectory: true)
         if let series = newBook.series {
             destination = destination
@@ -61,9 +59,6 @@ struct Import {
         try! FileManager.default.moveItemCreatingIntermediaryDirectories(at: fileURL, to: destination)
         newBook.file = destination
         log.info("Adding audiobook \(newBook) to library")
-        self.library.shelve(book: newBook)
-        
+        library.shelve(book: newBook)
     }
 }
-
-

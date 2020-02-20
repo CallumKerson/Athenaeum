@@ -4,14 +4,14 @@
  Licensed under the MIT license.
  */
 
-import Foundation
 import Combine
+import Foundation
 
 protocol Repository {
     associatedtype EntityObject: Entity
 
     var publisher: AnyPublisher<DatabaseAction, Never> { get }
-    
+
     func getAll(where predicate: NSPredicate?) -> [EntityObject]
     func insert(item: EntityObject) throws
     func update(item: EntityObject) throws

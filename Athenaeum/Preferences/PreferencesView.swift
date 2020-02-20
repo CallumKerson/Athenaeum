@@ -12,7 +12,7 @@ struct PreferencesView: View {
     @State var importPathSelection = 0
 
     @ObservedObject var preferences: PreferencesStore
-    
+
     var window: NSWindow!
     init(withPreferences preferences: PreferencesStore = PreferencesStore.global) {
         self.preferences = preferences
@@ -25,7 +25,6 @@ struct PreferencesView: View {
         prefsWindowDelegate.windowIsOpen = true
         window.makeKeyAndOrderFront(nil)
     }
-
 
     var body: some View {
         Form {

@@ -5,9 +5,9 @@
  */
 
 @testable import Athenaeum
+import Combine
 import RealmSwift
 import XCTest
-import Combine
 
 class RealmRepository🧪Tests: XCTestCase {
     var prideAndPrejudiceURL: URL?
@@ -37,13 +37,13 @@ class RealmRepository🧪Tests: XCTestCase {
         let repository = createRepository()
 
         var 🎧📚: [Audiobook] = []
-        
-        let cancellable  = repository.publisher.sink(receiveValue: { action in
+
+        let cancellable = repository.publisher.sink(receiveValue: { action in
             XCTAssertEqual(action, .insert)
             🎧📚 = repository.getAll()
             expectation.fulfill()
         })
-        
+
         try! repository.insert(item: prideAndPrejudice)
 
         XCTAssertNotNil(cancellable)
@@ -61,10 +61,10 @@ class RealmRepository🧪Tests: XCTestCase {
         // Proper title and puncutation
         theFifthSeason.title = "The Fifth Season"
         theFifthSeason.author = "N. K. Jemisin"
-        
+
         var 🎧📚: [Audiobook] = []
-        
-        let cancellable  = repository.publisher.sink(receiveValue: { action in
+
+        let cancellable = repository.publisher.sink(receiveValue: { action in
             XCTAssertEqual(action, .update)
             🎧📚 = repository.getAll()
             expectation.fulfill()
@@ -83,16 +83,16 @@ class RealmRepository🧪Tests: XCTestCase {
 
         let repository = createRepository()
         try! repository.insert(item: prideAndPrejudice)
-        
+
         var 🎧📚: [Audiobook] = repository.getAll()
         XCTAssertEqual(1, 🎧📚.count)
-        
-        let cancellable  = repository.publisher.sink(receiveValue: { action in
+
+        let cancellable = repository.publisher.sink(receiveValue: { action in
             XCTAssertEqual(action, .delete)
             🎧📚 = repository.getAll()
             expectation.fulfill()
         })
-        
+
         try! repository.delete(item: prideAndPrejudice)
 
         XCTAssertNotNil(cancellable)
