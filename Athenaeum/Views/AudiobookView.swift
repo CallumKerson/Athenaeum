@@ -64,7 +64,7 @@ struct Cover: View {
     struct AudiobookView_Previews: PreviewProvider {
         static var previews: some View {
             Group {
-                AudiobookView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"))
+                AudiobookView(book: previewAudiobooks[0])
             }
         }
     }

@@ -7,21 +7,25 @@
 import CryptoKit
 import Foundation
 
-extension Audiobook: Equatable {
-    static func == (lhs: Audiobook, rhs: Audiobook) -> Bool {
+extension AudiobookFile: Equatable {
+    static func == (lhs: AudiobookFile, rhs: AudiobookFile) -> Bool {
         guard lhs.title == rhs.title else {
             return false
         }
         guard lhs.author == rhs.author else {
             return false
         }
+        guard lhs.location == rhs.location else {
+            return false
+        }
         return true
     }
 }
 
-extension Audiobook: Hashable {
+extension AudiobookFile: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(title)
         hasher.combine(author)
+        hasher.combine(location)
     }
 }

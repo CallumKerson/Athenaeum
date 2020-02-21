@@ -8,7 +8,7 @@ import AVFoundation
 import Foundation
 import GoodReadsKit
 
-extension Audiobook {
+extension AudiobookFile {
     convenience init(fromFileWithPath path: String, withGoodReads goodReads: GoodReads? = PreferencesStore.global.goodReadsAPI) {
         self.init(fromFile: URL(fileURLWithPath: path), withGoodReads: goodReads)
     }
@@ -35,9 +35,9 @@ extension Audiobook {
             do {
                 let fetchedBook = try goodReads
                     .getBook(title: title!, author: author!)
-                var series: (title: String, entry: String)?
+                var series: Series?
                 if let seriesTitle = fetchedBook.seriesTitle, let seriesEntry = fetchedBook.seriesEntry {
-                    series = (title: seriesTitle, entry: String(seriesEntry))
+                    series = Series(title: seriesTitle, entry: String(seriesEntry))
                 }
                 self.init(title: fetchedBook.title,
                           author: fetchedBook.getAuthorString(),
@@ -62,19 +62,20 @@ extension Audiobook {
     }
 }
 
-enum AudiobookError: Error {
-    case fileMissingMetadata(filepath: String)
+extension AudiobookFile {
+    func getCover() -> Data? {
+        if let artworkItem = AVMetadataItem.metadataItems(from: AVURLAsset(url: location).commonMetadata, filteredByIdentifier: .commonIdentifierArtwork).first {
+            // Coerce the value to an NSData using its dataValue property
+            if let imageData = artworkItem.dataValue {
+                return imageData
+            }
+        }
+        return nil
+    }
 }
 
-extension String {
-    func removeCharacters(from forbiddenChars: CharacterSet) -> String {
-        let passed = unicodeScalars.filter { !forbiddenChars.contains($0) }
-        return String(String.UnicodeScalarView(passed))
-    }
-
-    func removeCharacters(from: String) -> String {
-        removeCharacters(from: CharacterSet(charactersIn: from))
-    }
+enum AudiobookFileError: Error {
+    case fileMissingMetadata(filepath: String)
 }
 
 extension PreferencesStore {

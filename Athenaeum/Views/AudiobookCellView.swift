@@ -35,8 +35,10 @@ struct SmallCover: View {
     }
 }
 
+#if DEBUG
 struct AudiobookCellView_Previews: PreviewProvider {
     static var previews: some View {
-        AudiobookCellView(book: Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"))
+        AudiobookCellView(book: previewAudiobooks[0])
     }
 }
+#endif

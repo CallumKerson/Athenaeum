@@ -10,7 +10,7 @@ struct AudiobookListView: View {
     let books: [Audiobook]
 
     var body: some View {
-        List(books) { book in
+        List(books, id: \.title) { book in
             AudiobookCellView(book: book)
         }
     }
@@ -18,10 +18,6 @@ struct AudiobookListView: View {
 
 struct AudiobookList_Previews: PreviewProvider {
     static var previews: some View {
-        AudiobookListView(books: [
-            Audiobook(fromFileWithPath: "/Users/ckerson/Music/TWoK.m4b"),
-            Audiobook(fromFileWithPath: "/Users/ckerson/Music/In the Labyrinth of Drakes.m4b"),
-            Audiobook(fromFileWithPath: "/Users/ckerson/Music/Smarter Faster Better.m4b"),
-        ])
+        AudiobookListView(books: previewAudiobooks)
     }
 }

@@ -23,12 +23,12 @@ final class StorableAudiobook: Object, Storable {
         "uuid"
     }
 
-    var model: Audiobook {
-        var series: (title: String, entry: String)?
+    var model: AudiobookFile {
+        var series: Series?
         if let seriesTitle = seriesTitle, let seriesEntry = seriesEntry {
-            series = (title: seriesTitle, entry: seriesEntry)
+            series = Series(title: seriesTitle, entry: seriesEntry)
         }
-        return Audiobook(title: title,
+        return AudiobookFile(title: title,
                          author: author,
                          file: URL(fileURLWithPath: filePath),
                          narrator: narrator,

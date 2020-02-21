@@ -1,5 +1,5 @@
 //
-//  Library.swift
+//  File.swift
 //  Athenaeum
 //
 //  Created by Callum Kerson on 21/02/2020.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol Library: ObservableObject {
-    var 🎧📚: [Audiobook] {get set}
-    func shelve(book: Audiobook)
+struct Series: Codable {
+    let title: String
+    let entry: String
 }

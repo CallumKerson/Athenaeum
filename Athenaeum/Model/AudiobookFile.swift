@@ -6,15 +6,15 @@
 
 import Foundation
 
-class Audiobook {
+class AudiobookFile: Audiobook {
     var title: String
     var author: String
-    var file: URL
+    var location: URL
     var narrator: String?
     var publicationDate: String?
     var isbn: String?
     var summary: String?
-    var series: (title: String, entry: String)?
+    var series: Series?
 
     init(title: String,
          author: String,
@@ -23,10 +23,10 @@ class Audiobook {
          publicationDate: String? = nil,
          isbn: String? = nil,
          summary: String? = nil,
-         series: (title: String, entry: String)? = nil) {
+         series: Series? = nil) {
         self.title = title
         self.author = author
-        self.file = file
+        self.location = file
         self.narrator = narrator
         self.publicationDate = publicationDate
         self.isbn = isbn
@@ -35,11 +35,11 @@ class Audiobook {
     }
 }
 
-extension Audiobook: Identifiable {
+extension AudiobookFile: Identifiable {
 //    let id = UUID()
 }
 
-extension Audiobook: CustomStringConvertible {
+extension AudiobookFile: CustomStringConvertible {
     var description: String {
         "\(title) by \(author)"
     }

@@ -9,10 +9,10 @@ import Foundation
 
 struct Import {
     let preferences: PreferencesStore
-    let library: Library
+    let library: RepositoryLibrary
 
     init(withPreferences preferences: PreferencesStore = PreferencesStore.global,
-         withLibrary library: Library = Library.global) {
+         withLibrary library: RepositoryLibrary = RepositoryLibrary.global) {
         self.preferences = preferences
         self.library = library
     }
@@ -42,7 +42,7 @@ struct Import {
 
     func importAudiobook(fileURL: URL) {
         log.info("Importing audiobook file from \(fileURL.path)")
-        let newBook = Audiobook(fromFile: fileURL)
+        let newBook = AudiobookFile(fromFile: fileURL)
         var destination = preferences.libraryPath
             .appendingPathComponent(newBook.author, isDirectory: true)
         if let series = newBook.series {
@@ -57,7 +57,7 @@ struct Import {
         }
         log.debug("Moving audiobook file to \(destination.path)")
         try! FileManager.default.moveItemCreatingIntermediaryDirectories(at: fileURL, to: destination)
-        newBook.file = destination
+        newBook.location = destination
         log.info("Adding audiobook \(newBook) to library")
         library.shelve(book: newBook)
     }

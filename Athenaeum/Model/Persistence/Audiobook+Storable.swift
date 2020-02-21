@@ -6,13 +6,13 @@
 
 import Foundation
 
-extension Audiobook: Entity {
+extension AudiobookFile: Entity {
     private var storableAudiobook: StorableAudiobook {
         let realmAudiobook = StorableAudiobook()
-        realmAudiobook.uuid = file.sha256HashOfContents
+        realmAudiobook.uuid = location.sha256HashOfContents
         realmAudiobook.title = title
         realmAudiobook.author = author
-        realmAudiobook.filePath = file.path
+        realmAudiobook.filePath = location.path
         realmAudiobook.publicationDate = publicationDate
         realmAudiobook.narrator = narrator
         realmAudiobook.summary = summary

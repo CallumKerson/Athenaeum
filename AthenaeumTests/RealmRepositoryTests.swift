@@ -33,10 +33,10 @@ class RealmRepository🧪Tests: XCTestCase {
 
     func test_insert_stores_🎧📚_locally() {
         let expectation = XCTestExpectation(description: "Publishes notification of database insert")
-        let prideAndPrejudice = Audiobook(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
+        let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
         let repository = createRepository()
 
-        var 🎧📚: [Audiobook] = []
+        var 🎧📚: [AudiobookFile] = []
 
         let cancellable = repository.publisher.sink(receiveValue: { action in
             XCTAssertEqual(action, .insert)
@@ -54,7 +54,7 @@ class RealmRepository🧪Tests: XCTestCase {
 
     func test_update_updated_🎧📚() {
         let expectation = XCTestExpectation(description: "Publishes notification of database update")
-        let theFifthSeason = Audiobook(title: "Fifth Season", author: "NK Jemisin", file: theFifthSeasonURL!)
+        let theFifthSeason = AudiobookFile(title: "Fifth Season", author: "NK Jemisin", file: theFifthSeasonURL!)
         let repository = createRepository()
         try! repository.insert(item: theFifthSeason)
 
@@ -62,7 +62,7 @@ class RealmRepository🧪Tests: XCTestCase {
         theFifthSeason.title = "The Fifth Season"
         theFifthSeason.author = "N. K. Jemisin"
 
-        var 🎧📚: [Audiobook] = []
+        var 🎧📚: [AudiobookFile] = []
 
         let cancellable = repository.publisher.sink(receiveValue: { action in
             XCTAssertEqual(action, .update)
@@ -79,12 +79,12 @@ class RealmRepository🧪Tests: XCTestCase {
 
     func test_delete_removes_🎧📚() {
         let expectation = XCTestExpectation(description: "Publishes notification of database delete")
-        let prideAndPrejudice = Audiobook(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
+        let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
 
         let repository = createRepository()
         try! repository.insert(item: prideAndPrejudice)
 
-        var 🎧📚: [Audiobook] = repository.getAll()
+        var 🎧📚: [AudiobookFile] = repository.getAll()
         XCTAssertEqual(1, 🎧📚.count)
 
         let cancellable = repository.publisher.sink(receiveValue: { action in
@@ -100,20 +100,20 @@ class RealmRepository🧪Tests: XCTestCase {
     }
 
     func test_getAll_filters_🎧📚() {
-        let theFifthSeason = Audiobook(title: "The Fifth Season", author: "N. K. Jemisin", file: theFifthSeasonURL!)
-        let prideAndPrejudice = Audiobook(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
+        let theFifthSeason = AudiobookFile(title: "The Fifth Season", author: "N. K. Jemisin", file: theFifthSeasonURL!)
+        let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
 
         let repository = createRepository()
         try! repository.insert(item: theFifthSeason)
         try! repository.insert(item: prideAndPrejudice)
 
-        let 🎧📚: [Audiobook] = repository.getAll(where: NSPredicate(format: "author = %@", theFifthSeason.author))
+        let 🎧📚: [AudiobookFile] = repository.getAll(where: NSPredicate(format: "author = %@", theFifthSeason.author))
 
         XCTAssertEqual(1, 🎧📚.count)
         XCTAssertEqual("The Fifth Season", 🎧📚.first?.title)
     }
 
-    private func createRepository() -> RealmRepository<Audiobook> {
+    private func createRepository() -> RealmRepository<AudiobookFile> {
         RealmRepository()
     }
 }
