@@ -1,2 +1,3 @@
 --swiftversion 5.1
---header "/**\n {file}\n Copyright (c) {year} Callum Kerr-Edwards\n Licensed under the MIT license.\n*/"
+--header "/**\n {file}\n Copyright (c) {year} Callum Kerr-Edwards\n*/"
+--self insert

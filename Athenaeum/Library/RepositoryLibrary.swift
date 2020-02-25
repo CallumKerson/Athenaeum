@@ -1,7 +1,6 @@
 /**
- Library.swift
+ RepositoryLibrary.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Combine
@@ -14,7 +13,7 @@ final class RepositoryLibrary: Library {
 
     var 🎧📚: [Audiobook] = [] {
         willSet {
-            objectWillChange.send()
+            self.objectWillChange.send()
         }
     }
 
@@ -22,7 +21,7 @@ final class RepositoryLibrary: Library {
 
     init() {
         log.info("Initialising Library")
-        🎧📚 = RepositoryLibrary.getRepository().getAll()
+        self.🎧📚 = RepositoryLibrary.getRepository().getAll()
     }
 
     public func shelve(book: Audiobook) {

@@ -1,7 +1,6 @@
 /**
  AudiobookCellView.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import SwiftUI
@@ -36,9 +35,9 @@ struct SmallCover: View {
 }
 
 #if DEBUG
-struct AudiobookCellView_Previews: PreviewProvider {
-    static var previews: some View {
-        AudiobookCellView(book: previewAudiobooks[0])
+    struct AudiobookCellView_Previews: PreviewProvider {
+        static var previews: some View {
+            AudiobookCellView(book: previewAudiobooks[0])
+        }
     }
-}
 #endif

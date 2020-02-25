@@ -1,7 +1,6 @@
 /**
  Repository.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Combine
@@ -20,7 +19,7 @@ protocol Repository {
 
 extension Repository {
     func getAll() -> [EntityObject] {
-        getAll(where: nil)
+        self.getAll(where: nil)
     }
 }
 

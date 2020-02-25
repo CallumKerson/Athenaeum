@@ -1,7 +1,6 @@
 /**
  PreferencesView.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import SwiftUI
@@ -16,14 +15,14 @@ struct PreferencesView: View {
     var window: NSWindow!
     init(withPreferences preferences: PreferencesStore = PreferencesStore.global) {
         self.preferences = preferences
-        window = NSWindow.createStandardWindow(withTitle: "Preferences",
-                                               width: 600,
-                                               height: 160)
-        window.contentView = NSHostingView(rootView: self)
-        window.delegate = prefsWindowDelegate
-        window.tabbingMode = .disallowed
-        prefsWindowDelegate.windowIsOpen = true
-        window.makeKeyAndOrderFront(nil)
+        self.window = NSWindow.createStandardWindow(withTitle: "Preferences",
+                                                    width: 600,
+                                                    height: 160)
+        self.window.contentView = NSHostingView(rootView: self)
+        self.window.delegate = self.prefsWindowDelegate
+        self.window.tabbingMode = .disallowed
+        self.prefsWindowDelegate.windowIsOpen = true
+        self.window.makeKeyAndOrderFront(nil)
     }
 
     var body: some View {
@@ -56,8 +55,8 @@ struct PreferencesView: View {
     }
 
     func getImportPath() -> Text {
-        if preferences.useImportDirectory {
-            return Text(preferences.importPath.deSandboxedPath)
+        if self.preferences.useImportDirectory {
+            return Text(self.preferences.importPath.deSandboxedPath)
         }
         return Text("")
     }
@@ -66,7 +65,7 @@ struct PreferencesView: View {
         var windowIsOpen = false
 
         func windowWillClose(_: Notification) {
-            windowIsOpen = false
+            self.windowIsOpen = false
         }
     }
 }

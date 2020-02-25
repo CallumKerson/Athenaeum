@@ -1,7 +1,6 @@
 /**
- Audiobook.swift
+ AudiobookFile.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Foundation
@@ -41,6 +40,6 @@ extension AudiobookFile: Identifiable {
 
 extension AudiobookFile: CustomStringConvertible {
     var description: String {
-        "\(title) by \(author)"
+        "\(self.title) by \(self.author)"
     }
 }

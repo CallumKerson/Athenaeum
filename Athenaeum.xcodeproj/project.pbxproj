@@ -26,7 +26,7 @@
 		A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A222E23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift */; };
 		A52A223123FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A223023FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift */; };
 		A52A223423FAB6DE00F34A17 /* AudiobookFile+Construction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A223323FAB6DE00F34A17 /* AudiobookFile+Construction.swift */; };
-		A52A223C23FAF49600F34A17 /* PersistableAudiobook.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A223B23FAF49600F34A17 /* PersistableAudiobook.swift */; };
+		A52A223C23FAF49600F34A17 /* StorableAudiobook.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A223B23FAF49600F34A17 /* StorableAudiobook.swift */; };
 		A52A224023FAF84F00F34A17 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A223F23FAF84F00F34A17 /* Repository.swift */; };
 		A52A224223FAF89A00F34A17 /* Audiobook+Storable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A224123FAF89A00F34A17 /* Audiobook+Storable.swift */; };
 		A52A224623FBDED600F34A17 /* String+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A224523FBDED600F34A17 /* String+Utils.swift */; };
@@ -90,7 +90,7 @@
 		A52A222E23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+MoveCreatingIntermediaryDirectories.swift"; sourceTree = "<group>"; };
 		A52A223023FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+CreateStandardWindow.swift"; sourceTree = "<group>"; };
 		A52A223323FAB6DE00F34A17 /* AudiobookFile+Construction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudiobookFile+Construction.swift"; sourceTree = "<group>"; };
-		A52A223B23FAF49600F34A17 /* PersistableAudiobook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistableAudiobook.swift; sourceTree = "<group>"; };
+		A52A223B23FAF49600F34A17 /* StorableAudiobook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorableAudiobook.swift; sourceTree = "<group>"; };
 		A52A223F23FAF84F00F34A17 /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
 		A52A224123FAF89A00F34A17 /* Audiobook+Storable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Audiobook+Storable.swift"; sourceTree = "<group>"; };
 		A52A224323FBDE8A00F34A17 /* AudiobookFile+Equitable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudiobookFile+Equitable.swift"; sourceTree = "<group>"; };
@@ -213,7 +213,7 @@
 			children = (
 				A5DC1E0723FD2D4F009D061F /* Realm */,
 				A52A224123FAF89A00F34A17 /* Audiobook+Storable.swift */,
-				A52A223B23FAF49600F34A17 /* PersistableAudiobook.swift */,
+				A52A223B23FAF49600F34A17 /* StorableAudiobook.swift */,
 				A52A223F23FAF84F00F34A17 /* Repository.swift */,
 			);
 			path = Persistence;
@@ -452,7 +452,7 @@
 				A52A224223FAF89A00F34A17 /* Audiobook+Storable.swift in Sources */,
 				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
 				A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */,
-				A52A223C23FAF49600F34A17 /* PersistableAudiobook.swift in Sources */,
+				A52A223C23FAF49600F34A17 /* StorableAudiobook.swift in Sources */,
 				A519E33523FFD0890033A6E8 /* PreviewAudiobooks.swift in Sources */,
 				A52A224023FAF84F00F34A17 /* Repository.swift in Sources */,
 				A519E33723FFD2D80033A6E8 /* Audiobook.swift in Sources */,

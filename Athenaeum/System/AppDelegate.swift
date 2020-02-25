@@ -1,7 +1,6 @@
 /**
  AppDelegate.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Cocoa
@@ -23,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // MARK: Menus
 
         log.info("Setting up menu items")
-        manageMenus()
+        self.manageMenus()
 
         // MARK: Main View
 
@@ -31,15 +30,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let contentView = LibraryView(withLibrary: RepositoryLibrary.global)
         // Create the window and set the content view.
-        window = NSWindow(
+        self.window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered, defer: false
         )
-        window.center()
-        window.setFrameAutosaveName("Main Window")
-        window.contentView = NSHostingView(rootView: contentView)
-        window.makeKeyAndOrderFront(nil)
+        self.window.center()
+        self.window.setFrameAutosaveName("Main Window")
+        self.window.contentView = NSHostingView(rootView: contentView)
+        self.window.makeKeyAndOrderFront(nil)
     }
 
     func applicationWillTerminate(_: Notification) {
@@ -52,7 +51,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let i: Int = appMenu.indexOfItem(withTitle: "Preferences…")
         guard let preferencesMenuItem = appMenu.item(at: i) else { return }
         appMenu.removeItem(preferencesMenuItem)
-        preferencesMenuItem.action = #selector(preferencesMenuItemActionHandler(_:))
+        preferencesMenuItem.action = #selector(self.preferencesMenuItemActionHandler(_:))
         appMenu.addItem(preferencesMenuItem)
 
         log.debug("Setting up import menu item")
@@ -62,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         importItem.keyEquivalent = "i"
         importItem.keyEquivalentModifierMask = [.command]
         importItem.isEnabled = true
-        importItem.action = #selector(importMenuItemActionHandler(_:))
+        importItem.action = #selector(self.importMenuItemActionHandler(_:))
         fileMenu.addItem(importItem)
     }
 
@@ -74,7 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let prefsView = prefsView, prefsView.prefsWindowDelegate.windowIsOpen {
             prefsView.window.makeKeyAndOrderFront(self)
         } else {
-            prefsView = PreferencesView()
+            self.prefsView = PreferencesView()
         }
     }
 }

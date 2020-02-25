@@ -1,7 +1,6 @@
 /**
- PersistableAudiobook.swift
+ StorableAudiobook.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Foundation
@@ -28,13 +27,13 @@ final class StorableAudiobook: Object, Storable {
         if let seriesTitle = seriesTitle, let seriesEntry = seriesEntry {
             series = Series(title: seriesTitle, entry: seriesEntry)
         }
-        return AudiobookFile(title: title,
-                         author: author,
-                         file: URL(fileURLWithPath: filePath),
-                         narrator: narrator,
-                         publicationDate: publicationDate,
-                         isbn: isbn,
-                         summary: summary,
-                         series: series)
+        return AudiobookFile(title: self.title,
+                             author: self.author,
+                             file: URL(fileURLWithPath: self.filePath),
+                             narrator: self.narrator,
+                             publicationDate: self.publicationDate,
+                             isbn: self.isbn,
+                             summary: self.summary,
+                             series: series)
     }
 }

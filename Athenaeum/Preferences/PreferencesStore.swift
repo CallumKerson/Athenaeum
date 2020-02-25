@@ -1,7 +1,6 @@
 /**
  PreferencesStore.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Combine
@@ -22,28 +21,28 @@ final class PreferencesStore: ObservableObject {
 
     @UserDefault(key: .libraryPath, defaultValue: defaultLibraryPath)
     var libraryPath: URL {
-        willSet { objectWillChange.send() }
+        willSet { self.objectWillChange.send() }
     }
 
     @UserDefault(key: .useImport, defaultValue: false)
     var useImportDirectory: Bool {
-      willSet { self.objectWillChange.send() }
+        willSet { self.objectWillChange.send() }
     }
 
     @UserDefault(key: .importPath, defaultValue: defaultImportPath)
     var importPath: URL {
-        willSet { objectWillChange.send() }
+        willSet { self.objectWillChange.send() }
     }
 
     @UserDefault(key: .goodReadsAPIKey, defaultValue: "")
     var goodReadsAPIKey: String {
-        willSet { objectWillChange.send() }
+        willSet { self.objectWillChange.send() }
     }
 
     private var didChangeCancellable: AnyCancellable?
 
     init() {
-        didChangeCancellable = NotificationCenter.default
+        self.didChangeCancellable = NotificationCenter.default
             .publisher(for: UserDefaults.didChangeNotification)
             .map { _ in () }
             .receive(on: DispatchQueue.main)

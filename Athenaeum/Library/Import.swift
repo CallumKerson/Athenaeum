@@ -1,7 +1,6 @@
 /**
  Import.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Cocoa
@@ -43,7 +42,7 @@ struct Import {
     func importAudiobook(fileURL: URL) {
         log.info("Importing audiobook file from \(fileURL.path)")
         let newBook = AudiobookFile(fromFile: fileURL)
-        var destination = preferences.libraryPath
+        var destination = self.preferences.libraryPath
             .appendingPathComponent(newBook.author, isDirectory: true)
         if let series = newBook.series {
             destination = destination
@@ -59,6 +58,6 @@ struct Import {
         try! FileManager.default.moveItemCreatingIntermediaryDirectories(at: fileURL, to: destination)
         newBook.location = destination
         log.info("Adding audiobook \(newBook) to library")
-        library.shelve(book: newBook)
+        self.library.shelve(book: newBook)
     }
 }

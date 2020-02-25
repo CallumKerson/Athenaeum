@@ -1,7 +1,6 @@
 /**
  RealmRepositoryTests.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 @testable import Athenaeum
@@ -19,13 +18,13 @@ class RealmRepository🧪Tests: XCTestCase {
         let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
 
         prideAndPrejudiceURL = temporaryDirectoryURL.appendingPathComponent("\(UUID().uuidString)PrideAndPrejudice.m4b")
-        theFifthSeasonURL = temporaryDirectoryURL.appendingPathComponent("\(UUID().uuidString)TheFifthSeason.m4b")
+        self.theFifthSeasonURL = temporaryDirectoryURL.appendingPathComponent("\(UUID().uuidString)TheFifthSeason.m4b")
 
         do {
             try "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife."
-                .data(using: .utf8)!.write(to: prideAndPrejudiceURL!, options: .atomic)
+                .data(using: .utf8)!.write(to: self.prideAndPrejudiceURL!, options: .atomic)
             try "Let's start with the end of the world, why don't we? Get it over with and move on to more interesting things."
-                .data(using: .utf8)!.write(to: theFifthSeasonURL!, options: .atomic)
+                .data(using: .utf8)!.write(to: self.theFifthSeasonURL!, options: .atomic)
         } catch {
             XCTFail()
         }
@@ -34,7 +33,7 @@ class RealmRepository🧪Tests: XCTestCase {
     func test_insert_stores_🎧📚_locally() {
         let expectation = XCTestExpectation(description: "Publishes notification of database insert")
         let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
-        let repository = createRepository()
+        let repository = self.createRepository()
 
         var 🎧📚: [AudiobookFile] = []
 
@@ -55,7 +54,7 @@ class RealmRepository🧪Tests: XCTestCase {
     func test_update_updated_🎧📚() {
         let expectation = XCTestExpectation(description: "Publishes notification of database update")
         let theFifthSeason = AudiobookFile(title: "Fifth Season", author: "NK Jemisin", file: theFifthSeasonURL!)
-        let repository = createRepository()
+        let repository = self.createRepository()
         try! repository.insert(item: theFifthSeason)
 
         // Proper title and puncutation
@@ -81,7 +80,7 @@ class RealmRepository🧪Tests: XCTestCase {
         let expectation = XCTestExpectation(description: "Publishes notification of database delete")
         let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
 
-        let repository = createRepository()
+        let repository = self.createRepository()
         try! repository.insert(item: prideAndPrejudice)
 
         var 🎧📚: [AudiobookFile] = repository.getAll()
@@ -103,7 +102,7 @@ class RealmRepository🧪Tests: XCTestCase {
         let theFifthSeason = AudiobookFile(title: "The Fifth Season", author: "N. K. Jemisin", file: theFifthSeasonURL!)
         let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice", author: "Jane Austen", file: prideAndPrejudiceURL!)
 
-        let repository = createRepository()
+        let repository = self.createRepository()
         try! repository.insert(item: theFifthSeason)
         try! repository.insert(item: prideAndPrejudice)
 

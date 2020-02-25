@@ -1,7 +1,6 @@
 /**
  UserDefault.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Foundation
@@ -13,10 +12,10 @@ struct UserDefault<T> {
 
     var wrappedValue: T {
         get {
-            UserDefaults.standard.object(forKey: key.rawValue) as? T ?? defaultValue
+            UserDefaults.standard.object(forKey: self.key.rawValue) as? T ?? self.defaultValue
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: key.rawValue)
+            UserDefaults.standard.set(newValue, forKey: self.key.rawValue)
         }
     }
 }

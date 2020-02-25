@@ -1,7 +1,6 @@
 /**
- GenericRepository.swift
+ RealmRepository.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Combine
@@ -19,12 +18,12 @@ class RealmRepository<RepositoryObject>: Repository
     private let realm: Realm
 
     init() {
-        realm = try! Realm()
-        publisher = subject.eraseToAnyPublisher()
+        self.realm = try! Realm()
+        self.publisher = self.subject.eraseToAnyPublisher()
     }
 
     func getAll(where predicate: NSPredicate?) -> [RepositoryObject] {
-        var objects = realm.objects(RealmObject.self)
+        var objects = self.realm.objects(RealmObject.self)
 
         if let predicate = predicate {
             objects = objects.filter(predicate)
@@ -33,29 +32,29 @@ class RealmRepository<RepositoryObject>: Repository
     }
 
     func insert(item: RepositoryObject) throws {
-        try insertItem(item)
-        subject.send(.insert)
+        try self.insertItem(item)
+        self.subject.send(.insert)
     }
 
     func update(item: RepositoryObject) throws {
-        try deleteItem(item)
-        try insertItem(item)
-        subject.send(.update)
+        try self.deleteItem(item)
+        try self.insertItem(item)
+        self.subject.send(.update)
     }
 
     func delete(item: RepositoryObject) throws {
-        try deleteItem(item)
-        subject.send(.delete)
+        try self.deleteItem(item)
+        self.subject.send(.delete)
     }
 
     private func insertItem(_ item: RepositoryObject) throws {
-        try realm.write {
+        try self.realm.write {
             realm.add(item.toStorable())
         }
     }
 
     private func deleteItem(_ item: RepositoryObject) throws {
-        try realm.write {
+        try self.realm.write {
             let predicate = NSPredicate(format: "uuid == %@", item.toStorable().uuid)
             if let productToDelete = realm.objects(RealmObject.self)
                 .filter(predicate).first {

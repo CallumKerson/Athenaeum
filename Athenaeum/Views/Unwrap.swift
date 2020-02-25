@@ -1,7 +1,6 @@
 /**
  Unwrap.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Foundation
@@ -14,7 +13,7 @@ struct Unwrap<Value, Content: View>: View {
     init(_ value: Value?,
          @ViewBuilder content: @escaping (Value) -> Content) {
         self.value = value
-        contentProvider = content
+        self.contentProvider = content
     }
 
     var body: some View {

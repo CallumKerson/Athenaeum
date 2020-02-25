@@ -1,7 +1,6 @@
 /**
  SummaryView.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import SwiftUI
@@ -10,7 +9,7 @@ struct SummaryView: View {
     let lines: [String]
 
     init(summary: String) {
-        lines = summary.components(separatedBy: "<br />")
+        self.lines = summary.components(separatedBy: "<br />")
     }
 
     var body: some View {
