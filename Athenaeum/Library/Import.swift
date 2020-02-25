@@ -10,7 +10,8 @@ struct Import {
     let preferences: PreferencesStore
     let library: RepositoryLibrary
 
-    init(withPreferences preferences: PreferencesStore = PreferencesStore.global,
+    init(withPreferences preferences: PreferencesStore = PreferencesStore
+        .global,
          withLibrary library: RepositoryLibrary = RepositoryLibrary.global) {
         self.preferences = preferences
         self.library = library
@@ -55,7 +56,9 @@ struct Import {
                 .appendingPathExtension("m4b")
         }
         log.debug("Moving audiobook file to \(destination.path)")
-        try! FileManager.default.moveItemCreatingIntermediaryDirectories(at: fileURL, to: destination)
+        try! FileManager.default
+            .moveItemCreatingIntermediaryDirectories(at: fileURL,
+                                                     to: destination)
         newBook.location = destination
         log.info("Adding audiobook \(newBook) to library")
         self.library.shelve(book: newBook)

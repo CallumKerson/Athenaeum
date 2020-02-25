@@ -29,7 +29,8 @@ struct SmallCover: View {
             .resizable()
             .scaledToFit()
             .aspectRatio(contentMode: .fit)
-            .frame(width: 50, height: 50).clipShape(RoundedRectangle(cornerRadius: 5))
+            .frame(width: 50, height: 50)
+            .clipShape(RoundedRectangle(cornerRadius: 5))
             .shadow(radius: 10)
     }
 }

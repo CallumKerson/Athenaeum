@@ -55,7 +55,8 @@ class RealmRepository<RepositoryObject>: Repository
 
     private func deleteItem(_ item: RepositoryObject) throws {
         try self.realm.write {
-            let predicate = NSPredicate(format: "uuid == %@", item.toStorable().uuid)
+            let predicate = NSPredicate(format: "uuid == %@",
+                                        item.toStorable().uuid)
             if let productToDelete = realm.objects(RealmObject.self)
                 .filter(predicate).first {
                 realm.delete(productToDelete)

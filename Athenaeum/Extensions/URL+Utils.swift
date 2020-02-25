@@ -8,7 +8,9 @@ import Foundation
 
 extension URL {
     var deSandboxedPath: String {
-        path.replacingOccurrences(of: "Library/Containers/com.umbra.Athenaeum/Data/", with: "")
+        path
+            .replacingOccurrences(of: "Library/Containers/com.umbra.Athenaeum/Data/",
+                                  with: "")
     }
 }
 

@@ -32,7 +32,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create the window and set the content view.
         self.window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            styleMask: [.titled, .closable, .miniaturizable, .resizable,
+                        .fullSizeContentView],
             backing: .buffered, defer: false
         )
         self.window.center()
@@ -47,15 +48,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private final func manageMenus() {
         log.debug("Setting up preferences menu item")
-        guard let appMenu = NSApplication.shared.mainMenu?.item(at: 0)?.submenu else { return }
+        guard let appMenu = NSApplication.shared.mainMenu?.item(at: 0)?.submenu
+        else { return }
         let i: Int = appMenu.indexOfItem(withTitle: "Preferences…")
         guard let preferencesMenuItem = appMenu.item(at: i) else { return }
         appMenu.removeItem(preferencesMenuItem)
-        preferencesMenuItem.action = #selector(self.preferencesMenuItemActionHandler(_:))
+        preferencesMenuItem
+            .action = #selector(self.preferencesMenuItemActionHandler(_:))
         appMenu.addItem(preferencesMenuItem)
 
         log.debug("Setting up import menu item")
-        guard let fileMenu = NSApplication.shared.mainMenu?.item(at: 1)?.submenu else { return }
+        guard let fileMenu = NSApplication.shared.mainMenu?.item(at: 1)?
+            .submenu else { return }
         let importItem = NSMenuItem()
         importItem.title = "Import"
         importItem.keyEquivalent = "i"
@@ -70,7 +74,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func preferencesMenuItemActionHandler(_: NSMenuItem) {
-        if let prefsView = prefsView, prefsView.prefsWindowDelegate.windowIsOpen {
+        if let prefsView = prefsView,
+            prefsView.prefsWindowDelegate.windowIsOpen {
             prefsView.window.makeKeyAndOrderFront(self)
         } else {
             self.prefsView = PreferencesView()

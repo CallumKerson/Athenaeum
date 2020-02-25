@@ -20,7 +20,8 @@ import Foundation
     func load<T: Decodable>(_ filename: String) -> T {
         let data: Data
 
-        guard let file = Bundle.main.url(forResource: filename, withExtension: nil)
+        guard let file = Bundle.main
+            .url(forResource: filename, withExtension: nil)
         else {
             fatalError("Couldn't find \(filename) in main bundle.")
         }
@@ -57,7 +58,8 @@ import Foundation
         var series: Series?
 
         func getCover() -> Data? {
-            if let filePath = Bundle.main.url(forResource: title, withExtension: "jpg") {
+            if let filePath = Bundle.main.url(forResource: title,
+                                              withExtension: "jpg") {
                 do {
                     return try Data(contentsOf: filePath)
                 } catch {

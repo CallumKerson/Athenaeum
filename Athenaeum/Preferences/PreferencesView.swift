@@ -13,7 +13,8 @@ struct PreferencesView: View {
     @ObservedObject var preferences: PreferencesStore
 
     var window: NSWindow!
-    init(withPreferences preferences: PreferencesStore = PreferencesStore.global) {
+    init(withPreferences preferences: PreferencesStore = PreferencesStore
+        .global) {
         self.preferences = preferences
         self.window = NSWindow.createStandardWindow(withTitle: "Preferences",
                                                     width: 600,
@@ -35,7 +36,8 @@ struct PreferencesView: View {
             })
             }.padding(.bottom)
             Section {
-                Toggle("Use Import Directory", isOn: $preferences.useImportDirectory)
+                Toggle("Use Import Directory",
+                       isOn: $preferences.useImportDirectory)
             }
             Section {
                 Picker(selection: $importPathSelection, label:
@@ -47,7 +49,8 @@ struct PreferencesView: View {
             .disabled(!preferences.useImportDirectory)
             .padding(.bottom)
             Section {
-                TextField("GoodReads API Key", text: $preferences.goodReadsAPIKey)
+                TextField("GoodReads API Key",
+                          text: $preferences.goodReadsAPIKey)
             }
         }
         .frame(minWidth: 600, maxWidth: 600, minHeight: 160, maxHeight: 160)

@@ -15,7 +15,8 @@ struct AudiobookView: View {
             }
             VStack(alignment: .leading) {
                 if book.title.contains(":") {
-                    ForEach(book.title.components(separatedBy: ":"), id: \.self) { title in
+                    ForEach(book.title.components(separatedBy: ":"),
+                            id: \.self) { title in
                         Text(title.trimmed)
                             .font(.headline)
                     }

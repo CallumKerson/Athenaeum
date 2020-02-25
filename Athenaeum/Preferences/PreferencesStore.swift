@@ -50,7 +50,8 @@ final class PreferencesStore: ObservableObject {
     }
 
     private static func userMusicPath() -> URL {
-        if let path = FileManager.default.urls(for: .musicDirectory, in: .userDomainMask).first {
+        if let path = FileManager.default.urls(for: .musicDirectory,
+                                               in: .userDomainMask).first {
             return path
         } else {
             return URL(string: NSHomeDirectory())!

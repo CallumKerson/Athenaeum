@@ -1,3 +1,4 @@
 --swiftversion 5.1
 --header "/**\n {file}\n Copyright (c) {year} Callum Kerr-Edwards\n*/"
 --self insert
+--maxwidth 80
