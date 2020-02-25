@@ -39,6 +39,14 @@ struct AudiobookView: View {
                     }
                 }
             }
+            Unwrap(book.narrator) { narrator in
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Narrated by \(narrator)")
+                        Spacer()
+                    }
+                }
+            }
             Unwrap(book.summary) { summary in
                 Divider()
                 ScrollView {
