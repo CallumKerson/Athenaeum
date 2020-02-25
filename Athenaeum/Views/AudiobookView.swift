@@ -13,7 +13,7 @@ struct AudiobookView: View {
             Unwrap(book.getCover()) { cover in
                 Cover(data: cover)
             }
-            VStack(alignment: .leading) {
+            VStack(alignment: .center) {
                 if book.title.contains(":") {
                     ForEach(book.title.components(separatedBy: ":"),
                             id: \.self) { title in
@@ -24,12 +24,17 @@ struct AudiobookView: View {
                     Text(book.title)
                         .font(.headline)
                 }
+                Unwrap(book.series) { series in
+                    Text("Book \(series.entry) of \(series.title)")
+                }
+            }
+            VStack(alignment: .leading) {
                 HStack {
                     Text(book.author)
                         .font(.subheadline)
-                    if book.publicationDate != nil {
+                    Unwrap(book.publicationDate) { date in
                         Spacer()
-                        Text(book.publicationDate!)
+                        Text(date)
                             .font(.subheadline)
                     }
                 }
@@ -56,7 +61,7 @@ struct Cover: View {
             .scaledToFit()
             .frame(width: 400, height: 400)
             .clipShape(RoundedRectangle(cornerRadius: 5))
-            .shadow(radius: 10)
+            .shadow(radius: 20)
     }
 }
 
@@ -65,6 +70,9 @@ struct Cover: View {
         static var previews: some View {
             Group {
                 AudiobookView(book: previewAudiobooks[0])
+                AudiobookView(book: previewAudiobooks[1])
+                    .environment(\.colorScheme, .dark)
+                AudiobookView(book: previewAudiobooks[3])
             }
         }
     }

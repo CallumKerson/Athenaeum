@@ -13,7 +13,7 @@
 		A511221D23CDB0620063FB32 /* AthenaeumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511221C23CDB0620063FB32 /* AthenaeumTests.swift */; };
 		A511222823CDB0620063FB32 /* AthenaeumUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511222723CDB0620063FB32 /* AthenaeumUITests.swift */; };
 		A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */; };
-		A5193DBC23F8106900EFF01D /* AudiobookListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBB23F8106900EFF01D /* AudiobookListView.swift */; };
+		A5193DBC23F8106900EFF01D /* ForEachAudiobookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */; };
 		A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBD23F8234100EFF01D /* LibraryView.swift */; };
 		A5193DC023F992D600EFF01D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A5193DBF23F992D600EFF01D /* Main.storyboard */; };
 		A5193DC223F9952C00EFF01D /* Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DC123F9952C00EFF01D /* Import.swift */; };
@@ -37,6 +37,7 @@
 		A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3723EDC37000B1DF81 /* URL+Utils.swift */; };
 		A54A03A723F6EDE000C8305A /* AudiobookFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A623F6EDE000C8305A /* AudiobookFile.swift */; };
 		A54A03AA23F6EE2B00C8305A /* AudiobookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A923F6EE2B00C8305A /* AudiobookView.swift */; };
+		A580AFF8240527B200B91771 /* NSImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580AFF7240527B200B91771 /* NSImage+Resize.swift */; };
 		A5AAC47E23FFD88600542E6D /* RealmRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AAC47D23FFD88600542E6D /* RealmRepository.swift */; };
 		A5AAC48823FFE01E00542E6D /* Words of Radiance.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48723FFE01E00542E6D /* Words of Radiance.jpg */; };
 		A5AAC48A23FFE05800542E6D /* Oathbringer.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48923FFE05800542E6D /* Oathbringer.jpg */; };
@@ -79,7 +80,7 @@
 		A511222723CDB0620063FB32 /* AthenaeumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthenaeumUITests.swift; sourceTree = "<group>"; };
 		A511222923CDB0620063FB32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookCellView.swift; sourceTree = "<group>"; };
-		A5193DBB23F8106900EFF01D /* AudiobookListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookListView.swift; sourceTree = "<group>"; };
+		A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForEachAudiobookView.swift; sourceTree = "<group>"; };
 		A5193DBD23F8234100EFF01D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		A5193DBF23F992D600EFF01D /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		A5193DC123F9952C00EFF01D /* Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Import.swift; sourceTree = "<group>"; };
@@ -102,6 +103,7 @@
 		A5429E3723EDC37000B1DF81 /* URL+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Utils.swift"; sourceTree = "<group>"; };
 		A54A03A623F6EDE000C8305A /* AudiobookFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookFile.swift; sourceTree = "<group>"; };
 		A54A03A923F6EE2B00C8305A /* AudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookView.swift; sourceTree = "<group>"; };
+		A580AFF7240527B200B91771 /* NSImage+Resize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+Resize.swift"; sourceTree = "<group>"; };
 		A5AAC47D23FFD88600542E6D /* RealmRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmRepository.swift; sourceTree = "<group>"; };
 		A5AAC48723FFE01E00542E6D /* Words of Radiance.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Words of Radiance.jpg"; sourceTree = "<group>"; };
 		A5AAC48923FFE05800542E6D /* Oathbringer.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Oathbringer.jpg; sourceTree = "<group>"; };
@@ -247,6 +249,7 @@
 				A52A224523FBDED600F34A17 /* String+Utils.swift */,
 				A5429E3723EDC37000B1DF81 /* URL+Utils.swift */,
 				A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */,
+				A580AFF7240527B200B91771 /* NSImage+Resize.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -255,7 +258,7 @@
 			isa = PBXGroup;
 			children = (
 				A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */,
-				A5193DBB23F8106900EFF01D /* AudiobookListView.swift */,
+				A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */,
 				A54A03A923F6EE2B00C8305A /* AudiobookView.swift */,
 				A5193DBD23F8234100EFF01D /* LibraryView.swift */,
 				A52A224D23FBFCAF00F34A17 /* SummaryView.swift */,
@@ -456,6 +459,7 @@
 				A519E33523FFD0890033A6E8 /* PreviewAudiobooks.swift in Sources */,
 				A52A224023FAF84F00F34A17 /* Repository.swift in Sources */,
 				A519E33723FFD2D80033A6E8 /* Audiobook.swift in Sources */,
+				A580AFF8240527B200B91771 /* NSImage+Resize.swift in Sources */,
 				A52A223123FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift in Sources */,
 				A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */,
 				A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */,
@@ -463,7 +467,7 @@
 				A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */,
 				A519E33223FEAD3B0033A6E8 /* Unwrap.swift in Sources */,
 				A52A223423FAB6DE00F34A17 /* AudiobookFile+Construction.swift in Sources */,
-				A5193DBC23F8106900EFF01D /* AudiobookListView.swift in Sources */,
+				A5193DBC23F8106900EFF01D /* ForEachAudiobookView.swift in Sources */,
 				A5AAC47E23FFD88600542E6D /* RealmRepository.swift in Sources */,
 				A5429E3523EDBAB100B1DF81 /* RepositoryLibrary.swift in Sources */,
 				A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */,
