@@ -19,11 +19,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         log.addDestination(ConsoleDestination())
 
-        // MARK: Menus
-
-        log.info("Setting up menu items")
-        self.manageMenus()
-
         // MARK: Main View
 
         log.info("Creating main view")
@@ -47,36 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         log.info("Exiting app")
     }
 
-    private final func manageMenus() {
-        log.debug("Setting up preferences menu item")
-        guard let appMenu = NSApplication.shared.mainMenu?.item(at: 0)?.submenu
-        else { return }
-        let i: Int = appMenu.indexOfItem(withTitle: "Preferences…")
-        guard let preferencesMenuItem = appMenu.item(at: i) else { return }
-        appMenu.removeItem(preferencesMenuItem)
-        preferencesMenuItem
-            .action = #selector(self.preferencesMenuItemActionHandler(_:))
-        appMenu.addItem(preferencesMenuItem)
-
-        log.debug("Setting up import menu item")
-        guard let fileMenu = NSApplication.shared.mainMenu?.item(at: 1)?
-            .submenu else { return }
-        let importItem = NSMenuItem()
-        importItem.title = "Import"
-        importItem.keyEquivalent = "i"
-        importItem.keyEquivalentModifierMask = [.command]
-        importItem.isEnabled = true
-        importItem.action = #selector(self.importMenuItemActionHandler(_:))
-        fileMenu.addItem(importItem)
-    }
-
-    @objc private func importMenuItemActionHandler(_: NSMenuItem) {
-        Import(withPreferences: UserDefaultsPreferencesStore.global,
-               withRepository: AudiobookRepository.global)
-            .openImportAudiobookDialog()
-    }
-
-    @objc private func preferencesMenuItemActionHandler(_: NSMenuItem) {
+    @IBAction func preferencesMenuItemActionHandler(_: NSMenuItem) {
+        log.info("Opening preferences window from menu item")
         if let prefsView = prefsView,
             prefsView.prefsWindowDelegate.windowIsOpen {
             prefsView.window.makeKeyAndOrderFront(self)
@@ -86,5 +53,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 PreferencesView(withPreferences: UserDefaultsPreferencesStore
                         .global)
         }
+    }
+
+    @IBAction func importMenuItemActionHandler(_: NSMenuItem) {
+        log.info("Opening import dialog from menu item")
+        Import(withPreferences: UserDefaultsPreferencesStore.global,
+               withRepository: AudiobookRepository.global)
+            .openImportAudiobookDialog()
     }
 }
