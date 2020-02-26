@@ -44,43 +44,49 @@ extension AudiobookFile {
             author = item.stringValue!.removeIllegalCharacters
         }
 
-        if let goodReads = goodReads {
-            log.debug("Getting audiobook metadata from GoodReads API")
-
-            do {
-                let fetchedBook = try goodReads
-                    .getBook(title: title!, author: author!)
-                var series: Series?
-                if let seriesTitle = fetchedBook.seriesTitle,
-                    let seriesEntry = fetchedBook.seriesEntry {
-                    series = Series(title: seriesTitle,
-                                    entry: String(seriesEntry))
-                }
-                self.init(title: fetchedBook.title,
-                          author: fetchedBook.getAuthorString(),
-                          file: fileURL,
-                          publicationDate: fetchedBook.getDateString(),
-                          isbn: fetchedBook.isbn,
-                          summary: fetchedBook.bookDescription,
-                          series: series)
-                return
-            } catch {
-                log
-                    .error("Could not get book details from GoodReads API with search terms title: \(title ?? "nil") and author \(author ?? "nil")")
-                log.error(error)
-            }
-        }
-
         var date: String?
         if let item = AVMetadataItem.metadataItems(from: metadata,
                                                    filteredByIdentifier: .commonIdentifierCreationDate)
             .first {
             date = item.stringValue
         }
-        log.debug("Getting Audiobook metadata from file metadata")
+        if let title = title, let author = author {
+            if let goodReads = goodReads {
+                log.debug("Getting audiobook metadata from GoodReads API")
+
+                do {
+                    let fetchedBook = try goodReads
+                        .getBook(title: title, author: author)
+                    var series: Series?
+                    if let seriesTitle = fetchedBook.seriesTitle,
+                        let seriesEntry = fetchedBook.seriesEntry {
+                        series = Series(title: seriesTitle,
+                                        entry: String(seriesEntry))
+                    }
+                    self.init(title: fetchedBook.title,
+                              author: fetchedBook.getAuthorString(),
+                              file: fileURL,
+                              publicationDate: fetchedBook.getDateString(),
+                              isbn: fetchedBook.isbn,
+                              summary: fetchedBook.bookDescription,
+                              series: series)
+                    return
+                } catch {
+                    log
+                        .error("Could not get book details from GoodReads API with search terms title: \(title) and author \(author)")
+                    log.error(error)
+                }
+            }
+
+            log.debug("Getting Audiobook metadata from file metadata")
+            self
+                .init(title: title, author: author, file: fileURL,
+                      publicationDate: date)
+            return
+        }
         self
-            .init(title: title!, author: author!, file: fileURL,
-                  publicationDate: date)
+            .init(title: fileURL.deletingPathExtension().lastPathComponent,
+                  author: "Unknown", file: fileURL, publicationDate: date)
     }
 }
 
@@ -103,7 +109,7 @@ enum AudiobookFileError: Error {
     case fileMissingMetadata(filepath: String)
 }
 
-extension UserDefaultsPreferencesStore {
+extension PreferencesStore {
     var goodReadsAPI: GoodReads? {
         if goodReadsAPIKey.isBlank {
             return nil

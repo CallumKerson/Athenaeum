@@ -35,18 +35,9 @@ struct PreferencesView<P>: View where P: PreferencesStore {
             })
             }.padding(.bottom)
             Section {
-                Toggle("Use Import Directory",
+                Toggle("Use Automatic Import",
                        isOn: $preferences.useImportDirectory)
             }
-            Section {
-                Picker(selection: $importPathSelection, label:
-                    Text("Import Path:"),
-                       content: {
-                        getImportPath().tag(0)
-            })
-            }
-            .disabled(!preferences.useImportDirectory)
-            .padding(.bottom)
             Section {
                 TextField("GoodReads API Key",
                           text: $preferences.goodReadsAPIKey)
@@ -56,12 +47,12 @@ struct PreferencesView<P>: View where P: PreferencesStore {
         .padding()
     }
 
-    func getImportPath() -> Text {
-        if self.preferences.useImportDirectory {
-            return Text(self.preferences.importPath.deSandboxedPath)
-        }
-        return Text("")
-    }
+//    func getImportPath() -> Text {
+//        if self.preferences.useImportDirectory {
+//            return Text(self.preferences.importPath.deSandboxedPath)
+//        }
+//        return Text("")
+//    }
 
     class PrefsWindowDelegate: NSObject, NSWindowDelegate {
         var windowIsOpen = false

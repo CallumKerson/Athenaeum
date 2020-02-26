@@ -15,4 +15,12 @@ extension FileManager {
         }
         try moveItem(at: at, to: to)
     }
+
+    func createDirectoryIfDoesNotExist(atURL url: URL) throws {
+        var isDir = ObjCBool(true)
+        if fileExists(atPath: url.path, isDirectory: &isDir) == false {
+            try createDirectory(at: url, withIntermediateDirectories: true,
+                                attributes: nil)
+        }
+    }
 }

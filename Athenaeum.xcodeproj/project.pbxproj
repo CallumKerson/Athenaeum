@@ -16,7 +16,7 @@
 		A5193DBC23F8106900EFF01D /* ForEachAudiobookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */; };
 		A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBD23F8234100EFF01D /* LibraryView.swift */; };
 		A5193DC023F992D600EFF01D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A5193DBF23F992D600EFF01D /* Main.storyboard */; };
-		A5193DC223F9952C00EFF01D /* Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DC123F9952C00EFF01D /* Import.swift */; };
+		A5193DC223F9952C00EFF01D /* Librarian.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DC123F9952C00EFF01D /* Librarian.swift */; };
 		A5193DC523F99D4A00EFF01D /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A5193DC423F99D4A00EFF01D /* RealmSwift */; };
 		A5193DC823FA995E00EFF01D /* GoodReadsKit in Frameworks */ = {isa = PBXBuildFile; productRef = A5193DC723FA995E00EFF01D /* GoodReadsKit */; };
 		A5193DCB23FAA16E00EFF01D /* SwiftyBeaver in Frameworks */ = {isa = PBXBuildFile; productRef = A5193DCA23FAA16E00EFF01D /* SwiftyBeaver */; };
@@ -33,6 +33,9 @@
 		A52A224823FBE14500F34A17 /* RealmRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A224723FBE14500F34A17 /* RealmRepositoryTests.swift */; };
 		A52A224E23FBFCAF00F34A17 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A224D23FBFCAF00F34A17 /* SummaryView.swift */; };
 		A53669F7240679E500760FE0 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669F6240679E500760FE0 /* PreferencesStore.swift */; };
+		A53669F92406828000760FE0 /* Librarian+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669F82406828000760FE0 /* Librarian+Cocoa.swift */; };
+		A53669FB2406840300760FE0 /* FileLibrarian.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669FA2406840300760FE0 /* FileLibrarian.swift */; };
+		A53669FD240688A300760FE0 /* LibrarianTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669FC240688A300760FE0 /* LibrarianTests.swift */; };
 		A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */; };
 		A5429E3523EDBAB100B1DF81 /* AudiobookRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3423EDBAB100B1DF81 /* AudiobookRepository.swift */; };
 		A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3723EDC37000B1DF81 /* URL+Utils.swift */; };
@@ -83,7 +86,7 @@
 		A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForEachAudiobookView.swift; sourceTree = "<group>"; };
 		A5193DBD23F8234100EFF01D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		A5193DBF23F992D600EFF01D /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
-		A5193DC123F9952C00EFF01D /* Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Import.swift; sourceTree = "<group>"; };
+		A5193DC123F9952C00EFF01D /* Librarian.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Librarian.swift; sourceTree = "<group>"; };
 		A519E33123FEAD3B0033A6E8 /* Unwrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unwrap.swift; sourceTree = "<group>"; };
 		A519E33323FFCFFA0033A6E8 /* Athenaeum.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Athenaeum.entitlements; sourceTree = "<group>"; };
 		A519E33423FFD0890033A6E8 /* PreviewAudiobooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewAudiobooks.swift; sourceTree = "<group>"; };
@@ -99,6 +102,9 @@
 		A52A224723FBE14500F34A17 /* RealmRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmRepositoryTests.swift; sourceTree = "<group>"; };
 		A52A224D23FBFCAF00F34A17 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
 		A53669F6240679E500760FE0 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
+		A53669F82406828000760FE0 /* Librarian+Cocoa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Librarian+Cocoa.swift"; sourceTree = "<group>"; };
+		A53669FA2406840300760FE0 /* FileLibrarian.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLibrarian.swift; sourceTree = "<group>"; };
+		A53669FC240688A300760FE0 /* LibrarianTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarianTests.swift; sourceTree = "<group>"; };
 		A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		A5429E3423EDBAB100B1DF81 /* AudiobookRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookRepository.swift; sourceTree = "<group>"; };
 		A5429E3723EDC37000B1DF81 /* URL+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Utils.swift"; sourceTree = "<group>"; };
@@ -197,6 +203,7 @@
 				A511221C23CDB0620063FB32 /* AthenaeumTests.swift */,
 				A511221E23CDB0620063FB32 /* Info.plist */,
 				A52A224723FBE14500F34A17 /* RealmRepositoryTests.swift */,
+				A53669FC240688A300760FE0 /* LibrarianTests.swift */,
 			);
 			path = AthenaeumTests;
 			sourceTree = "<group>";
@@ -235,8 +242,10 @@
 		A5429E3323EDBA9F00B1DF81 /* Library */ = {
 			isa = PBXGroup;
 			children = (
-				A5193DC123F9952C00EFF01D /* Import.swift */,
+				A5193DC123F9952C00EFF01D /* Librarian.swift */,
 				A5429E3423EDBAB100B1DF81 /* AudiobookRepository.swift */,
+				A53669F82406828000760FE0 /* Librarian+Cocoa.swift */,
+				A53669FA2406840300760FE0 /* FileLibrarian.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -450,13 +459,14 @@
 				A52A224623FBDED600F34A17 /* String+Utils.swift in Sources */,
 				A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */,
 				A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */,
-				A5193DC223F9952C00EFF01D /* Import.swift in Sources */,
+				A5193DC223F9952C00EFF01D /* Librarian.swift in Sources */,
 				A5BDF5E023FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift in Sources */,
 				A52A224223FAF89A00F34A17 /* Audiobook+Storable.swift in Sources */,
 				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
 				A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */,
 				A52A223C23FAF49600F34A17 /* StorableAudiobook.swift in Sources */,
 				A519E33523FFD0890033A6E8 /* PreviewAudiobooks.swift in Sources */,
+				A53669F92406828000760FE0 /* Librarian+Cocoa.swift in Sources */,
 				A52A224023FAF84F00F34A17 /* Repository.swift in Sources */,
 				A519E33723FFD2D80033A6E8 /* Audiobook.swift in Sources */,
 				A580AFF8240527B200B91771 /* NSImage+Resize.swift in Sources */,
@@ -470,6 +480,7 @@
 				A53669F7240679E500760FE0 /* PreferencesStore.swift in Sources */,
 				A5193DBC23F8106900EFF01D /* ForEachAudiobookView.swift in Sources */,
 				A5AAC47E23FFD88600542E6D /* RealmRepository.swift in Sources */,
+				A53669FB2406840300760FE0 /* FileLibrarian.swift in Sources */,
 				A5429E3523EDBAB100B1DF81 /* AudiobookRepository.swift in Sources */,
 				A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */,
 				A5AAC48E23FFE2F100542E6D /* Series.swift in Sources */,
@@ -482,6 +493,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A53669FD240688A300760FE0 /* LibrarianTests.swift in Sources */,
 				A511221D23CDB0620063FB32 /* AthenaeumTests.swift in Sources */,
 				A52A224823FBE14500F34A17 /* RealmRepositoryTests.swift in Sources */,
 			);

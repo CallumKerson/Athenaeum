@@ -19,10 +19,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         log.addDestination(ConsoleDestination())
 
+        // MARK: Setting up library
+
+        FileLibrarian.global.setUpLibraryPath()
+
         // MARK: Main View
 
         log.info("Creating main view")
-
         let contentView = LibraryView(withRepository: AudiobookRepository
             .global)
         // Create the window and set the content view.
@@ -48,16 +51,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             prefsView.prefsWindowDelegate.windowIsOpen {
             prefsView.window.makeKeyAndOrderFront(self)
         } else {
-            self.prefsView =
-                PreferencesView(withPreferences: UserDefaultsPreferencesStore
-                        .global)
+            self.prefsView = PreferencesView(withPreferences: UserDefaultsPreferencesStore.global)
         }
     }
 
     @IBAction func importMenuItemActionHandler(_: NSMenuItem) {
         log.info("Opening import dialog from menu item")
-        Import(withPreferences: UserDefaultsPreferencesStore.global,
-               withRepository: AudiobookRepository.global)
-            .openImportAudiobookDialog()
+        FileLibrarian.global.openImportAudiobookDialog()
     }
 }

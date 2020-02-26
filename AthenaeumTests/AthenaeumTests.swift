@@ -4,7 +4,6 @@
  */
 
 @testable import Athenaeum
-import AVFoundation
 import XCTest
 
 class AthenaeumTests: XCTestCase {

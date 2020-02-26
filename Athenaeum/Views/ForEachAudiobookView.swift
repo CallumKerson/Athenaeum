@@ -5,8 +5,7 @@
 
 import SwiftUI
 
-struct ForEachAudiobookView<R>: View where R: Repository,
-    R.EntityObject: Audiobook {
+struct ForEachAudiobookView<R>: View where R: Repository, R.EntityObject: Audiobook {
     @ObservedObject var repository: R
 
     init(inRepository repository: R) {

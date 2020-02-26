@@ -30,11 +30,6 @@ final class UserDefaultsPreferencesStore: PreferencesStore {
         willSet { self.objectWillChange.send() }
     }
 
-    @UserDefault(key: .importPath, defaultValue: defaultImportPath)
-    var importPath: URL {
-        willSet { self.objectWillChange.send() }
-    }
-
     @UserDefault(key: .goodReadsAPIKey, defaultValue: "")
     var goodReadsAPIKey: String {
         willSet { self.objectWillChange.send() }

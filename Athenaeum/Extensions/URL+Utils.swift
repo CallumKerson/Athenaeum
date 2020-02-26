@@ -12,6 +12,14 @@ extension URL {
             .replacingOccurrences(of: "Library/Containers/com.umbra.Athenaeum/Data/",
                                   with: "")
     }
+
+    func isSameIgnoringSandbox(as otherURL: URL) -> Bool {
+        self.deSandboxedPath == otherURL.deSandboxedPath
+    }
+
+    var isDirectory: Bool {
+        (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+    }
 }
 
 extension URL {
