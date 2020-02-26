@@ -7,54 +7,48 @@ import Combine
 import Foundation
 import RealmSwift
 
-class RealmRepository<RepositoryObject>: Repository
-    where RepositoryObject: Entity,
+class RealmRepository<RepositoryObject>: Repository,
+    ObservableObject where RepositoryObject: Entity,
     RepositoryObject.StoreType: Object {
     typealias RealmObject = RepositoryObject.StoreType
 
-    private let subject = PassthroughSubject<DatabaseAction, Never>()
-    let publisher: AnyPublisher<DatabaseAction, Never>
+    @Published var items = [RepositoryObject]()
 
-    private let realm: Realm
+    private var token: NotificationToken?
 
     init() {
-        self.realm = try! Realm()
-        self.publisher = self.subject.eraseToAnyPublisher()
+        log.debug("Initalising Realm Repository")
+        self.reloadItems()
+        self.token = try! Realm().objects(RealmObject.self).observe { _ in
+            self.reloadItems()
+        }
     }
 
-    func getAll(where predicate: NSPredicate?) -> [RepositoryObject] {
-        var objects = self.realm.objects(RealmObject.self)
+    deinit {
+        token?.invalidate()
+    }
 
-        if let predicate = predicate {
-            objects = objects.filter(predicate)
-        }
-        return objects.compactMap { ($0).model as? RepositoryObject }
+    private func reloadItems() {
+        self.items = try! Realm()
+            .objects(RealmObject.self)
+            .compactMap { ($0).model as? RepositoryObject }
     }
 
     func insert(item: RepositoryObject) throws {
-        try self.insertItem(item)
-        self.subject.send(.insert)
-    }
-
-    func update(item: RepositoryObject) throws {
-        try self.deleteItem(item)
-        try self.insertItem(item)
-        self.subject.send(.update)
-    }
-
-    func delete(item: RepositoryObject) throws {
-        try self.deleteItem(item)
-        self.subject.send(.delete)
-    }
-
-    private func insertItem(_ item: RepositoryObject) throws {
-        try self.realm.write {
+        let realm = try! Realm()
+        try realm.write {
             realm.add(item.toStorable())
         }
     }
 
-    private func deleteItem(_ item: RepositoryObject) throws {
-        try self.realm.write {
+    func update(item: RepositoryObject) throws {
+        try self.delete(item: item)
+        try self.insert(item: item)
+    }
+
+    func delete(item: RepositoryObject) throws {
+        let realm = try! Realm()
+        try realm.write {
             let predicate = NSPredicate(format: "uuid == %@",
                                         item.toStorable().uuid)
             if let productToDelete = realm.objects(RealmObject.self)

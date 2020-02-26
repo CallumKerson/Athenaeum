@@ -5,15 +5,16 @@
 
 import SwiftUI
 
-struct ForEachAudiobookView<Lib>: View where Lib: Library {
-    @ObservedObject var library: Lib
+struct ForEachAudiobookView<R>: View where R: Repository,
+    R.EntityObject: Audiobook {
+    @ObservedObject var repository: R
 
-    init(inLibrary library: Lib) {
-        self.library = library
+    init(inRepository repository: R) {
+        self.repository = repository
     }
 
     var body: some View {
-        ForEach(library.🎧📚.sorted(by: {
+        ForEach(repository.items.sorted(by: {
             if $0.author != $1.author {
                 return $0.author < $1.author
             } else if let pubDateZero = $0.publicationDate,
@@ -30,8 +31,10 @@ struct ForEachAudiobookView<Lib>: View where Lib: Library {
     }
 }
 
-struct AudiobookList_Previews: PreviewProvider {
-    static var previews: some View {
-        ForEachAudiobookView(inLibrary: MockLibrary())
+#if DEBUG
+    struct AudiobookList_Previews: PreviewProvider {
+        static var previews: some View {
+            ForEachAudiobookView(inRepository: MockRepo())
+        }
     }
-}
+#endif

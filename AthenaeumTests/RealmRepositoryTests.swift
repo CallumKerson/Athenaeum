@@ -35,101 +35,94 @@ class RealmRepository🧪Tests: XCTestCase {
         }
     }
 
-    func test_insert_stores_🎧📚_locally() {
+    func testInsertItem() {
+        /// given
         let expectation =
-            XCTestExpectation(description: "Publishes notification of database insert")
+            XCTestExpectation(description: "Object will change when insert occurs")
+        expectation.expectedFulfillmentCount = 2
         let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice",
                                               author: "Jane Austen",
                                               file: prideAndPrejudiceURL!)
         let repository = self.createRepository()
 
-        var 🎧📚: [AudiobookFile] = []
-
-        let cancellable = repository.publisher.sink(receiveValue: { action in
-            XCTAssertEqual(action, .insert)
-            🎧📚 = repository.getAll()
+        let cancellable = repository.objectWillChange.sink { _ in
             expectation.fulfill()
-        })
+        }
 
+        /// when
         try! repository.insert(item: prideAndPrejudice)
 
+        /// then
         XCTAssertNotNil(cancellable)
         wait(for: [expectation], timeout: 1.0)
-        XCTAssertEqual(1, 🎧📚.count)
-        XCTAssertEqual("Jane Austen", 🎧📚.first?.author)
+
+        XCTAssertEqual(repository.items.count, 1)
+        XCTAssertEqual(repository.items.first?.author, "Jane Austen")
     }
 
-    func test_update_updated_🎧📚() {
+    func testUpdateItem() {
+        /// given
         let expectation =
-            XCTestExpectation(description: "Publishes notification of database update")
+            XCTestExpectation(description: "Object will change when update occurs")
+        expectation.expectedFulfillmentCount = 3
         let theFifthSeason = AudiobookFile(title: "Fifth Season",
                                            author: "NK Jemisin",
                                            file: theFifthSeasonURL!)
         let repository = self.createRepository()
         try! repository.insert(item: theFifthSeason)
+        let cancellable = repository.objectWillChange.sink { _ in
+            expectation.fulfill()
+        }
 
-        // Proper title and puncutation
+        /// when
+        /// Proper title and puncutation
         theFifthSeason.title = "The Fifth Season"
         theFifthSeason.author = "N. K. Jemisin"
 
-        var 🎧📚: [AudiobookFile] = []
-
-        let cancellable = repository.publisher.sink(receiveValue: { action in
-            XCTAssertEqual(action, .update)
-            🎧📚 = repository.getAll()
-            expectation.fulfill()
-        })
-
         try! repository.update(item: theFifthSeason)
 
+        /// then
         XCTAssertNotNil(cancellable)
-        XCTAssertEqual("The Fifth Season", 🎧📚.first?.title)
-        XCTAssertEqual("N. K. Jemisin", 🎧📚.first?.author)
+        wait(for: [expectation], timeout: 1.0)
+
+        XCTAssertEqual(repository.items.count, 1)
+        XCTAssertEqual(repository.items.first?.title, "The Fifth Season")
+        XCTAssertEqual(repository.items.first?.author, "N. K. Jemisin")
     }
 
-    func test_delete_removes_🎧📚() {
-        let expectation =
-            XCTestExpectation(description: "Publishes notification of database delete")
+    func testDeleteItem() {
+        /// given
+        let insertExpectation =
+            XCTestExpectation(description: "Object will change when insert occurs")
+        insertExpectation.expectedFulfillmentCount = 2
+        let deleteExpectation =
+            XCTestExpectation(description: "Object will change when delete occurs")
+        deleteExpectation.expectedFulfillmentCount = 3
         let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice",
                                               author: "Jane Austen",
                                               file: prideAndPrejudiceURL!)
 
         let repository = self.createRepository()
+
+        let cancellable = repository.objectWillChange.sink { _ in
+            insertExpectation.fulfill()
+            deleteExpectation.fulfill()
+        }
+
         try! repository.insert(item: prideAndPrejudice)
 
-        var 🎧📚: [AudiobookFile] = repository.getAll()
-        XCTAssertEqual(1, 🎧📚.count)
+        XCTAssertNotNil(cancellable)
+        wait(for: [insertExpectation], timeout: 1.0)
+        XCTAssertEqual(repository.items.count, 1)
 
-        let cancellable = repository.publisher.sink(receiveValue: { action in
-            XCTAssertEqual(action, .delete)
-            🎧📚 = repository.getAll()
-            expectation.fulfill()
-        })
+        /// when
 
         try! repository.delete(item: prideAndPrejudice)
 
+        /// then
         XCTAssertNotNil(cancellable)
-        XCTAssertEqual(0, 🎧📚.count)
-    }
-
-    func test_getAll_filters_🎧📚() {
-        let theFifthSeason = AudiobookFile(title: "The Fifth Season",
-                                           author: "N. K. Jemisin",
-                                           file: theFifthSeasonURL!)
-        let prideAndPrejudice = AudiobookFile(title: "Pride and Prejudice",
-                                              author: "Jane Austen",
-                                              file: prideAndPrejudiceURL!)
-
-        let repository = self.createRepository()
-        try! repository.insert(item: theFifthSeason)
-        try! repository.insert(item: prideAndPrejudice)
-
-        let 🎧📚: [AudiobookFile] = repository
-            .getAll(where: NSPredicate(format: "author = %@",
-                                       theFifthSeason.author))
-
-        XCTAssertEqual(1, 🎧📚.count)
-        XCTAssertEqual("The Fifth Season", 🎧📚.first?.title)
+        wait(for: [deleteExpectation], timeout: 1.0)
+        XCTAssertEqual(repository.items.count, 0)
     }
 
     private func createRepository() -> RealmRepository<AudiobookFile> {

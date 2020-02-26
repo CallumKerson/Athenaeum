@@ -5,18 +5,18 @@
 
 import SwiftUI
 
-struct LibraryView<Lib>: View where Lib: Library {
-    @ObservedObject var library: Lib
+struct LibraryView<R>: View where R: Repository, R.EntityObject: Audiobook {
+    @ObservedObject var repository: R
 
-    init(withLibrary library: Lib) {
-        self.library = library
+    init(withRepository repository: R) {
+        self.repository = repository
     }
 
     var body: some View {
         NavigationView {
             List {
                 Section(header: HeaderView()) {
-                    ForEachAudiobookView(inLibrary: library)
+                    ForEachAudiobookView(inRepository: repository)
                 }
             }
             .frame(minWidth: 425, maxWidth: 425)
@@ -42,13 +42,15 @@ struct HeaderView: View {
     }
 }
 
-struct LibraryView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            LibraryView(withLibrary: MockLibrary())
-                .environment(\.colorScheme, .light)
-            LibraryView(withLibrary: MockLibrary())
-                .environment(\.colorScheme, .dark)
+#if DEBUG
+    struct LibraryView_Previews: PreviewProvider {
+        static var previews: some View {
+            Group {
+                LibraryView(withRepository: MockRepo())
+                    .environment(\.colorScheme, .light)
+                LibraryView(withRepository: MockRepo())
+                    .environment(\.colorScheme, .dark)
+            }
         }
     }
-}
+#endif

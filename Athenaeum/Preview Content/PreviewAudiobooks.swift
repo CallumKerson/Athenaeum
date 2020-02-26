@@ -4,16 +4,29 @@
  */
 
 import Foundation
+import RealmSwift
 
 #if DEBUG
 
     let previewAudiobooks: [MockAudiobook] = load("previewAudiobooks.json")
 
-    class MockLibrary: Library {
-        var 🎧📚: [Audiobook] = previewAudiobooks
+    class MockRepo: Repository {
+        var items: [MockAudiobook]
 
-        func shelve(book _: Audiobook) {
-            // non functional
+        init() {
+            self.items = previewAudiobooks
+        }
+
+        func insert(item _: MockAudiobook) throws {
+            //
+        }
+
+        func update(item _: MockAudiobook) throws {
+            //
+        }
+
+        func delete(item _: MockAudiobook) throws {
+            //
         }
     }
 
@@ -40,7 +53,7 @@ import Foundation
         }
     }
 
-    class MockAudiobook: Audiobook, Decodable {
+    class MockAudiobook: Audiobook, Decodable, Entity {
         var title: String = "Audiobook Title"
 
         var author: String = "Some Author"
@@ -67,6 +80,42 @@ import Foundation
                 }
             }
             return nil
+        }
+
+        func toStorable() -> StorableMockAudiobook {
+            StorableMockAudiobook()
+        }
+    }
+
+    final class StorableMockAudiobook: Object, Storable {
+        @objc dynamic var uuid = ""
+        @objc dynamic var title = ""
+        @objc dynamic var author = ""
+        @objc dynamic var filePath = ""
+        @objc dynamic var narrator: String?
+        @objc dynamic var publicationDate: String?
+        @objc dynamic var isbn: String?
+        @objc dynamic var summary: String?
+        @objc dynamic var seriesEntry: String?
+        @objc dynamic var seriesTitle: String?
+
+        public override static func primaryKey() -> String? {
+            "uuid"
+        }
+
+        var model: AudiobookFile {
+            var series: Series?
+            if let seriesTitle = seriesTitle, let seriesEntry = seriesEntry {
+                series = Series(title: seriesTitle, entry: seriesEntry)
+            }
+            return AudiobookFile(title: self.title,
+                                 author: self.author,
+                                 file: URL(fileURLWithPath: self.filePath),
+                                 narrator: self.narrator,
+                                 publicationDate: self.publicationDate,
+                                 isbn: self.isbn,
+                                 summary: self.summary,
+                                 series: series)
         }
     }
 #endif

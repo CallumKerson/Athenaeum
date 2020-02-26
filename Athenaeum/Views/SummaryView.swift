@@ -40,8 +40,10 @@ struct SummaryView: View {
     }
 }
 
-struct SummaryView_Previews: PreviewProvider {
-    static var previews: some View {
-        SummaryView(summary: previewAudiobooks[0].summary!)
+#if DEBUG
+    struct SummaryView_Previews: PreviewProvider {
+        static var previews: some View {
+            SummaryView(summary: previewAudiobooks[0].summary!)
+        }
     }
-}
+#endif

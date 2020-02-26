@@ -6,21 +6,14 @@
 import Combine
 import Foundation
 
-protocol Repository {
+protocol Repository: ObservableObject {
     associatedtype EntityObject: Entity
 
-    var publisher: AnyPublisher<DatabaseAction, Never> { get }
+    var items: [EntityObject] { get set }
 
-    func getAll(where predicate: NSPredicate?) -> [EntityObject]
     func insert(item: EntityObject) throws
     func update(item: EntityObject) throws
     func delete(item: EntityObject) throws
-}
-
-extension Repository {
-    func getAll() -> [EntityObject] {
-        self.getAll(where: nil)
-    }
 }
 
 public protocol Entity {
@@ -34,10 +27,4 @@ public protocol Storable {
 
     var model: EntityObject { get }
     var uuid: String { get }
-}
-
-public enum DatabaseAction: String {
-    case insert
-    case update
-    case delete
 }

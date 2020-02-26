@@ -28,7 +28,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         log.info("Creating main view")
 
-        let contentView = LibraryView(withLibrary: RepositoryLibrary.global)
+        let contentView = LibraryView(withRepository: AudiobookRepository
+            .global)
         // Create the window and set the content view.
         self.window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
@@ -70,7 +71,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func importMenuItemActionHandler(_: NSMenuItem) {
-        Import().openImportAudiobookDialog()
+        Import(withRepository: AudiobookRepository.global)
+            .openImportAudiobookDialog()
     }
 
     @objc private func preferencesMenuItemActionHandler(_: NSMenuItem) {

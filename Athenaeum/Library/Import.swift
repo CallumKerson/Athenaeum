@@ -6,15 +6,15 @@
 import Cocoa
 import Foundation
 
-struct Import {
+struct Import<R> where R: Repository, R.EntityObject == AudiobookFile {
     let preferences: PreferencesStore
-    let library: RepositoryLibrary
+    let repository: R
 
     init(withPreferences preferences: PreferencesStore = PreferencesStore
         .global,
-         withLibrary library: RepositoryLibrary = RepositoryLibrary.global) {
+         withRepository repository: R) {
         self.preferences = preferences
-        self.library = library
+        self.repository = repository
     }
 
     func openImportAudiobookDialog() {
@@ -28,7 +28,6 @@ struct Import {
 
         openPanel.begin { response in
             if response == .OK {
-                // TODO: Thread properly - this freezes the import window until import is complete
                 for url in openPanel.urls {
                     DispatchQueue.global(qos: .userInitiated).async {
                         log.debug("User opening file \(url.path)")
@@ -61,6 +60,10 @@ struct Import {
                                                      to: destination)
         newBook.location = destination
         log.info("Adding audiobook \(newBook) to library")
-        self.library.shelve(book: newBook)
+        do {
+            try self.repository.insert(item: newBook)
+        } catch {
+            log.error(error)
+        }
     }
 }
