@@ -44,7 +44,6 @@
 		A5AAC48C23FFE08A00542E6D /* The Way of Kings.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48B23FFE08A00542E6D /* The Way of Kings.jpg */; };
 		A5AAC48E23FFE2F100542E6D /* Series.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AAC48D23FFE2F100542E6D /* Series.swift */; };
 		A5AAC49023FFE49400542E6D /* previewAudiobooks.json in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48F23FFE49400542E6D /* previewAudiobooks.json */; };
-		A5AAC49223FFEA6B00542E6D /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AAC49123FFEA6B00542E6D /* Library.swift */; };
 		A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */; };
 		A5BDF5E023FD50CE00DB6170 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */; };
 		A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */; };
@@ -110,7 +109,6 @@
 		A5AAC48B23FFE08A00542E6D /* The Way of Kings.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "The Way of Kings.jpg"; sourceTree = "<group>"; };
 		A5AAC48D23FFE2F100542E6D /* Series.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Series.swift; sourceTree = "<group>"; };
 		A5AAC48F23FFE49400542E6D /* previewAudiobooks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = previewAudiobooks.json; sourceTree = "<group>"; };
-		A5AAC49123FFEA6B00542E6D /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
 		A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
 		A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+Indexed.swift"; sourceTree = "<group>"; };
@@ -236,7 +234,6 @@
 			children = (
 				A5193DC123F9952C00EFF01D /* Import.swift */,
 				A5429E3423EDBAB100B1DF81 /* AudiobookRepository.swift */,
-				A5AAC49123FFEA6B00542E6D /* Library.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -474,7 +471,6 @@
 				A5AAC48E23FFE2F100542E6D /* Series.swift in Sources */,
 				A52A224E23FBFCAF00F34A17 /* SummaryView.swift in Sources */,
 				A54A03A723F6EDE000C8305A /* AudiobookFile.swift in Sources */,
-				A5AAC49223FFEA6B00542E6D /* Library.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
