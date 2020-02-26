@@ -48,8 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             prefsView.prefsWindowDelegate.windowIsOpen {
             prefsView.window.makeKeyAndOrderFront(self)
         } else {
-            self
-                .prefsView =
+            self.prefsView =
                 PreferencesView(withPreferences: UserDefaultsPreferencesStore
                         .global)
         }
