@@ -14,6 +14,7 @@ protocol Repository: ObservableObject {
     func insert(item: EntityObject) throws
     func update(item: EntityObject) throws
     func delete(item: EntityObject) throws
+    func objectExists(item: EntityObject) throws -> Bool
 }
 
 public protocol Entity {

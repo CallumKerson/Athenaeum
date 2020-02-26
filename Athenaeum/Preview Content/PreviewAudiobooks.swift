@@ -28,6 +28,10 @@ import RealmSwift
         func delete(item _: MockAudiobook) throws {
             //
         }
+
+        func objectExists(item _: MockAudiobook) throws -> Bool {
+            false
+        }
     }
 
     func load<T: Decodable>(_ filename: String) -> T {

@@ -3,8 +3,8 @@
  Copyright (c) 2020 Callum Kerr-Edwards
  */
 
+import FileKit
 import Foundation
-import GoodReadsKit
 
 class Librarian<R, S> where R: Repository, R.EntityObject == AudiobookFile, S: PreferencesStore {
     let preferences: S
@@ -13,44 +13,6 @@ class Librarian<R, S> where R: Repository, R.EntityObject == AudiobookFile, S: P
     init(withPreferences preferences: S, withRepository repository: R) {
         self.preferences = preferences
         self.repository = repository
-    }
-
-    func importAudiobook(fileURL: URL) {
-        log.info("Importing audiobook file from \(fileURL.path)")
-        let newBook = AudiobookFile(fromFile: fileURL)
-        var destination = self.preferences.libraryPath
-            .appendingPathComponent(newBook.author, isDirectory: true)
-        if let series = newBook.series {
-            destination = destination
-                .appendingPathComponent(series.title, isDirectory: true)
-                .appendingPathComponent("\(series.entry) \(newBook.title)")
-                .appendingPathExtension("m4b")
-        } else {
-            destination = destination
-                .appendingPathComponent(newBook.title)
-                .appendingPathExtension("m4b")
-        }
-
-        if fileURL.isSameIgnoringSandbox(as: destination) {
-            log.debug("New Audiobook \(newBook) is already in the right place")
-        } else {
-            log.debug("Moving audiobook file to \(destination.path)")
-            do {
-                try FileManager.default
-                    .moveItemCreatingIntermediaryDirectories(at: fileURL, to: destination)
-                newBook.location = destination
-            } catch {
-                log.error("Cannot move \(fileURL.path) to \(destination.path)")
-                log.error(error)
-                return
-            }
-        }
-        log.info("Adding audiobook \(newBook) to library")
-        do {
-            try self.repository.insert(item: newBook)
-        } catch {
-            log.error(error)
-        }
     }
 
     func setUpLibraryPath() {
@@ -66,6 +28,50 @@ class Librarian<R, S> where R: Repository, R.EntityObject == AudiobookFile, S: P
             DispatchQueue.global(qos: .userInitiated).async {
                 self.importFilesInLibraryPath()
             }
+            self.setUpMonitor()
+        }
+    }
+
+    func importAudiobook(fileURL: URL) {
+        log.info("Importing audiobook file from \(fileURL.path)")
+        let newBook = AudiobookFile(fromFile: fileURL)
+        do {
+            if !(try self.repository.objectExists(item: newBook)) {
+                var destination = self.preferences.libraryPath
+                    .appendingPathComponent(newBook.author, isDirectory: true)
+                if let series = newBook.series {
+                    destination = destination
+                        .appendingPathComponent(series.title, isDirectory: true)
+                        .appendingPathComponent("\(series.entry) \(newBook.title)")
+                        .appendingPathExtension("m4b")
+                } else {
+                    destination = destination
+                        .appendingPathComponent(newBook.title)
+                        .appendingPathExtension("m4b")
+                }
+
+                if fileURL.isSameIgnoringSandbox(as: destination) {
+                    log.debug("New Audiobook \(newBook) is already in the right place")
+                } else {
+                    log.debug("Moving audiobook file to \(destination.path)")
+                    do {
+                        try FileManager.default
+                            .moveItemCreatingIntermediaryDirectories(at: fileURL, to: destination)
+                        newBook.location = destination
+                    } catch {
+                        log.error("Cannot move \(fileURL.path) to \(destination.path)")
+                        log.error(error)
+                        return
+                    }
+                }
+                log.info("Adding audiobook \(newBook) to library")
+                try self.repository.insert(item: newBook)
+
+            } else {
+                log.warning("Audiobook \(newBook.description) already exists")
+            }
+        } catch {
+            log.error(error)
         }
     }
 
@@ -97,5 +103,16 @@ class Librarian<R, S> where R: Repository, R.EntityObject == AudiobookFile, S: P
         for file in files {
             self.importAudiobook(fileURL: file)
         }
+    }
+
+    private let monitorQueue = DispatchQueue(label: "com.umbra.Athenaeum.monitorQueue")
+
+    func setUpMonitor() {
+        log.info("Monitoring \(self.preferences.libraryPath.path) for files")
+        let watcher = Path(self.preferences.libraryPath.path).watch2(queue: monitorQueue) { _ in
+            log.verbose("Found file system event in path \(self.preferences.libraryPath.path)")
+            self.importFilesInLibraryPath()
+        }
+        watcher.startWatching()
     }
 }

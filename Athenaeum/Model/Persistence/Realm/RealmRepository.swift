@@ -35,9 +35,13 @@ class RealmRepository<RepositoryObject>: Repository,
     }
 
     func insert(item: RepositoryObject) throws {
-        let realm = try! Realm()
-        try realm.write {
-            realm.add(item.toStorable())
+        let realm = try Realm()
+        if !(try self.objectExists(item: item)) {
+            try realm.write {
+                realm.add(item.toStorable())
+            }
+        } else {
+            throw RealmRepositoryError.objectAlreadyExists(id: item.toStorable().uuid)
         }
     }
 
@@ -57,4 +61,13 @@ class RealmRepository<RepositoryObject>: Repository,
             }
         }
     }
+
+    func objectExists(item: RepositoryObject) throws -> Bool {
+        let realm = try! Realm()
+        return realm.object(ofType: RealmObject.self, forPrimaryKey: item.toStorable().uuid) != nil
+    }
+}
+
+enum RealmRepositoryError: Error {
+    case objectAlreadyExists(id: String)
 }

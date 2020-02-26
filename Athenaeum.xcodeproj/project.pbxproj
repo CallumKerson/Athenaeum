@@ -36,6 +36,7 @@
 		A53669F92406828000760FE0 /* Librarian+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669F82406828000760FE0 /* Librarian+Cocoa.swift */; };
 		A53669FB2406840300760FE0 /* FileLibrarian.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669FA2406840300760FE0 /* FileLibrarian.swift */; };
 		A53669FD240688A300760FE0 /* LibrarianTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669FC240688A300760FE0 /* LibrarianTests.swift */; };
+		A5366A002406BFAB00760FE0 /* FileKit in Frameworks */ = {isa = PBXBuildFile; productRef = A53669FF2406BFAB00760FE0 /* FileKit */; };
 		A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */; };
 		A5429E3523EDBAB100B1DF81 /* AudiobookRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3423EDBAB100B1DF81 /* AudiobookRepository.swift */; };
 		A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3723EDC37000B1DF81 /* URL+Utils.swift */; };
@@ -130,6 +131,7 @@
 				A5193DC823FA995E00EFF01D /* GoodReadsKit in Frameworks */,
 				A5193DC523F99D4A00EFF01D /* RealmSwift in Frameworks */,
 				A5193DCB23FAA16E00EFF01D /* SwiftyBeaver in Frameworks */,
+				A5366A002406BFAB00760FE0 /* FileKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -329,6 +331,7 @@
 				A5193DC423F99D4A00EFF01D /* RealmSwift */,
 				A5193DC723FA995E00EFF01D /* GoodReadsKit */,
 				A5193DCA23FAA16E00EFF01D /* SwiftyBeaver */,
+				A53669FF2406BFAB00760FE0 /* FileKit */,
 			);
 			productName = Athenaeum;
 			productReference = A511220023CDB05E0063FB32 /* Athenaeum.app */;
@@ -408,6 +411,7 @@
 				A5193DC623FA995E00EFF01D /* XCRemoteSwiftPackageReference "GoodReadsKit" */,
 				A5193DC923FAA16E00EFF01D /* XCRemoteSwiftPackageReference "SwiftyBeaver" */,
 				A5BDF5E123FD602700DB6170 /* XCRemoteSwiftPackageReference "Resolver" */,
+				A53669FE2406BFAA00760FE0 /* XCRemoteSwiftPackageReference "FileKit" */,
 			);
 			productRefGroup = A511220123CDB05E0063FB32 /* Products */;
 			projectDirPath = "";
@@ -834,6 +838,14 @@
 				minimumVersion = 1.8.4;
 			};
 		};
+		A53669FE2406BFAA00760FE0 /* XCRemoteSwiftPackageReference "FileKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nvzqz/FileKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
 		A5429E3923EDC50900B1DF81 /* XCRemoteSwiftPackageReference "Preferences" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/Preferences";
@@ -867,6 +879,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5193DC923FAA16E00EFF01D /* XCRemoteSwiftPackageReference "SwiftyBeaver" */;
 			productName = SwiftyBeaver;
+		};
+		A53669FF2406BFAB00760FE0 /* FileKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A53669FE2406BFAA00760FE0 /* XCRemoteSwiftPackageReference "FileKit" */;
+			productName = FileKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

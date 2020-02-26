@@ -97,10 +97,11 @@ class LibrarianTests: XCTestCase {
 
         /// then
         let cancellable = repository.objectWillChange.sink { _ in
+            print("----------------______-----________________")
             expectation.fulfill()
         }
         XCTAssertNotNil(cancellable)
-        wait(for: [expectation], timeout: 2.0)
+        wait(for: [expectation], timeout: 5.0)
         XCTAssertEqual(repository.items.count, 2)
         let titles = repository.items.map { $0.title }
         XCTAssertTrue(titles.contains("PrideAndPrejudice"))
@@ -119,6 +120,45 @@ class LibrarianTests: XCTestCase {
         XCTAssertFalse(FileManager.default
             .fileExists(atPath: temporaryLibraryURL.appendingPathComponent("TheFifthSeason.m4b")
                 .path))
+    }
+
+    func testMonitoring() {
+        /// given
+        let expectation = XCTestExpectation(description: "Updating repository with imported files")
+        expectation.expectedFulfillmentCount = 2
+
+        let temporaryLibraryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("\(UUID().uuidString)Library")
+        let preferences = MockPreferences(mockLibraryURL: temporaryLibraryURL)
+        let repository = self.createRepository()
+        preferences.useImportDirectory = true
+        let librarian = Librarian(withPreferences: preferences, withRepository: repository)
+
+        /// create test library directory
+        try! FileManager.default
+            .createDirectory(at: temporaryLibraryURL, withIntermediateDirectories: true)
+        librarian.setUpLibraryPath()
+
+        /// when
+        librarian.setUpMonitor()
+
+        /// add files to test library directory
+        do {
+            try "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife."
+                .data(using: .utf8)!
+                .write(to: temporaryLibraryURL.appendingPathComponent("PrideAndPrejudice.m4b"),
+                       options: .atomic)
+        } catch {
+            XCTFail()
+        }
+
+        /// then
+        let cancellable = repository.objectWillChange.sink { _ in
+            expectation.fulfill()
+        }
+        XCTAssertNotNil(cancellable)
+        wait(for: [expectation], timeout: 5.0)
+        XCTAssertEqual(repository.items.first?.title, "PrideAndPrejudice")
     }
 
     private func createRepository() -> RealmRepository<AudiobookFile> {
