@@ -32,6 +32,7 @@
 		A52A224623FBDED600F34A17 /* String+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A224523FBDED600F34A17 /* String+Utils.swift */; };
 		A52A224823FBE14500F34A17 /* RealmRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A224723FBE14500F34A17 /* RealmRepositoryTests.swift */; };
 		A52A224E23FBFCAF00F34A17 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A224D23FBFCAF00F34A17 /* SummaryView.swift */; };
+		A53669F7240679E500760FE0 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53669F6240679E500760FE0 /* PreferencesStore.swift */; };
 		A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */; };
 		A5429E3523EDBAB100B1DF81 /* AudiobookRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3423EDBAB100B1DF81 /* AudiobookRepository.swift */; };
 		A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5429E3723EDC37000B1DF81 /* URL+Utils.swift */; };
@@ -45,7 +46,7 @@
 		A5AAC48E23FFE2F100542E6D /* Series.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AAC48D23FFE2F100542E6D /* Series.swift */; };
 		A5AAC49023FFE49400542E6D /* previewAudiobooks.json in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48F23FFE49400542E6D /* previewAudiobooks.json */; };
 		A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */; };
-		A5BDF5E023FD50CE00DB6170 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */; };
+		A5BDF5E023FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DF23FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift */; };
 		A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */; };
 /* End PBXBuildFile section */
 
@@ -97,6 +98,7 @@
 		A52A224523FBDED600F34A17 /* String+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Utils.swift"; sourceTree = "<group>"; };
 		A52A224723FBE14500F34A17 /* RealmRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmRepositoryTests.swift; sourceTree = "<group>"; };
 		A52A224D23FBFCAF00F34A17 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
+		A53669F6240679E500760FE0 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
 		A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		A5429E3423EDBAB100B1DF81 /* AudiobookRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookRepository.swift; sourceTree = "<group>"; };
 		A5429E3723EDC37000B1DF81 /* URL+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Utils.swift"; sourceTree = "<group>"; };
@@ -110,7 +112,7 @@
 		A5AAC48D23FFE2F100542E6D /* Series.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Series.swift; sourceTree = "<group>"; };
 		A5AAC48F23FFE49400542E6D /* previewAudiobooks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = previewAudiobooks.json; sourceTree = "<group>"; };
 		A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
-		A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
+		A5BDF5DF23FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsPreferencesStore.swift; sourceTree = "<group>"; };
 		A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+Indexed.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -224,7 +226,8 @@
 			children = (
 				A5429DB623EDB1B600B1DF81 /* PreferencesView.swift */,
 				A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */,
-				A5BDF5DF23FD50CE00DB6170 /* PreferencesStore.swift */,
+				A5BDF5DF23FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift */,
+				A53669F6240679E500760FE0 /* PreferencesStore.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -448,7 +451,7 @@
 				A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */,
 				A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */,
 				A5193DC223F9952C00EFF01D /* Import.swift in Sources */,
-				A5BDF5E023FD50CE00DB6170 /* PreferencesStore.swift in Sources */,
+				A5BDF5E023FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift in Sources */,
 				A52A224223FAF89A00F34A17 /* Audiobook+Storable.swift in Sources */,
 				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
 				A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */,
@@ -464,6 +467,7 @@
 				A511220423CDB05E0063FB32 /* AppDelegate.swift in Sources */,
 				A519E33223FEAD3B0033A6E8 /* Unwrap.swift in Sources */,
 				A52A223423FAB6DE00F34A17 /* AudiobookFile+Construction.swift in Sources */,
+				A53669F7240679E500760FE0 /* PreferencesStore.swift in Sources */,
 				A5193DBC23F8106900EFF01D /* ForEachAudiobookView.swift in Sources */,
 				A5AAC47E23FFD88600542E6D /* RealmRepository.swift in Sources */,
 				A5429E3523EDBAB100B1DF81 /* AudiobookRepository.swift in Sources */,

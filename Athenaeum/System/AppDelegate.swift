@@ -12,7 +12,7 @@ let log = SwiftyBeaver.self
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
-    var prefsView: PreferencesView?
+    var prefsView: PreferencesView<UserDefaultsPreferencesStore>?
 
     func applicationDidFinishLaunching(_: Notification) {
         // MARK: Logging
@@ -71,7 +71,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func importMenuItemActionHandler(_: NSMenuItem) {
-        Import(withRepository: AudiobookRepository.global)
+        Import(withPreferences: UserDefaultsPreferencesStore.global,
+               withRepository: AudiobookRepository.global)
             .openImportAudiobookDialog()
     }
 
@@ -80,7 +81,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             prefsView.prefsWindowDelegate.windowIsOpen {
             prefsView.window.makeKeyAndOrderFront(self)
         } else {
-            self.prefsView = PreferencesView()
+            self
+                .prefsView =
+                PreferencesView(withPreferences: UserDefaultsPreferencesStore
+                        .global)
         }
     }
 }

@@ -10,7 +10,8 @@ import GoodReadsKit
 extension AudiobookFile {
     convenience init(
         fromFileWithPath path: String,
-        withGoodReads goodReads: GoodReads? = PreferencesStore.global
+        withGoodReads goodReads: GoodReads? = UserDefaultsPreferencesStore
+            .global
             .goodReadsAPI
     ) {
         self
@@ -20,7 +21,8 @@ extension AudiobookFile {
 
     convenience init(
         fromFile fileURL: URL,
-        withGoodReads goodReads: GoodReads? = PreferencesStore.global
+        withGoodReads goodReads: GoodReads? = UserDefaultsPreferencesStore
+            .global
             .goodReadsAPI
     ) {
         log.debug("Creating Audiobook from file \(fileURL.path)")
@@ -101,7 +103,7 @@ enum AudiobookFileError: Error {
     case fileMissingMetadata(filepath: String)
 }
 
-extension PreferencesStore {
+extension UserDefaultsPreferencesStore {
     var goodReadsAPI: GoodReads? {
         if goodReadsAPIKey.isBlank {
             return nil

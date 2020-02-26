@@ -5,16 +5,15 @@
 
 import SwiftUI
 
-struct PreferencesView: View {
+struct PreferencesView<P>: View where P: PreferencesStore {
     @State var prefsWindowDelegate = PrefsWindowDelegate()
     @State var libraryPathSelection = 0
     @State var importPathSelection = 0
 
-    @ObservedObject var preferences: PreferencesStore
+    @ObservedObject var preferences: P
 
     var window: NSWindow!
-    init(withPreferences preferences: PreferencesStore = PreferencesStore
-        .global) {
+    init(withPreferences preferences: P) {
         self.preferences = preferences
         self.window = NSWindow.createStandardWindow(withTitle: "Preferences",
                                                     width: 600,
@@ -73,8 +72,11 @@ struct PreferencesView: View {
     }
 }
 
-struct PrefsView_Previews: PreviewProvider {
-    static var previews: some View {
-        PreferencesView()
+#if DEBUG
+    struct PrefsView_Previews: PreviewProvider {
+        static var previews: some View {
+            PreferencesView(withPreferences: UserDefaultsPreferencesStore
+                .global)
+        }
     }
-}
+#endif

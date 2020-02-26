@@ -6,13 +6,12 @@
 import Cocoa
 import Foundation
 
-struct Import<R> where R: Repository, R.EntityObject == AudiobookFile {
-    let preferences: PreferencesStore
+struct Import<R, S> where R: Repository, R.EntityObject == AudiobookFile,
+    S: PreferencesStore {
+    let preferences: S
     let repository: R
 
-    init(withPreferences preferences: PreferencesStore = PreferencesStore
-        .global,
-         withRepository repository: R) {
+    init(withPreferences preferences: S, withRepository repository: R) {
         self.preferences = preferences
         self.repository = repository
     }
