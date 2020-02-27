@@ -69,7 +69,7 @@ struct Cover: View {
             .scaledToFit()
             .frame(width: 400, height: 400)
             .clipShape(RoundedRectangle(cornerRadius: 5))
-            .shadow(radius: 20)
+            .shadow(radius: 5)
     }
 }
 

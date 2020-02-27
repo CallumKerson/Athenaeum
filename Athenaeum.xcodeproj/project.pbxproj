@@ -269,8 +269,8 @@
 			isa = PBXGroup;
 			children = (
 				A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */,
-				A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */,
 				A54A03A923F6EE2B00C8305A /* AudiobookView.swift */,
+				A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */,
 				A5193DBD23F8234100EFF01D /* LibraryView.swift */,
 				A52A224D23FBFCAF00F34A17 /* SummaryView.swift */,
 				A519E33123FEAD3B0033A6E8 /* Unwrap.swift */,
