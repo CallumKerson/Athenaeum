@@ -27,8 +27,6 @@
 		A511221D23CDB0620063FB32 /* AthenaeumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511221C23CDB0620063FB32 /* AthenaeumTests.swift */; };
 		A511222823CDB0620063FB32 /* AthenaeumUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A511222723CDB0620063FB32 /* AthenaeumUITests.swift */; };
 		A51156D32407F8BC00F55940 /* 🎧📖.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51156D22407F8BC00F55940 /* 🎧📖.swift */; };
-		A51156DD2408099D00F55940 /* AudiobookViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51156DC2408099D00F55940 /* AudiobookViewModel.swift */; };
-		A51156DF240809D800F55940 /* 🎧📖View.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51156DE240809D800F55940 /* 🎧📖View.swift */; };
 		A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */; };
 		A5193DBC23F8106900EFF01D /* ForEachAudiobookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */; };
 		A5193DBE23F8234100EFF01D /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5193DBD23F8234100EFF01D /* LibraryView.swift */; };
@@ -131,8 +129,6 @@
 		A511222723CDB0620063FB32 /* AthenaeumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthenaeumUITests.swift; sourceTree = "<group>"; };
 		A511222923CDB0620063FB32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A51156D22407F8BC00F55940 /* 🎧📖.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "🎧📖.swift"; sourceTree = "<group>"; };
-		A51156DC2408099D00F55940 /* AudiobookViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookViewModel.swift; sourceTree = "<group>"; };
-		A51156DE240809D800F55940 /* 🎧📖View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "🎧📖View.swift"; sourceTree = "<group>"; };
 		A5193DB923F80D5900EFF01D /* AudiobookCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookCellView.swift; sourceTree = "<group>"; };
 		A5193DBB23F8106900EFF01D /* ForEachAudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForEachAudiobookView.swift; sourceTree = "<group>"; };
 		A5193DBD23F8234100EFF01D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
@@ -374,8 +370,6 @@
 				A5EDFCC7240AC4CE00B2D72D /* AudiobookListViewModel.swift */,
 				A5EDFCBF240AB76A00B2D72D /* AudiobookRowView.swift */,
 				A5EDFCC1240AB79E00B2D72D /* AudiobookRowViewModel.swift */,
-				A51156DE240809D800F55940 /* 🎧📖View.swift */,
-				A51156DC2408099D00F55940 /* AudiobookViewModel.swift */,
 				A5EDFCD1240AF23D00B2D72D /* NavigationDetailView.swift */,
 				A5EDFCD3240AF2D700B2D72D /* NavigationDetailViewModel.swift */,
 				A5EDFCCB240AC7B200B2D72D /* NavigationHeaderView.swift */,
@@ -645,7 +639,6 @@
 				A507DC3124090B6C000E2861 /* GlobalStore.swift in Sources */,
 				A507DC4224094FAF000E2861 /* AudiobookReducer.swift in Sources */,
 				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
-				A51156DD2408099D00F55940 /* AudiobookViewModel.swift in Sources */,
 				A507DC3C24094F31000E2861 /* GlobalAppState.swift in Sources */,
 				A507DC2B24090617000E2861 /* Protocols.swift in Sources */,
 				A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */,
@@ -680,7 +673,6 @@
 				A5429E3523EDBAB100B1DF81 /* AudiobookRepository.swift in Sources */,
 				A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */,
 				A5AAC48E23FFE2F100542E6D /* Series.swift in Sources */,
-				A51156DF240809D800F55940 /* 🎧📖View.swift in Sources */,
 				A5EDFCB4240A4CBA00B2D72D /* ErrorActions.swift in Sources */,
 				A507DC2D2409069A000E2861 /* Store.swift in Sources */,
 				A52A224E23FBFCAF00F34A17 /* SummaryView.swift in Sources */,
