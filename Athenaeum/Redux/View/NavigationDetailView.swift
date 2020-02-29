@@ -20,7 +20,6 @@ struct NavigationDetailView: View {
                         Unwrap(book.getCover()) { coverData in
                             DetailCover(data: coverData)
                         }
-
                         BookText(audiobook: book)
                             .font(.subheadline)
                     }
@@ -68,13 +67,6 @@ struct BookText: View {
     }
 }
 
-struct NavigationDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationDetailView(NavigationDetailViewModel(id: sampleAudiobook.id,
-                                                       store: sampleStore))
-    }
-}
-
 struct DetailCover: View {
     let data: Data
 
@@ -87,3 +79,12 @@ struct DetailCover: View {
             .shadow(radius: 10)
     }
 }
+
+#if DEBUG
+    struct NavigationDetailView_Previews: PreviewProvider {
+        static var previews: some View {
+            NavigationDetailView(NavigationDetailViewModel(id: sampleAudiobook.id,
+                                                           store: sampleStore))
+        }
+    }
+#endif

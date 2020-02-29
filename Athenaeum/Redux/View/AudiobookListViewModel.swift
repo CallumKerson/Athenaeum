@@ -18,7 +18,7 @@ class AudiobookListViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
 
     private var didStateChangeCancellable: AnyCancellable?
-    var store: Store<GlobalAppState>
+    let store: Store<GlobalAppState>
 
     init(store: Store<GlobalAppState>) {
         self.store = store

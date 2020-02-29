@@ -58,8 +58,10 @@ struct ActivityIndicator: View {
     }
 }
 
-struct NavigationHeaderView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationHeaderView(NavigationHeaderViewModel(store: sampleStore))
+#if DEBUG
+    struct NavigationHeaderView_Previews: PreviewProvider {
+        static var previews: some View {
+            NavigationHeaderView(NavigationHeaderViewModel(store: sampleStore))
+        }
     }
-}
+#endif

@@ -11,7 +11,7 @@ class NavigationDetailViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
 
     private var didStateChangeCancellable: AnyCancellable?
-    private var store: Store<GlobalAppState>
+    private let store: Store<GlobalAppState>
 
     init(id: UUID, store: Store<GlobalAppState>) {
         self.store = store

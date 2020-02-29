@@ -29,21 +29,17 @@ struct AudiobookListView: View {
                 }
             }), id: \.id) { audiobook in
                 AudiobookRowView(AudiobookRowViewModel(id: audiobook.id,
-                                                       store: store))
+                                                       store: self.viewModel.store))
                     .tag(audiobook)
             }
         }
     }
 }
 
-extension Binding {
-    /// Wrapper to listen to didSet of Binding
-    func didSet(_ didSet: @escaping ((newValue: Value, oldValue: Value)) -> Void)
-        -> Binding<Value> {
-        .init(get: { self.wrappedValue }, set: { newValue in
-            let oldValue = self.wrappedValue
-            self.wrappedValue = newValue
-            didSet((newValue, oldValue))
-        })
+#if DEBUG
+    struct AudiobookListView_Previews: PreviewProvider {
+        static var previews: some View {
+            AudiobookListView(AudiobookListViewModel(store: sampleStore))
+        }
     }
-}
+#endif
