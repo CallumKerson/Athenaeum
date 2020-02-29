@@ -32,6 +32,17 @@ extension String {
     func removeCharacters(from: String) -> String {
         self.removeCharacters(from: CharacterSet(charactersIn: from))
     }
+
+    func replacingLastOccurrenceOfString(_ searchString: String,
+                                         with replacementString: String) -> String {
+        if let range = self.range(of: searchString,
+                                  options: [.backwards],
+                                  range: nil,
+                                  locale: nil) {
+            return replacingCharacters(in: range, with: replacementString)
+        }
+        return self
+    }
 }
 
 extension Optional where Wrapped == String {

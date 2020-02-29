@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct Series: Codable {
+struct Series: Codable, Equatable, Hashable {
     let title: String
     let entry: String
 }

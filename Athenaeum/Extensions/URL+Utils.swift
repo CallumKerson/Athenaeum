@@ -23,12 +23,21 @@ extension URL {
 }
 
 extension URL {
-    var sha256HashOfContents: String {
-        do {
-            return SHA256.hash(data: try Data(contentsOf: self)).description
-        } catch {
-            log.error("Cannot hash contents of file \(path)")
-            return ""
+    var sha256HashOfContents: String? {
+        var hasher = SHA256()
+
+        if let stream = InputStream(fileAtPath: path) {
+            stream.open()
+            let bufferSize = 2048
+            let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+            while stream.hasBytesAvailable {
+                let read = stream.read(buffer, maxLength: bufferSize)
+                let bufferPointer = UnsafeRawBufferPointer(start: buffer,
+                                                           count: read)
+                hasher.update(bufferPointer: bufferPointer)
+            }
+            return hasher.finalize().stringValue
         }
+        return nil
     }
 }

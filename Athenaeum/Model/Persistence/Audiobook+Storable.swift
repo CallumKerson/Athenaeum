@@ -8,7 +8,7 @@ import Foundation
 extension AudiobookFile: Entity {
     private var storableAudiobook: StorableAudiobook {
         let realmAudiobook = StorableAudiobook()
-        realmAudiobook.uuid = location.sha256HashOfContents
+        realmAudiobook.uuid = location.sha256HashOfContents ?? ""
         realmAudiobook.title = title
         realmAudiobook.author = author
         realmAudiobook.filePath = location.path

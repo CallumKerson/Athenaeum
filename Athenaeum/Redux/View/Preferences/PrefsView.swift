@@ -1,20 +1,23 @@
 /**
- PreferencesView.swift
+ PrefsView.swift
  Copyright (c) 2020 Callum Kerr-Edwards
  */
 
 import SwiftUI
 
-struct PreferencesView<P>: View where P: PreferencesStore {
+struct PrefsView: View {
     @State var prefsWindowDelegate = PrefsWindowDelegate()
     @State var libraryPathSelection = 0
     @State var importPathSelection = 0
 
-    @ObservedObject var preferences: P
+    @State var autoImport: Bool = false
+
+    @ObservedObject var viewModel: PrefsViewModel
 
     var window: NSWindow!
-    init(withPreferences preferences: P) {
-        self.preferences = preferences
+    init(_ prefsViewModel: PrefsViewModel) {
+        self.viewModel = prefsViewModel
+        self.autoImport = prefsViewModel.useAutoImport
         self.window = NSWindow.createStandardWindow(withTitle: "Preferences",
                                                     width: 600,
                                                     height: 160)
@@ -31,16 +34,16 @@ struct PreferencesView<P>: View where P: PreferencesStore {
                 Picker(selection: $libraryPathSelection, label:
                     Text("Audiobook Library Path:"),
                        content: {
-                        Text(preferences.libraryPath.deSandboxedPath).tag(0)
+                        Text(viewModel.libraryPath).tag(0)
             })
             }.padding(.bottom)
             Section {
                 Toggle("Use Automatic Import",
-                       isOn: $preferences.useImportDirectory)
+                       isOn: $viewModel.useAutoImport)
             }
             Section {
                 TextField("GoodReads API Key",
-                          text: $preferences.goodReadsAPIKey)
+                          text: $viewModel.goodReadsAPIKey)
             }
         }
         .frame(minWidth: 600, maxWidth: 600, minHeight: 160, maxHeight: 160)
@@ -57,10 +60,9 @@ struct PreferencesView<P>: View where P: PreferencesStore {
 }
 
 #if DEBUG
-    struct PreferencesView_Previews: PreviewProvider {
+    struct PrefsView_Previews: PreviewProvider {
         static var previews: some View {
-            PreferencesView(withPreferences: UserDefaultsPreferencesStore
-                .global)
+            PrefsView(PrefsViewModel(withStore: sampleStore))
         }
     }
 #endif

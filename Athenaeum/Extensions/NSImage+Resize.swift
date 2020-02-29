@@ -17,7 +17,6 @@ extension NSImage {
                             drawingHandler: { (_) -> Bool in
                                 representation.draw(in: frame)
         })
-
         return image
     }
 }

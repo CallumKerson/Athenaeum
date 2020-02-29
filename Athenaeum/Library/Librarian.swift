@@ -23,13 +23,13 @@ class Librarian<R, S> where R: Repository, R.EntityObject == AudiobookFile, S: P
             log.error("Could not create library at path \(self.preferences.libraryPath.path)")
         }
 
-        if self.preferences.useImportDirectory {
-            log.info("Enabling auto import")
-            DispatchQueue.global(qos: .userInitiated).async {
-                self.importFilesInLibraryPath()
-            }
-            self.setUpMonitor()
-        }
+//        if self.preferences.useImportDirectory {
+//            log.info("Enabling auto import")
+//            DispatchQueue.global(qos: .userInitiated).async {
+//                self.importFilesInLibraryPath()
+//            }
+//            self.setUpMonitor()
+//        }
     }
 
     func importAudiobook(fileURL: URL) {
