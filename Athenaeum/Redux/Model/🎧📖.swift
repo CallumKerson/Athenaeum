@@ -3,8 +3,8 @@
  Copyright (c) 2020 Callum Kerr-Edwards
  */
 
-import Foundation
 import AVFoundation
+import Foundation
 
 struct AudioBook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
     let id: UUID
@@ -27,12 +27,12 @@ struct AudioBook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
             return nil
         }
     }
-    
+
     var debugDescription: String {
         if let authors = getAuthorsString() {
-            return "\(title) by \(authors) (\(location.path))"
+            return "\(self.title) by \(authors) (\(self.location.path))"
         } else {
-            return "\(title) (\(location.path))"
+            return "\(self.title) (\(self.location.path))"
         }
     }
 }
@@ -49,7 +49,6 @@ struct Author: Equatable, Codable, Hashable {
         }
     }
 }
-
 
 extension AudioBook {
     func getCover() -> Data? {
