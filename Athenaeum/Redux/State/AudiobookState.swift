@@ -6,7 +6,6 @@
 import Foundation
 
 struct AudiobookState: AppState, Codable, Equatable {
-    var audiobooks: [UUID: AudioBook] = [:]
-    var importsInProgress: Set<UUID> = Set()
+    var audiobooks: [UUID: Loadable<AudioBook>] = [:]
     var selectedAudiobook: AudioBook?
 }

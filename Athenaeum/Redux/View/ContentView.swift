@@ -52,8 +52,9 @@ struct ContentView: View {
                                     bookDescription: sampleDescription,
                                     series: Series(title: "The Stormlight Archive",
                                                    entry: "1"))
-    let sampleAudiobookState = AudiobookState(audiobooks: [sampleAudiobook.id: sampleAudiobook],
-                                              selectedAudiobook: sampleAudiobook)
+    let sampleAudiobookState =
+        AudiobookState(audiobooks: [sampleAudiobook.id: .loaded(sampleAudiobook)],
+                       selectedAudiobook: sampleAudiobook)
     let sampleStore = Store<GlobalAppState>(reducer: appStateReducer,
                                             middleware: [logMiddleware],
                                             state: GlobalAppState(audiobookState: sampleAudiobookState))

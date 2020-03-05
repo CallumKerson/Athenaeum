@@ -17,7 +17,7 @@ struct NavigationHeaderView: View {
             Text("Library").font(.largeTitle)
             HStack {
                 Button(action: {
-                    self.viewModel.importFromOpenDialog()
+                    self.viewModel.importButtonAction()
                 }) {
                     Text("Import")
                 }

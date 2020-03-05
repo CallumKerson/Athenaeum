@@ -19,6 +19,7 @@ struct NavigationDetailView: View {
                     HStack(alignment: VerticalAlignment.center, spacing: 24) {
                         Unwrap(book.getCover()) { coverData in
                             DetailCover(data: coverData)
+                                .padding(8)
                         }
                         BookText(audiobook: book)
                             .font(.subheadline)
@@ -26,7 +27,7 @@ struct NavigationDetailView: View {
 
                     Unwrap(book.bookDescription) { description in
                         Divider()
-                        Text(description)
+                        SummaryView(summary: description)
                             .lineLimit(nil)
                     }
                 }
@@ -43,7 +44,9 @@ struct BookText: View {
     var body: some View {
         VStack(alignment: HorizontalAlignment.leading) {
             VStack(alignment: HorizontalAlignment.leading) {
-                Text(audiobook.title).font(.title)
+                Unwrap(audiobook.title) { title in
+                    Text(title).font(.title)
+                }
 
                 Unwrap(audiobook.series) { series in
                     Text("Book \(series.entry) of \(series.title)")
@@ -76,7 +79,7 @@ struct DetailCover: View {
             .scaledToFit()
             .frame(width: 400, height: 400)
             .clipShape(RoundedRectangle(cornerRadius: 10))
-            .shadow(radius: 10)
+            .shadow(radius: 5)
     }
 }
 

@@ -13,16 +13,35 @@ let log = SwiftyBeaver.self
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
+    var store: Store<GlobalAppState>?
     var prefsView: PrefsView?
+    var persistence: PersistenceService?
 
     func applicationDidFinishLaunching(_: Notification) {
         // MARK: Logging
 
         log.addDestination(ConsoleDestination())
 
-        // MARK: Setting up library
+        // MARK: Setting app state
 
-//        FileLibrarian.global.setUpLibraryPath()
+        let decoder = JSONDecoder()
+        if let jsonData = try? Data(contentsOf: PersistenceService.getSaveURL()),
+            let state = try? decoder.decode(GlobalAppState.self, from: jsonData) {
+            store = Store<GlobalAppState>(reducer: appStateReducer,
+                                          middleware: [logMiddleware],
+                                          state: state)
+        } else {
+            store = Store<GlobalAppState>(reducer: appStateReducer,
+                                          middleware: [logMiddleware],
+                                          state: GlobalAppState())
+        }
+
+        guard let store = store else {
+            log.error("Invalid app state store")
+            fatalError("Invalid app state store")
+        }
+
+        self.persistence = PersistenceService(store: store)
 
         // MARK: Main View
 
@@ -32,21 +51,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     .default
                     .removeItem(at: Realm.Configuration.defaultConfiguration.fileURL!)
             } catch {
-                log.info("Hello")
+                log.debug("Clearing database")
             }
 
         #endif
 
         log.info("Creating main view")
-//        let contentView = LibraryView(withRepository: AudiobookRepository
-//            .global)
-
-//        let sampleAudiobook = AudioBook(id: UUID(),
-//                                        title: "The Way of Kings",
-//                                        location: URL(string: "https://www.goodreads.com/book/show/7235533-the-way-of-kings")!)
-//        let sampleStore = Store<GlobalAppState>(reducer: appStateReducer,
-//                                                middleware: [logMiddleware],
-//                                                state: GlobalAppState(audiobookState: AudiobookState(audiobooks: [sampleAudiobook])))
 
         let contentView = ContentView(ContentViewModel(store: store))
 
@@ -69,6 +79,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func preferencesMenuItemActionHandler(_: NSMenuItem) {
         log.info("Opening preferences window from menu item")
+        guard let store = store else {
+            log.error("Invalid app state store")
+            fatalError("Invalid app state store")
+        }
         if let prefsView = prefsView,
             prefsView.prefsWindowDelegate.windowIsOpen {
             prefsView.window.makeKeyAndOrderFront(self)
@@ -78,7 +92,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func importMenuItemActionHandler(_: NSMenuItem) {
+        guard let store = store else {
+            log.error("Invalid app state store")
+            fatalError("Invalid app state store")
+        }
         log.info("Opening import dialog from menu item")
-//        FileLibrarian.global.openImportAudiobookDialog()
+        importFromOpenDialog(store: store)
     }
 }

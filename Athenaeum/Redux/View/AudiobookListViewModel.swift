@@ -23,7 +23,8 @@ class AudiobookListViewModel: ObservableObject {
     init(store: Store<GlobalAppState>) {
         self.store = store
         self.didStateChangeCancellable = self.store.stateSubject.sink(receiveValue: {
-            let recievedAudiobooks = Array($0.audiobookState.audiobooks.values)
+            let recievedAudiobooks: [AudioBook] = Array($0.audiobookState.audiobooks.values)
+                .loadedAudiobooks
             if self.audiobooks != recievedAudiobooks {
                 self.audiobooks = recievedAudiobooks
                 self.objectWillChange.send()

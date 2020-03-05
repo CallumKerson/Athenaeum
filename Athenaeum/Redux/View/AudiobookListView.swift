@@ -24,8 +24,11 @@ struct AudiobookListView: View {
                 if let pubDateZero = $0.publicationDate,
                     let pubDateOne = $1.publicationDate {
                     return pubDateZero < pubDateOne
+                }
+                if let titleZero = $0.title, let titleOne = $1.title {
+                    return titleZero < titleOne
                 } else {
-                    return $0.title < $1.title
+                    return $0.id.uuidString < $1.id.uuidString
                 }
             }), id: \.id) { audiobook in
                 AudiobookRowView(AudiobookRowViewModel(id: audiobook.id,

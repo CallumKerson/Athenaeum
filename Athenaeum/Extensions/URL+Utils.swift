@@ -17,13 +17,26 @@ extension URL {
         self.deSandboxedPath == otherURL.deSandboxedPath
     }
 
+    var attributes: [FileAttributeKey: Any]? {
+        do {
+            return try FileManager.default.attributesOfItem(atPath: path)
+        } catch {
+            log.debug("FileAttribute error: \(error)")
+        }
+        return nil
+    }
+
     var isDirectory: Bool {
         (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+    }
+
+    var fileSize: UInt64 {
+        self.attributes?[.size] as? UInt64 ?? UInt64(0)
     }
 }
 
 extension URL {
-    var sha256HashOfContents: String? {
+    var sha256HashOfContents: SHA256.Digest? {
         var hasher = SHA256()
 
         if let stream = InputStream(fileAtPath: path) {
@@ -36,7 +49,7 @@ extension URL {
                                                            count: read)
                 hasher.update(bufferPointer: bufferPointer)
             }
-            return hasher.finalize().stringValue
+            return hasher.finalize()
         }
         return nil
     }

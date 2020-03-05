@@ -6,18 +6,8 @@
 import Foundation
 
 struct AudiobookActions {
-    struct RequestNewAudiobookFromFile: AsyncAction {
-        let fileURL: URL
-
-        func execute(state _: AppState?, dispatch: @escaping DispatchFunction) {
-            let newAudiobookID = UUID()
-            dispatch(StartingImportOfAudiobook(id: newAudiobookID))
-            dispatch(ValidateAudiobookFile(newAuidobookID: newAudiobookID, fileURL: self.fileURL))
-        }
-    }
-
     struct StartingImportOfAudiobook: Action {
-        let id: UUID
+        let audiobook: AudioBook
     }
 
     struct SetAudiobook: Action {

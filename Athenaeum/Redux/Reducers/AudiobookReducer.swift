@@ -9,16 +9,21 @@ func audiobookStateReducer(state: AudiobookState, action: Action) -> AudiobookSt
     var state = state
     switch action {
     case let action as AudiobookActions.SetAudiobook:
-        state.audiobooks[action.audiobook.id] = action.audiobook
-        state.importsInProgress.remove(action.audiobook.id)
+        state.audiobooks[action.audiobook.id] = .loaded(action.audiobook)
     case let action as AudiobookActions.StartingImportOfAudiobook:
-        state.importsInProgress.insert(action.id)
+        state.audiobooks[action.audiobook.id] = .loading(action.audiobook)
     case let action as ErrorActions.SetImportedFileAlreadyExistsError:
-        state.importsInProgress.remove(action.idNotProcessed)
+        state
+            .audiobooks[action.audiobook.id] = .errored(action.audiobook,
+                                                        message: "File already exists")
     case let action as ErrorActions.SetImportedFileIsOfWrongTypeError:
-        state.importsInProgress.remove(action.idNotProcessed)
+        state
+            .audiobooks[action.audiobook.id] = .errored(action.audiobook,
+                                                        message: "File is of wrong type")
     case let action as ErrorActions.SetImportedFileURLCannotBeOpenedError:
-        state.importsInProgress.remove(action.idNotProcessed)
+        state
+            .audiobooks[action.audiobook.id] = .errored(action.audiobook,
+                                                        message: "File cannot be accessed")
     case let action as AudiobookActions.SetSelectedAudiobook:
         state.selectedAudiobook = action.audiobook
     default:

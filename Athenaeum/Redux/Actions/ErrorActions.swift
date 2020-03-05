@@ -7,18 +7,14 @@ import Foundation
 
 struct ErrorActions {
     struct SetImportedFileIsOfWrongTypeError: Action {
-        let idNotProcessed: UUID
-        let fileURL: URL
+        let audiobook: AudioBook
     }
 
     struct SetImportedFileURLCannotBeOpenedError: Action {
-        let idNotProcessed: UUID
-        let fileURL: URL
+        let audiobook: AudioBook
     }
 
     struct SetImportedFileAlreadyExistsError: Action {
-        let idNotProcessed: UUID
-        let importedFileURL: URL
-        let existingAudiobook: AudioBook?
+        let audiobook: AudioBook
     }
 }

@@ -9,8 +9,8 @@ import Foundation
 struct AudioBook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
     let id: UUID
     var location: URL
-    var contentsHash: String
-    var title: String
+    var contentsHash: String?
+    var title: String?
     var authors: [Author]?
     var narrator: String?
     var publicationDate: String?
@@ -29,10 +29,14 @@ struct AudioBook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
     }
 
     var debugDescription: String {
-        if let authors = getAuthorsString() {
-            return "\(self.title) by \(authors) (\(self.location.path))"
+        if let title = self.title {
+            if let authors = getAuthorsString() {
+                return "\(title) by \(authors) (\(self.location.path))"
+            } else {
+                return "\(title) (\(self.location.path))"
+            }
         } else {
-            return "\(self.title) (\(self.location.path))"
+            return self.location.path
         }
     }
 }
@@ -62,5 +66,24 @@ extension AudioBook {
             }
         }
         return nil
+    }
+}
+
+extension Array where Element == AudioBook {
+    func hasAudibookWithSameFileAs(_ fileURL: URL) -> Bool {
+        let filesInDirectory = self.map { $0.location }
+        let fileSizes: [UInt64] = filesInDirectory.map { $0.fileSize }
+        if fileSizes.contains(fileURL.fileSize) {
+            let filesWithSameSize = filesInDirectory.filter { $0.fileSize == fileURL.fileSize }
+
+            let fileDigest = fileURL.sha256HashOfContents
+            for fileToTest in filesWithSameSize {
+                if fileToTest.sha256HashOfContents == fileDigest {
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 }

@@ -20,10 +20,12 @@ struct AudiobookRowView: View {
                 }
 
                 VStack(alignment: HorizontalAlignment.leading) {
-                    Text(audiobook.title)
-                        .fontWeight(.bold)
-                        .truncationMode(.tail)
-                        .frame(minWidth: 20)
+                    Unwrap(audiobook.title) { title in
+                        Text(title)
+                            .fontWeight(.bold)
+                            .truncationMode(.tail)
+                            .frame(minWidth: 20)
+                    }
 
                     Unwrap(audiobook.getAuthorsString()) { author in
                         Text(author)
