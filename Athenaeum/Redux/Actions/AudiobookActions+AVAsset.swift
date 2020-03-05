@@ -29,7 +29,6 @@ extension AudiobookActions {
 
                 if let state = getGlobalState(state) {
                     let books = Array(state.audiobookState.audiobooks.values).loadedAudiobooks
-//                    log.warning("Loaded audiobooks \(Array(state.audiobookState.audiobooks.values).loadedAudiobooks)")
                     if books.hasAudibookWithSameFileAs(self.fileURL) {
                         DispatchQueue.main.async {
                             dispatch(ErrorActions

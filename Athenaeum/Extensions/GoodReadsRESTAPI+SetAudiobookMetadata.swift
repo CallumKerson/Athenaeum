@@ -7,6 +7,8 @@ import Foundation
 import GoodReadsKit
 
 extension GoodReadsRESTAPI {
+    /// Looks up book metadata and adds all found to the audiobook
+    /// - Parameter audiobook: audiobook for which the metadata is updated
     func setAudiobookMetadataFromGoodReads(audiobook: inout AudioBook) {
         do {
             if let title = audiobook.title {
