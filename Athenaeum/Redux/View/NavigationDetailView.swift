@@ -26,7 +26,7 @@ struct NavigationDetailView: View {
                                 HStack {
                                     Spacer()
                                     Button(action: {
-                                        self.viewModel.fixMatchButtonAction()
+                                        self.viewModel.showFixMatchDialog()
                                     }) {
                                         Text("Fix Match")
                                             .frame(maxWidth: 100, maxHeight: 24)
@@ -60,6 +60,12 @@ struct NavigationDetailView: View {
             }
         )
         .frame(minWidth: 800, maxWidth: 800, minHeight: 500)
+        .sheet(isPresented: $viewModel.fixMatchDialogDisplayed) {
+            Unwrap(self.viewModel.audiobook) { audiobook in
+                FixMatchModalView(viewModel: FixMatchModalViewModel(audiobook: audiobook,
+                                                                    store: self.viewModel.store))
+            }
+        }
     }
 }
 

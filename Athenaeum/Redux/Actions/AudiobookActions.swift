@@ -17,4 +17,8 @@ struct AudiobookActions {
     struct SetSelectedAudiobook: Action {
         let audiobook: AudioBook?
     }
+
+    struct SetFixMatchDialogVisible: Action {
+        let visibility: Bool
+    }
 }

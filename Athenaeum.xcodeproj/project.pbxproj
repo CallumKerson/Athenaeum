@@ -64,6 +64,8 @@
 		A54A03A723F6EDE000C8305A /* AudiobookFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A623F6EDE000C8305A /* AudiobookFile.swift */; };
 		A54A03AA23F6EE2B00C8305A /* AudiobookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A03A923F6EE2B00C8305A /* AudiobookView.swift */; };
 		A580AFF8240527B200B91771 /* NSImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580AFF7240527B200B91771 /* NSImage+Resize.swift */; };
+		A59B58D52412E384002F8B3A /* FixMatchModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59B58D42412E384002F8B3A /* FixMatchModalView.swift */; };
+		A59B58D72412E3D5002F8B3A /* FixMatchModalViewModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59B58D62412E3D5002F8B3A /* FixMatchModalViewModal.swift */; };
 		A5AAC47E23FFD88600542E6D /* RealmRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AAC47D23FFD88600542E6D /* RealmRepository.swift */; };
 		A5AAC48823FFE01E00542E6D /* Words of Radiance.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48723FFE01E00542E6D /* Words of Radiance.jpg */; };
 		A5AAC48A23FFE05800542E6D /* Oathbringer.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48923FFE05800542E6D /* Oathbringer.jpg */; };
@@ -167,6 +169,8 @@
 		A54A03A623F6EDE000C8305A /* AudiobookFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookFile.swift; sourceTree = "<group>"; };
 		A54A03A923F6EE2B00C8305A /* AudiobookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookView.swift; sourceTree = "<group>"; };
 		A580AFF7240527B200B91771 /* NSImage+Resize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+Resize.swift"; sourceTree = "<group>"; };
+		A59B58D42412E384002F8B3A /* FixMatchModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixMatchModalView.swift; sourceTree = "<group>"; };
+		A59B58D62412E3D5002F8B3A /* FixMatchModalViewModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixMatchModalViewModal.swift; sourceTree = "<group>"; };
 		A5AAC47D23FFD88600542E6D /* RealmRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmRepository.swift; sourceTree = "<group>"; };
 		A5AAC48723FFE01E00542E6D /* Words of Radiance.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Words of Radiance.jpg"; sourceTree = "<group>"; };
 		A5AAC48923FFE05800542E6D /* Oathbringer.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Oathbringer.jpg; sourceTree = "<group>"; };
@@ -378,6 +382,8 @@
 				A5EDFCC1240AB79E00B2D72D /* AudiobookRowViewModel.swift */,
 				A53064EA240B097E00EC29CD /* ContentView.swift */,
 				A53064EC240B099500EC29CD /* ContentViewModel.swift */,
+				A59B58D42412E384002F8B3A /* FixMatchModalView.swift */,
+				A59B58D62412E3D5002F8B3A /* FixMatchModalViewModal.swift */,
 				A5EDFCD1240AF23D00B2D72D /* NavigationDetailView.swift */,
 				A5EDFCD3240AF2D700B2D72D /* NavigationDetailViewModel.swift */,
 				A5EDFCCB240AC7B200B2D72D /* NavigationHeaderView.swift */,
@@ -657,6 +663,7 @@
 				A52019282410F530001BFBAB /* ImportService.swift in Sources */,
 				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
 				A507DC3C24094F31000E2861 /* GlobalAppState.swift in Sources */,
+				A59B58D72412E3D5002F8B3A /* FixMatchModalViewModal.swift in Sources */,
 				A520192E24114CC8001BFBAB /* AVAsset+Getters.swift in Sources */,
 				A507DC2B24090617000E2861 /* Protocols.swift in Sources */,
 				A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */,
@@ -682,6 +689,7 @@
 				A52A223423FAB6DE00F34A17 /* AudiobookFile+Construction.swift in Sources */,
 				A53669F7240679E500760FE0 /* PreferencesStore.swift in Sources */,
 				A5193DBC23F8106900EFF01D /* ForEachAudiobookView.swift in Sources */,
+				A59B58D52412E384002F8B3A /* FixMatchModalView.swift in Sources */,
 				A5AAC47E23FFD88600542E6D /* RealmRepository.swift in Sources */,
 				A53064EB240B097E00EC29CD /* ContentView.swift in Sources */,
 				A5EDFCCA240AC79D00B2D72D /* NavigationHeaderViewModel.swift in Sources */,

@@ -41,6 +41,7 @@ struct PrefsView: View {
                 Toggle("Use Automatic Import",
                        isOn: $viewModel.useAutoImport)
             }
+            .padding(.bottom)
             Section {
                 TextField("GoodReads API Key",
                           text: $viewModel.goodReadsAPIKey)

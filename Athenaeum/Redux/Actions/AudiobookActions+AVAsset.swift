@@ -74,6 +74,45 @@ extension AudiobookActions {
             dispatch(StartingImportOfAudiobook(audiobook: newAudiobook))
         }
     }
+
+    struct UpdateAudiobookFromGoodReads: AsyncAction {
+        let goodReadsID: String
+        let audiobook: AudioBook
+
+        func execute(state: AppState?, dispatch: @escaping DispatchFunction) {
+            // MARK: Validate audiobook file
+
+            AudiobookActions.RequestNewAudiobookFromFile.importQueue.async {
+                var updatedAudiobook = self.audiobook
+
+                if let state = getGlobalState(state) {
+                    if !state.preferencesState.goodReadsAPIKey.isBlank {
+                        GoodReadsRESTAPI(apiKey: state.preferencesState.goodReadsAPIKey)
+                            .setAudiobookMetadataFromGoodReadsID(goodReadsID: self.goodReadsID,
+                                                                 audiobook: &updatedAudiobook)
+                    }
+                }
+
+                // MARK: Move audiobook
+
+                if let state = getGlobalState(state) {
+                    do {
+                        try moveAudiobookToLibrary(&updatedAudiobook,
+                                                   libraryURL: state.preferencesState.libraryURL)
+                    } catch {
+                        DispatchQueue.main.async {
+                            dispatch(ErrorActions
+                                .SetImportedFileAlreadyExistsError(audiobook: updatedAudiobook))
+                        }
+                    }
+                }
+                DispatchQueue.main.async {
+                    dispatch(SetAudiobook(audiobook: updatedAudiobook))
+                }
+            }
+            dispatch(StartingImportOfAudiobook(audiobook: self.audiobook))
+        }
+    }
 }
 
 func getGlobalState(_ state: AppState?) -> GlobalAppState? {

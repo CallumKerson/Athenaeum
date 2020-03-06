@@ -3,17 +3,19 @@
  Copyright (c) 2020 Callum Kerr-Edwards
  */
 
+import Cocoa
 import Combine
 import Foundation
 
 class NavigationDetailViewModel: ObservableObject {
     var audiobook: AudioBook?
+    var fixMatchDialogDisplayed: Bool = false
     var isGoodReadsConfigured: Bool = false
     var isImporting: Bool = false
     let objectWillChange = ObservableObjectPublisher()
 
     private var didStateChangeCancellable: AnyCancellable?
-    private let store: Store<GlobalAppState>
+    let store: Store<GlobalAppState>
 
     init(id: UUID, store: Store<GlobalAppState>) {
         self.store = store
@@ -38,10 +40,16 @@ class NavigationDetailViewModel: ObservableObject {
                 self.isImporting = incomingImportState
                 self.objectWillChange.send()
             }
+
+            let incomingFixMatchDialogDisplayed = $0.audiobookState.fixMatchDialogDisplayed
+            if self.fixMatchDialogDisplayed != incomingFixMatchDialogDisplayed {
+                self.fixMatchDialogDisplayed = incomingFixMatchDialogDisplayed
+                self.objectWillChange.send()
+            }
         })
     }
 
-    func fixMatchButtonAction() {
-        log.warning("Fix match action")
+    func showFixMatchDialog() {
+        self.store.dispatch(action: AudiobookActions.SetFixMatchDialogVisible(visibility: true))
     }
 }
