@@ -21,8 +21,22 @@ struct NavigationDetailView: View {
                             DetailCover(data: coverData)
                                 .padding(8)
                         }
-                        BookText(audiobook: book)
-                            .font(.subheadline)
+                        VStack(alignment: HorizontalAlignment.leading) {
+                            if self.viewModel.isGoodReadsConfigured {
+                                HStack {
+                                    Spacer()
+                                    Button(action: {
+                                        self.viewModel.fixMatchButtonAction()
+                                    }) {
+                                        Text("Fix Match")
+                                            .frame(maxWidth: 100, maxHeight: 24)
+                                    }
+                                }
+                            }
+                            Spacer()
+                            BookText(audiobook: book)
+                            Spacer()
+                        }
                     }
 
                     Unwrap(book.bookDescription) { description in
@@ -33,7 +47,18 @@ struct NavigationDetailView: View {
                 }
             }
         }
+        .blur(radius: viewModel.isImporting ? 10 : 0)
         .padding()
+        .overlay(
+            VStack {
+                if viewModel.isImporting {
+                    ActivityIndicator()
+                        .frame(width: 100, height: 100)
+                } else {
+                    EmptyView()
+                }
+            }
+        )
         .frame(minWidth: 800, maxWidth: 800, minHeight: 500)
     }
 }

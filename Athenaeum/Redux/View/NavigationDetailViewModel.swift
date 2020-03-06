@@ -8,6 +8,8 @@ import Foundation
 
 class NavigationDetailViewModel: ObservableObject {
     var audiobook: AudioBook?
+    var isGoodReadsConfigured: Bool = false
+    var isImporting: Bool = false
     let objectWillChange = ObservableObjectPublisher()
 
     private var didStateChangeCancellable: AnyCancellable?
@@ -24,6 +26,22 @@ class NavigationDetailViewModel: ObservableObject {
                     }
                 }
             }
+            let goodReadsConfigured = !$0.preferencesState.goodReadsAPIKey.isBlank
+            if self.isGoodReadsConfigured != goodReadsConfigured {
+                self.isGoodReadsConfigured = goodReadsConfigured
+                self.objectWillChange.send()
+            }
+
+            let incomingImportState = ($0.audiobookState.audiobooks.values.filter { $0.isLoading }
+                .count != 0)
+            if self.isImporting != incomingImportState {
+                self.isImporting = incomingImportState
+                self.objectWillChange.send()
+            }
         })
+    }
+
+    func fixMatchButtonAction() {
+        log.warning("Fix match action")
     }
 }

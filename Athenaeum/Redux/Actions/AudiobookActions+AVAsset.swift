@@ -15,6 +15,8 @@ extension AudiobookActions {
         func execute(state: AppState?, dispatch: @escaping DispatchFunction) {
             var newAudiobook = AudioBook(id: UUID(), location: self.fileURL)
 
+            // MARK: Validate audiobook file
+
             AudiobookActions.RequestNewAudiobookFromFile.importQueue.async {
                 if self.fileURL.pathExtension != "m4b" {
                     dispatch(ErrorActions
@@ -38,6 +40,8 @@ extension AudiobookActions {
                     }
                 }
 
+                // MARK: Get audiobook metadata
+
                 let asset = AVURLAsset(url: self.fileURL)
                 newAudiobook.title = asset.commonTitle
                 newAudiobook.authors = asset.artistsAsAuthors
@@ -47,6 +51,20 @@ extension AudiobookActions {
                     if !state.preferencesState.goodReadsAPIKey.isBlank {
                         GoodReadsRESTAPI(apiKey: state.preferencesState.goodReadsAPIKey)
                             .setAudiobookMetadataFromGoodReads(audiobook: &newAudiobook)
+                    }
+                }
+
+                // MARK: Move audiobook
+
+                if let state = getGlobalState(state) {
+                    do {
+                        try moveAudiobookToLibrary(&newAudiobook,
+                                                   libraryURL: state.preferencesState.libraryURL)
+                    } catch {
+                        DispatchQueue.main.async {
+                            dispatch(ErrorActions
+                                .SetImportedFileAlreadyExistsError(audiobook: newAudiobook))
+                        }
                     }
                 }
                 DispatchQueue.main.async {
