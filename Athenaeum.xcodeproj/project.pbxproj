@@ -75,6 +75,8 @@
 		A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */; };
 		A5BDF5E023FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5DF23FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift */; };
 		A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */; };
+		A5E4ECE52413AF23007E0540 /* ErrorsPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECE42413AF23007E0540 /* ErrorsPopoverView.swift */; };
+		A5E4ECE72413B6F8007E0540 /* ErrorPopoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECE62413B6F8007E0540 /* ErrorPopoverViewModel.swift */; };
 		A5EDFCB4240A4CBA00B2D72D /* ErrorActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCB3240A4CBA00B2D72D /* ErrorActions.swift */; };
 		A5EDFCB6240A57C900B2D72D /* AudiobookActions+AVAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCB5240A57C900B2D72D /* AudiobookActions+AVAsset.swift */; };
 		A5EDFCBC240A990500B2D72D /* SHA256+StringValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCBB240A990500B2D72D /* SHA256+StringValue.swift */; };
@@ -180,6 +182,8 @@
 		A5BDF5DD23FD503F00DB6170 /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
 		A5BDF5DF23FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsPreferencesStore.swift; sourceTree = "<group>"; };
 		A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+Indexed.swift"; sourceTree = "<group>"; };
+		A5E4ECE42413AF23007E0540 /* ErrorsPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorsPopoverView.swift; sourceTree = "<group>"; };
+		A5E4ECE62413B6F8007E0540 /* ErrorPopoverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPopoverViewModel.swift; sourceTree = "<group>"; };
 		A5EDFCB3240A4CBA00B2D72D /* ErrorActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorActions.swift; sourceTree = "<group>"; };
 		A5EDFCB5240A57C900B2D72D /* AudiobookActions+AVAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudiobookActions+AVAsset.swift"; sourceTree = "<group>"; };
 		A5EDFCBB240A990500B2D72D /* SHA256+StringValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SHA256+StringValue.swift"; sourceTree = "<group>"; };
@@ -392,6 +396,8 @@
 				A5EDFCCF240ACA7A00B2D72D /* NavigationMasterViewModel.swift */,
 				A507DC4924095C43000E2861 /* Preferences */,
 				A52A224D23FBFCAF00F34A17 /* SummaryView.swift */,
+				A5E4ECE42413AF23007E0540 /* ErrorsPopoverView.swift */,
+				A5E4ECE62413B6F8007E0540 /* ErrorPopoverViewModel.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -654,6 +660,7 @@
 				A5BDF5DE23FD503F00DB6170 /* UserDefault.swift in Sources */,
 				A520193224115A87001BFBAB /* PersistenceService.swift in Sources */,
 				A5193DBA23F80D5900EFF01D /* AudiobookCellView.swift in Sources */,
+				A5E4ECE72413B6F8007E0540 /* ErrorPopoverViewModel.swift in Sources */,
 				A5193DC223F9952C00EFF01D /* Librarian.swift in Sources */,
 				A5BDF5E023FD50CE00DB6170 /* UserDefaultsPreferencesStore.swift in Sources */,
 				A52A224223FAF89A00F34A17 /* Audiobook+Storable.swift in Sources */,
@@ -708,6 +715,7 @@
 				A5EDFCD4240AF2D700B2D72D /* NavigationDetailViewModel.swift in Sources */,
 				A507DC3E24094F87000E2861 /* AudiobookState.swift in Sources */,
 				A54A03A723F6EDE000C8305A /* AudiobookFile.swift in Sources */,
+				A5E4ECE52413AF23007E0540 /* ErrorsPopoverView.swift in Sources */,
 				A53064ED240B099500EC29CD /* ContentViewModel.swift in Sources */,
 				A507DC4B24095C4F000E2861 /* PrefsView.swift in Sources */,
 				A507DC462409582A000E2861 /* PreferencesActions.swift in Sources */,

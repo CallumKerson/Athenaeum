@@ -21,4 +21,6 @@ struct AudiobookActions {
     struct SetFixMatchDialogVisible: Action {
         let visibility: Bool
     }
+
+    struct ClearErrors: Action {}
 }

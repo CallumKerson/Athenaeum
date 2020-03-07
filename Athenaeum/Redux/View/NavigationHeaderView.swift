@@ -8,12 +8,14 @@ import SwiftUI
 struct NavigationHeaderView: View {
     @ObservedObject var viewModel: NavigationHeaderViewModel
 
+    @State var showPopover: Bool = false
+
     init(_ viewModel: NavigationHeaderViewModel) {
         self.viewModel = viewModel
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: HorizontalAlignment.leading) {
             Text("Library").font(.largeTitle)
             HStack {
                 Button(action: {
@@ -25,6 +27,20 @@ struct NavigationHeaderView: View {
                 if viewModel.isImporting {
                     ActivityIndicator()
                         .frame(width: 20, height: 20)
+                }
+                if viewModel.isErrored {
+                    Text("􀇿")
+                        .foregroundColor(Color.red)
+                        .onHover { isHovered in
+                            if isHovered {
+                                self.showPopover = isHovered
+                            }
+                        }
+                        .popover(isPresented: self.$showPopover,
+                                 arrowEdge: .bottom) {
+                            ErrorsPopoverView(viewModel: ErrorPopoverViewModel(store: self
+                                    .viewModel.store))
+                        }
                 }
             }
         }

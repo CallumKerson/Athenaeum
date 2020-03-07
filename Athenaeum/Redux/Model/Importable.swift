@@ -67,6 +67,13 @@ extension Loadable {
         }
         return false
     }
+
+    var isErrored: Bool {
+        if case .errored = self {
+            return true
+        }
+        return false
+    }
 }
 
 extension Array where Element == Loadable<AudioBook> {
@@ -74,6 +81,15 @@ extension Array where Element == Loadable<AudioBook> {
         self.compactMap { (loadable) -> AudioBook? in
             if case let .loaded(incomingAudiobook) = loadable {
                 return incomingAudiobook
+            }
+            return nil
+        }
+    }
+
+    var errors: [(AudioBook, String)] {
+        self.compactMap { (loadable) -> (AudioBook, String)? in
+            if case let .errored(audiobook, errorMessage) = loadable {
+                return (audiobook, errorMessage)
             }
             return nil
         }

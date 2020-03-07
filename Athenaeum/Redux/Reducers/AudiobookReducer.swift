@@ -28,6 +28,11 @@ func audiobookStateReducer(state: AudiobookState, action: Action) -> AudiobookSt
         state.selectedAudiobook = action.audiobook
     case let action as AudiobookActions.SetFixMatchDialogVisible:
         state.fixMatchDialogDisplayed = action.visibility
+    case _ as AudiobookActions.ClearErrors:
+        let errorKeys = state.audiobooks.filter { $0.value.isErrored }.keys
+        for key in errorKeys {
+            state.audiobooks.removeValue(forKey: key)
+        }
     default:
         break
     }

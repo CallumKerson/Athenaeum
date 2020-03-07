@@ -65,6 +65,7 @@ extension AudiobookActions {
                             dispatch(ErrorActions
                                 .SetImportedFileAlreadyExistsError(audiobook: newAudiobook))
                         }
+                        return
                     }
                 }
                 DispatchQueue.main.async {
@@ -104,6 +105,7 @@ extension AudiobookActions {
                             dispatch(ErrorActions
                                 .SetImportedFileAlreadyExistsError(audiobook: updatedAudiobook))
                         }
+                        return
                     }
                 }
                 DispatchQueue.main.async {
