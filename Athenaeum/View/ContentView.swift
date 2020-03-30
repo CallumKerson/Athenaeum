@@ -52,8 +52,8 @@ struct ContentView: View {
         return sampleMetadata
     }
 
-    func getSampleAudiobook() -> AudioBook {
-        var sampleAudiobook = AudioBook(id: UUID(),
+    func getSampleAudiobook() -> Audiobook {
+        var sampleAudiobook = Audiobook(id: UUID(),
                                         location: URL(fileURLWithPath: "/Users/ckerson/Music/TWoK.m4b"))
         sampleAudiobook.metadata = getSampleMetadata()
         return sampleAudiobook

@@ -41,7 +41,7 @@ func importFromOpenDialog(store: Store<GlobalAppState>) {
 /// - Parameters:
 ///   - audiobook: Audiobook to move. The location is mutated to the location of the moved file
 ///   - libraryURL: The base URL of the library
-func moveAudiobookToLibrary(_ audiobook: inout AudioBook, libraryURL: URL) throws {
+func moveAudiobookToLibrary(_ audiobook: inout Audiobook, libraryURL: URL) throws {
     var destination = libraryURL
         .appendingPathComponent(audiobook.location.lastPathComponent)
     if let metadata = audiobook.metadata {

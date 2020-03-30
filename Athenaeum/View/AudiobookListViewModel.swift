@@ -6,8 +6,8 @@ import Combine
 import Foundation
 
 class AudiobookListViewModel: ObservableObject {
-    var audiobooks: [AudioBook] = []
-    var selectedAudiobook: AudioBook? {
+    var audiobooks: [Audiobook] = []
+    var selectedAudiobook: Audiobook? {
         didSet {
             self.store
                 .dispatch(action: AudiobookActions
@@ -23,7 +23,7 @@ class AudiobookListViewModel: ObservableObject {
     init(store: Store<GlobalAppState>) {
         self.store = store
         self.didStateChangeCancellable = self.store.stateSubject.sink(receiveValue: {
-            let recievedAudiobooks: [AudioBook] = Array($0.audiobookState.audiobooks.values)
+            let recievedAudiobooks: [Audiobook] = Array($0.audiobookState.audiobooks.values)
                 .loadedAudiobooks
             if self.audiobooks != recievedAudiobooks {
                 self.audiobooks = recievedAudiobooks

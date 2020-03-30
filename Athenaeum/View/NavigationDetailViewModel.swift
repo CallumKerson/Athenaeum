@@ -8,7 +8,7 @@ import Combine
 import Foundation
 
 class NavigationDetailViewModel: ObservableObject {
-    var audiobook: AudioBook?
+    var audiobook: Audiobook?
     var fixMatchDialogDisplayed: Bool = false
     var isGoodReadsConfigured: Bool = false
     var isImporting: Bool = false

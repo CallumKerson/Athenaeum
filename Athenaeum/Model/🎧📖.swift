@@ -7,7 +7,7 @@ import AVFoundation
 import Foundation
 import GoodReadsKit
 
-struct AudioBook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
+struct Audiobook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
     let id: UUID
     var location: URL
     var metadata: BookMetadata?
@@ -25,7 +25,7 @@ struct AudioBook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
     }
 }
 
-extension AudioBook {
+extension Audiobook {
     func getCover() -> Data? {
         if let artworkItem = AVMetadataItem
             .metadataItems(from: AVURLAsset(url: location).commonMetadata,
@@ -40,7 +40,7 @@ extension AudioBook {
     }
 }
 
-extension Array where Element == AudioBook {
+extension Array where Element == Audiobook {
     func hasAudibookWithSameFileAs(_ fileURL: URL) -> Bool {
         let filesInDirectory = self.map { $0.location }
         let fileSizes: [UInt64] = filesInDirectory.map { $0.fileSize }

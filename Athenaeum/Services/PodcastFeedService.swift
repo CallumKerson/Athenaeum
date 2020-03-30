@@ -18,7 +18,7 @@ struct PodcastFeedService {
             PodcastFeedService.persistenceQueue.async {
                 do {
                     var episodes: [Episode] = []
-                    let recievedAudiobooks: [AudioBook] = Array(state.audiobookState.audiobooks
+                    let recievedAudiobooks: [Audiobook] = Array(state.audiobookState.audiobooks
                         .values)
                         .loadedAudiobooks
                     for book in recievedAudiobooks {

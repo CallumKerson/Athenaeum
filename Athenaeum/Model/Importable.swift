@@ -87,9 +87,9 @@ extension Loadable {
     }
 }
 
-extension Array where Element == Loadable<AudioBook> {
-    var loadedAudiobooks: [AudioBook] {
-        self.compactMap { (loadable) -> AudioBook? in
+extension Array where Element == Loadable<Audiobook> {
+    var loadedAudiobooks: [Audiobook] {
+        self.compactMap { (loadable) -> Audiobook? in
             if case let .loaded(incomingAudiobook) = loadable {
                 return incomingAudiobook
             }
@@ -97,8 +97,8 @@ extension Array where Element == Loadable<AudioBook> {
         }
     }
 
-    var errors: [(AudioBook, String)] {
-        self.compactMap { (loadable) -> (AudioBook, String)? in
+    var errors: [(Audiobook, String)] {
+        self.compactMap { (loadable) -> (Audiobook, String)? in
             if case let .errored(audiobook, errorMessage) = loadable {
                 return (audiobook, errorMessage)
             }

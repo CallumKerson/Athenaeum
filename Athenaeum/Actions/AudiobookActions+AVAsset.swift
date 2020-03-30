@@ -13,7 +13,7 @@ extension AudiobookActions {
         let fileURL: URL
 
         func execute(state: AppState?, dispatch: @escaping DispatchFunction) {
-            var newAudiobook = AudioBook(id: UUID(), location: self.fileURL)
+            var newAudiobook = Audiobook(id: UUID(), location: self.fileURL)
 
             // MARK: Validate audiobook file
 
@@ -92,7 +92,7 @@ extension AudiobookActions {
 
     struct UpdateAudiobookFromGoodReads: AsyncAction {
         let goodReadsID: String
-        let audiobook: AudioBook
+        let audiobook: Audiobook
 
         func execute(state: AppState?, dispatch: @escaping DispatchFunction) {
             // MARK: Validate audiobook file

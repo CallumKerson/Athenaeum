@@ -6,7 +6,7 @@
 import Foundation
 
 struct AudiobookState: AppState, Codable, Equatable {
-    var audiobooks: [UUID: Loadable<AudioBook>] = [:]
+    var audiobooks: [UUID: Loadable<Audiobook>] = [:]
     var selectedAudiobookID: UUID?
     var fixMatchDialogDisplayed: Bool = false
 }

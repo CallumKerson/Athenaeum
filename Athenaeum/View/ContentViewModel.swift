@@ -7,7 +7,7 @@ import Combine
 import Foundation
 
 class ContentViewModel: ObservableObject {
-    var selectedAudiobook: AudioBook? {
+    var selectedAudiobook: Audiobook? {
         didSet {
             self.store
                 .dispatch(action: AudiobookActions

@@ -15,7 +15,7 @@ struct MetadataService {
     init(store: Store<GlobalAppState>) {
         self.didStateChangeCancellable = store.stateSubject.sink(receiveValue: { state in
             MetadataService.persistenceQueue.async {
-                let recievedAudiobooks: [AudioBook] = Array(state.audiobookState.audiobooks.values)
+                let recievedAudiobooks: [Audiobook] = Array(state.audiobookState.audiobooks.values)
                     .loadedAudiobooks
                 for book in recievedAudiobooks {
                     if let metadata = book.metadata {

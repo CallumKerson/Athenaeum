@@ -7,12 +7,12 @@ import Combine
 import Foundation
 
 class FixMatchModalViewModel: ObservableObject {
-    let audiobook: AudioBook
+    let audiobook: Audiobook
 
     private var didStateChangeCancellable: AnyCancellable?
     var store: Store<GlobalAppState>
 
-    init(audiobook: AudioBook, store: Store<GlobalAppState>) {
+    init(audiobook: Audiobook, store: Store<GlobalAppState>) {
         self.store = store
         self.audiobook = audiobook
     }

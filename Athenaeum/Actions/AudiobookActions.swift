@@ -7,11 +7,11 @@ import Foundation
 
 struct AudiobookActions {
     struct StartingImportOfAudiobook: Action {
-        let audiobook: AudioBook
+        let audiobook: Audiobook
     }
 
     struct SetAudiobook: Action {
-        let audiobook: AudioBook
+        let audiobook: Audiobook
     }
 
     struct SetSelectedAudiobook: Action {

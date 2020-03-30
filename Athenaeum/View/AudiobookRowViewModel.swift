@@ -7,7 +7,7 @@ import Combine
 import Foundation
 
 class AudiobookRowViewModel: ObservableObject {
-    var audiobook: AudioBook?
+    var audiobook: Audiobook?
     let objectWillChange = ObservableObjectPublisher()
 
     private var didStateChangeCancellable: AnyCancellable?

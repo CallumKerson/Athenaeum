@@ -7,14 +7,14 @@ import Foundation
 
 struct ErrorActions {
     struct SetImportedFileIsOfWrongTypeError: Action {
-        let audiobook: AudioBook
+        let audiobook: Audiobook
     }
 
     struct SetImportedFileURLCannotBeOpenedError: Action {
-        let audiobook: AudioBook
+        let audiobook: Audiobook
     }
 
     struct SetImportedFileAlreadyExistsError: Action {
-        let audiobook: AudioBook
+        let audiobook: Audiobook
     }
 }
