@@ -58,17 +58,17 @@ extension AudiobookFile {
                     let fetchedBook = try goodReads
                         .getBook(title: title, author: author)
                     var series: Series?
-                    if let seriesTitle = fetchedBook.seriesTitle,
-                        let seriesEntry = fetchedBook.seriesEntry {
+                    if let seriesTitle = fetchedBook.series?.title,
+                        let seriesEntry = fetchedBook.series?.entry {
                         series = Series(title: seriesTitle,
                                         entry: String(seriesEntry))
                     }
                     self.init(title: fetchedBook.title,
-                              author: fetchedBook.getAuthorString(),
+                              author: fetchedBook.authors?.author ?? "",
                               file: fileURL,
-                              publicationDate: fetchedBook.getDateString(),
+                              publicationDate: fetchedBook.publicationDate?.getDateAsString,
                               isbn: fetchedBook.isbn,
-                              summary: fetchedBook.bookDescription,
+                              summary: fetchedBook.summary,
                               series: series)
                     return
                 } catch {

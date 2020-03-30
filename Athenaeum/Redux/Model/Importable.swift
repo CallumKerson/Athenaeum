@@ -74,6 +74,17 @@ extension Loadable {
         }
         return false
     }
+
+    func get() -> T {
+        switch self {
+        case let .loading(value):
+            return value
+        case let .loaded(value):
+            return value
+        case let .errored(value, _):
+            return value
+        }
+    }
 }
 
 extension Array where Element == Loadable<AudioBook> {

@@ -43,14 +43,28 @@ extension AudiobookActions {
                 // MARK: Get audiobook metadata
 
                 let asset = AVURLAsset(url: self.fileURL)
-                newAudiobook.title = asset.commonTitle
-                newAudiobook.authors = asset.artistsAsAuthors
-                newAudiobook.publicationDate = asset.commonCreationDate
+                if let title = asset.commonTitle {
+                    newAudiobook.metadata = BookMetadata(title: title)
+                    newAudiobook.metadata?.authors = asset.artistsAsAuthors
+                    if let date = asset.commonCreationDate {
+                        newAudiobook.metadata?.publicationDate = try? PublicationDate(from: date)
+                    }
+                }
 
                 if let state = getGlobalState(state) {
                     if !state.preferencesState.goodReadsAPIKey.isBlank {
-                        GoodReadsRESTAPI(apiKey: state.preferencesState.goodReadsAPIKey)
-                            .setAudiobookMetadataFromGoodReads(audiobook: &newAudiobook)
+                        if let existingMetadata = newAudiobook.metadata {
+                            do {
+                                newAudiobook
+                                    .metadata = try GoodReadsRESTAPI(apiKey: state.preferencesState
+                                        .goodReadsAPIKey)
+                                    .getBook(title: existingMetadata.title,
+                                             author: existingMetadata.authors?.author)
+                            } catch {
+                                log
+                                    .error("Cannot get goodreads metadata for \(newAudiobook.debugDescription)")
+                            }
+                        }
                     }
                 }
 
@@ -88,9 +102,18 @@ extension AudiobookActions {
 
                 if let state = getGlobalState(state) {
                     if !state.preferencesState.goodReadsAPIKey.isBlank {
-                        GoodReadsRESTAPI(apiKey: state.preferencesState.goodReadsAPIKey)
-                            .setAudiobookMetadataFromGoodReadsID(goodReadsID: self.goodReadsID,
-                                                                 audiobook: &updatedAudiobook)
+                        if let id = Int(self.goodReadsID) {
+                            do {
+                                updatedAudiobook
+                                    .metadata = try GoodReadsRESTAPI(apiKey: state.preferencesState
+                                        .goodReadsAPIKey).getBook(goodReadsID: id)
+                            } catch {
+                                log
+                                    .error("Could not fetch metadata from GoodReads by title and author for audiobook \(self.audiobook)")
+                            }
+                        } else {
+                            log.error("Invalid GoodReads ID \(self.goodReadsID)")
+                        }
                     }
                 }
 

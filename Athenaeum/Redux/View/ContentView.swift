@@ -3,6 +3,7 @@
  Copyright (c) 2020 Callum Kerr-Edwards
  */
 
+import GoodReadsKit
 import SwiftUI
 
 struct ContentView: View {
@@ -41,20 +42,28 @@ struct ContentView: View {
     One of them may redeem us. And one of them will destroy us.
     """
 
-    let sampleAudiobook = AudioBook(id: UUID(),
-                                    location: URL(fileURLWithPath: "/Users/ckerson/Music/TWoK.m4b"),
-                                    contentsHash: "",
-                                    title: "The Way of Kings",
-                                    authors: [Author(firstName: "Brandon", lastName: "Sanderson")],
-                                    narrator: "Michael Kramer & Kate Reading",
-                                    publicationDate: "2010-08-31",
-                                    isbn: "0765326353",
-                                    bookDescription: sampleDescription,
-                                    series: Series(title: "The Stormlight Archive",
-                                                   entry: "1"))
+    func getSampleMetadata() -> BookMetadata {
+        var sampleMetadata = BookMetadata(title: "The Way of Kings")
+        sampleMetadata.authors = [Author(fullName: "Brandon Sanderson")]
+        sampleMetadata
+            .narrators = [Author(fullName: "Michael Kramer"), Author(fullName: "Kate Reading")]
+        sampleMetadata.publicationDate = PublicationDate(year: 2010, month: 08, day: 31)
+        sampleMetadata.series = GoodReadsKit.Series(title: "The Stormlight Archive", entry: 1.0)
+        return sampleMetadata
+    }
+
+    func getSampleAudiobook() -> AudioBook {
+        var sampleAudiobook = AudioBook(id: UUID(),
+                                        location: URL(fileURLWithPath: "/Users/ckerson/Music/TWoK.m4b"))
+        sampleAudiobook.metadata = getSampleMetadata()
+        return sampleAudiobook
+    }
+
+    let sampleAudiobook = getSampleAudiobook()
+
     let sampleAudiobookState =
         AudiobookState(audiobooks: [sampleAudiobook.id: .loaded(sampleAudiobook)],
-                       selectedAudiobook: sampleAudiobook)
+                       selectedAudiobookID: getSampleAudiobook().id)
     let sampleStore = Store<GlobalAppState>(reducer: appStateReducer,
                                             middleware: [logMiddleware],
                                             state: GlobalAppState(audiobookState: sampleAudiobookState))

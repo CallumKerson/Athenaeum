@@ -3,6 +3,7 @@
  Copyright (c) 2020 Callum Kerr-Edwards
  */
 
+import GoodReadsKit
 import SwiftUI
 
 struct NavigationDetailView: View {
@@ -34,14 +35,17 @@ struct NavigationDetailView: View {
                                 }
                             }
                             Spacer()
-                            BookText(audiobook: book)
+                            Unwrap(book.metadata) { metadata in
+                                BookText(metadata: metadata)
+                            }
+
                             Spacer()
                         }
                     }
 
-                    Unwrap(book.bookDescription) { description in
+                    Unwrap(book.metadata?.summary) { summary in
                         Divider()
-                        SummaryView(summary: description)
+                        SummaryView(summary: summary)
                             .lineLimit(nil)
                     }
                 }
@@ -70,30 +74,27 @@ struct NavigationDetailView: View {
 }
 
 struct BookText: View {
-    let audiobook: AudioBook
+    let metadata: BookMetadata
 
     var body: some View {
         VStack(alignment: HorizontalAlignment.leading) {
             VStack(alignment: HorizontalAlignment.leading) {
-                Unwrap(audiobook.title) { title in
-                    Text(title).font(.title)
-                }
-
-                Unwrap(audiobook.series) { series in
-                    Text("Book \(series.entry) of \(series.title)")
+                Text(metadata.title).font(.title)
+                Unwrap(metadata.series) { series in
+                    Text("Book \(series.entry.asString) of \(series.title)")
                 }
             }.padding(.bottom)
 
-            Unwrap(audiobook.getAuthorsString()) { author in
+            Unwrap(metadata.authors?.author) { author in
                 Text("Written by ") + Text(author)
             }
-            Unwrap(audiobook.publicationDate) { releaseDate in
+            Unwrap(metadata.publicationDate?.getDateAsString) { releaseDate in
                 Text("Released on ") + Text(releaseDate)
             }
-            Unwrap(audiobook.narrator) { narrator in
+            Unwrap(metadata.narrators?.author) { narrator in
                 Text("Narrated by ") + Text(narrator)
             }
-            Unwrap(audiobook.isbn) { isbn in
+            Unwrap(metadata.isbn) { isbn in
                 Text("ISBN ") + Text(isbn)
             }
         }

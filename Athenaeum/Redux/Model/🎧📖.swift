@@ -5,51 +5,22 @@
 
 import AVFoundation
 import Foundation
+import GoodReadsKit
 
 struct AudioBook: Equatable, Codable, Hashable, CustomDebugStringConvertible {
     let id: UUID
     var location: URL
-    var contentsHash: String?
-    var title: String?
-    var authors: [Author]?
-    var narrator: String?
-    var publicationDate: String?
-    var isbn: String?
-    var bookDescription: String?
-    var series: Series?
-
-    public func getAuthorsString() -> String? {
-        if let authors = authors {
-            let authorsStrings = authors.map { $0.getAuthorString() }
-            return authorsStrings.joined(separator: ", ")
-                .replacingLastOccurrenceOfString(",", with: " &")
-        } else {
-            return nil
-        }
-    }
+    var metadata: BookMetadata?
 
     var debugDescription: String {
-        if let title = self.title {
-            if let authors = getAuthorsString() {
-                return "\(title) by \(authors) (\(self.location.path))"
+        if let title = self.metadata?.title {
+            if let author = self.metadata?.authors?.author {
+                return "\(title) by \(author) (\(self.location.path))"
             } else {
                 return "\(title) (\(self.location.path))"
             }
         } else {
             return self.location.path
-        }
-    }
-}
-
-struct Author: Equatable, Codable, Hashable {
-    let firstName: String?
-    let lastName: String
-
-    func getAuthorString() -> String {
-        if let firstName = firstName {
-            return "\(firstName) \(self.lastName)"
-        } else {
-            return self.lastName
         }
     }
 }

@@ -19,19 +19,19 @@ struct AudiobookRowView: View {
                     RowCover(data: coverData)
                 }
 
-                VStack(alignment: HorizontalAlignment.leading) {
-                    Unwrap(audiobook.title) { title in
-                        Text(title)
+                Unwrap(audiobook.metadata) { metadata in
+                    VStack(alignment: HorizontalAlignment.leading) {
+                        Text(metadata.title)
                             .fontWeight(.bold)
                             .truncationMode(.tail)
                             .frame(minWidth: 20)
-                    }
 
-                    Unwrap(audiobook.getAuthorsString()) { author in
-                        Text(author)
-                            .font(.caption)
-                            .opacity(0.625)
-                            .truncationMode(.middle)
+                        Unwrap(metadata.authors) { authors in
+                            Text(authors.author)
+                                .font(.caption)
+                                .opacity(0.625)
+                                .truncationMode(.middle)
+                        }
                     }
                 }
 

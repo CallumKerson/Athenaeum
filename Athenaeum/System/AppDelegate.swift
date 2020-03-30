@@ -16,6 +16,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var store: Store<GlobalAppState>?
     var prefsView: PrefsView?
     var persistence: PersistenceService?
+    var metadata: MetadataService?
+    var podcast: PodcastFeedService?
 
     func applicationDidFinishLaunching(_: Notification) {
         // MARK: Logging
@@ -42,6 +44,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         self.persistence = PersistenceService(store: store)
+        self.metadata = MetadataService(store: store)
+        self.podcast = PodcastFeedService(store: store)
 
         // MARK: Main View
 

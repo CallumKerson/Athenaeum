@@ -77,6 +77,9 @@
 		A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */; };
 		A5E4ECE52413AF23007E0540 /* ErrorsPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECE42413AF23007E0540 /* ErrorsPopoverView.swift */; };
 		A5E4ECE72413B6F8007E0540 /* ErrorPopoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECE62413B6F8007E0540 /* ErrorPopoverViewModel.swift */; };
+		A5E4ECEC241546A1007E0540 /* MetadataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECEB241546A1007E0540 /* MetadataService.swift */; };
+		A5E4ECEE2415559A007E0540 /* PodcastFeedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECED2415559A007E0540 /* PodcastFeedService.swift */; };
+		A5E4ECF124155683007E0540 /* PodcastFeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = A5E4ECF024155683007E0540 /* PodcastFeedKit */; };
 		A5EDFCB4240A4CBA00B2D72D /* ErrorActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCB3240A4CBA00B2D72D /* ErrorActions.swift */; };
 		A5EDFCB6240A57C900B2D72D /* AudiobookActions+AVAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCB5240A57C900B2D72D /* AudiobookActions+AVAsset.swift */; };
 		A5EDFCBC240A990500B2D72D /* SHA256+StringValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCBB240A990500B2D72D /* SHA256+StringValue.swift */; };
@@ -90,6 +93,7 @@
 		A5EDFCD0240ACA7A00B2D72D /* NavigationMasterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCCF240ACA7A00B2D72D /* NavigationMasterViewModel.swift */; };
 		A5EDFCD2240AF23D00B2D72D /* NavigationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCD1240AF23D00B2D72D /* NavigationDetailView.swift */; };
 		A5EDFCD4240AF2D700B2D72D /* NavigationDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EDFCD3240AF2D700B2D72D /* NavigationDetailViewModel.swift */; };
+		A5FE221724190708008BF8AB /* Double+StringRepresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE221624190708008BF8AB /* Double+StringRepresentation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -184,6 +188,8 @@
 		A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+Indexed.swift"; sourceTree = "<group>"; };
 		A5E4ECE42413AF23007E0540 /* ErrorsPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorsPopoverView.swift; sourceTree = "<group>"; };
 		A5E4ECE62413B6F8007E0540 /* ErrorPopoverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPopoverViewModel.swift; sourceTree = "<group>"; };
+		A5E4ECEB241546A1007E0540 /* MetadataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataService.swift; sourceTree = "<group>"; };
+		A5E4ECED2415559A007E0540 /* PodcastFeedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastFeedService.swift; sourceTree = "<group>"; };
 		A5EDFCB3240A4CBA00B2D72D /* ErrorActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorActions.swift; sourceTree = "<group>"; };
 		A5EDFCB5240A57C900B2D72D /* AudiobookActions+AVAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudiobookActions+AVAsset.swift"; sourceTree = "<group>"; };
 		A5EDFCBB240A990500B2D72D /* SHA256+StringValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SHA256+StringValue.swift"; sourceTree = "<group>"; };
@@ -197,6 +203,7 @@
 		A5EDFCCF240ACA7A00B2D72D /* NavigationMasterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationMasterViewModel.swift; sourceTree = "<group>"; };
 		A5EDFCD1240AF23D00B2D72D /* NavigationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationDetailView.swift; sourceTree = "<group>"; };
 		A5EDFCD3240AF2D700B2D72D /* NavigationDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationDetailViewModel.swift; sourceTree = "<group>"; };
+		A5FE221624190708008BF8AB /* Double+StringRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+StringRepresentation.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +215,7 @@
 				A5193DC523F99D4A00EFF01D /* RealmSwift in Frameworks */,
 				A5193DCB23FAA16E00EFF01D /* SwiftyBeaver in Frameworks */,
 				A5366A002406BFAB00760FE0 /* FileKit in Frameworks */,
+				A5E4ECF124155683007E0540 /* PodcastFeedKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,6 +415,8 @@
 			children = (
 				A52019272410F530001BFBAB /* ImportService.swift */,
 				A520193124115A87001BFBAB /* PersistenceService.swift */,
+				A5E4ECEB241546A1007E0540 /* MetadataService.swift */,
+				A5E4ECED2415559A007E0540 /* PodcastFeedService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -456,6 +466,7 @@
 				A5EDFCBB240A990500B2D72D /* SHA256+StringValue.swift */,
 				A520192D24114CC8001BFBAB /* AVAsset+Getters.swift */,
 				A520192F24115794001BFBAB /* GoodReadsRESTAPI+SetAudiobookMetadata.swift */,
+				A5FE221624190708008BF8AB /* Double+StringRepresentation.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -526,6 +537,7 @@
 				A5193DC723FA995E00EFF01D /* GoodReadsKit */,
 				A5193DCA23FAA16E00EFF01D /* SwiftyBeaver */,
 				A53669FF2406BFAB00760FE0 /* FileKit */,
+				A5E4ECF024155683007E0540 /* PodcastFeedKit */,
 			);
 			productName = Athenaeum;
 			productReference = A511220023CDB05E0063FB32 /* Athenaeum.app */;
@@ -605,6 +617,7 @@
 				A5193DC623FA995E00EFF01D /* XCRemoteSwiftPackageReference "GoodReadsKit" */,
 				A5193DC923FAA16E00EFF01D /* XCRemoteSwiftPackageReference "SwiftyBeaver" */,
 				A53669FE2406BFAA00760FE0 /* XCRemoteSwiftPackageReference "FileKit" */,
+				A5E4ECEF24155683007E0540 /* XCRemoteSwiftPackageReference "PodcastFeedKit" */,
 			);
 			productRefGroup = A511220123CDB05E0063FB32 /* Products */;
 			projectDirPath = "";
@@ -671,6 +684,7 @@
 				A5429DB723EDB1B600B1DF81 /* PreferencesView.swift in Sources */,
 				A507DC3C24094F31000E2861 /* GlobalAppState.swift in Sources */,
 				A59B58D72412E3D5002F8B3A /* FixMatchModalViewModal.swift in Sources */,
+				A5E4ECEE2415559A007E0540 /* PodcastFeedService.swift in Sources */,
 				A520192E24114CC8001BFBAB /* AVAsset+Getters.swift in Sources */,
 				A507DC2B24090617000E2861 /* Protocols.swift in Sources */,
 				A52A222F23FAB46B00F34A17 /* FileManager+MoveCreatingIntermediaryDirectories.swift in Sources */,
@@ -703,6 +717,7 @@
 				A507DC4824095A68000E2861 /* PreferencesReducer.swift in Sources */,
 				A5EDFCC0240AB76A00B2D72D /* AudiobookRowView.swift in Sources */,
 				A53669FB2406840300760FE0 /* FileLibrarian.swift in Sources */,
+				A5E4ECEC241546A1007E0540 /* MetadataService.swift in Sources */,
 				A5429E3523EDBAB100B1DF81 /* AudiobookRepository.swift in Sources */,
 				A5429E3823EDC37000B1DF81 /* URL+Utils.swift in Sources */,
 				A5AAC48E23FFE2F100542E6D /* Series.swift in Sources */,
@@ -716,6 +731,7 @@
 				A507DC3E24094F87000E2861 /* AudiobookState.swift in Sources */,
 				A54A03A723F6EDE000C8305A /* AudiobookFile.swift in Sources */,
 				A5E4ECE52413AF23007E0540 /* ErrorsPopoverView.swift in Sources */,
+				A5FE221724190708008BF8AB /* Double+StringRepresentation.swift in Sources */,
 				A53064ED240B099500EC29CD /* ContentViewModel.swift in Sources */,
 				A507DC4B24095C4F000E2861 /* PrefsView.swift in Sources */,
 				A507DC462409582A000E2861 /* PreferencesActions.swift in Sources */,
@@ -1085,6 +1101,14 @@
 				minimumVersion = 1.0.1;
 			};
 		};
+		A5E4ECEF24155683007E0540 /* XCRemoteSwiftPackageReference "PodcastFeedKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CallumKerrEdwards/PodcastFeedKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1107,6 +1131,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A53669FE2406BFAA00760FE0 /* XCRemoteSwiftPackageReference "FileKit" */;
 			productName = FileKit;
+		};
+		A5E4ECF024155683007E0540 /* PodcastFeedKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5E4ECEF24155683007E0540 /* XCRemoteSwiftPackageReference "PodcastFeedKit" */;
+			productName = PodcastFeedKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

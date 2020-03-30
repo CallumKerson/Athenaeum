@@ -16,17 +16,18 @@ struct AudiobookListView: View {
     var body: some View {
         List(selection: $viewModel.selectedAudiobook) {
             ForEach(viewModel.audiobooks.sorted(by: {
-                if let authorZero = $0.authors?.first, let authorOne = $1.authors?.first {
-                    if authorZero != authorOne {
-                        return authorZero.lastName < authorOne.lastName
+                if let metadataZero = $0.metadata, let metadataOne = $1.metadata {
+                    if let authorZero = metadataZero.authors?.first,
+                        let authorOne = metadataOne.authors?.first {
+                        if authorZero != authorOne {
+                            return authorZero.lastName < authorOne.lastName
+                        }
                     }
-                }
-                if let pubDateZero = $0.publicationDate,
-                    let pubDateOne = $1.publicationDate {
-                    return pubDateZero < pubDateOne
-                }
-                if let titleZero = $0.title, let titleOne = $1.title {
-                    return titleZero < titleOne
+                    if let pubDateZero = metadataZero.publicationDate?.asDate,
+                        let pubDateOne = metadataOne.publicationDate?.asDate {
+                        return pubDateZero < pubDateOne
+                    }
+                    return metadataZero.title < metadataOne.title
                 } else {
                     return $0.id.uuidString < $1.id.uuidString
                 }

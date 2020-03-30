@@ -19,7 +19,7 @@ struct PersistenceService {
         self.didStateChangeCancellable = store.stateSubject.sink(receiveValue: { state in
             PersistenceService.persistenceQueue.async {
                 let encoder = JSONEncoder()
-                encoder.outputFormatting = .prettyPrinted
+                encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
                 if let encodedData = try? encoder.encode(state) {
                     do {
                         try encodedData.write(to: PersistenceService.getSaveURL())

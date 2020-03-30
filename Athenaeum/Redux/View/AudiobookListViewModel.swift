@@ -11,7 +11,7 @@ class AudiobookListViewModel: ObservableObject {
         didSet {
             self.store
                 .dispatch(action: AudiobookActions
-                    .SetSelectedAudiobook(audiobook: self.selectedAudiobook))
+                    .SetSelectedAudiobook(id: self.selectedAudiobook?.id))
         }
     }
 
@@ -29,9 +29,10 @@ class AudiobookListViewModel: ObservableObject {
                 self.audiobooks = recievedAudiobooks
                 self.objectWillChange.send()
             }
-            if let selectedAudiobook = $0.audiobookState.selectedAudiobook {
-                if self.selectedAudiobook != selectedAudiobook {
-                    self.selectedAudiobook = selectedAudiobook
+            if let selectedAudiobookID = $0.audiobookState.selectedAudiobookID {
+                let selectedAudiobook = $0.audiobookState.audiobooks[selectedAudiobookID]
+                if self.selectedAudiobook != selectedAudiobook?.get() {
+                    self.selectedAudiobook = selectedAudiobook?.get()
                     self.objectWillChange.send()
                 }
             }

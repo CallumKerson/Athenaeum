@@ -43,19 +43,22 @@ func importFromOpenDialog(store: Store<GlobalAppState>) {
 ///   - libraryURL: The base URL of the library
 func moveAudiobookToLibrary(_ audiobook: inout AudioBook, libraryURL: URL) throws {
     var destination = libraryURL
-    if let author = audiobook.getAuthorsString()?.replacingOccurrences(of: ":", with: " -"),
-        let title = audiobook.title?.replacingOccurrences(of: ":", with: " -") {
-        destination = libraryURL
-            .appendingPathComponent(author, isDirectory: true)
-        if let series = audiobook.series {
-            destination = destination
-                .appendingPathComponent(series.title, isDirectory: true)
-                .appendingPathComponent("\(series.entry) \(title)")
-                .appendingPathExtension("m4b")
-        } else {
-            destination = destination
-                .appendingPathComponent(title)
-                .appendingPathExtension("m4b")
+        .appendingPathComponent(audiobook.location.lastPathComponent)
+    if let metadata = audiobook.metadata {
+        if let author = metadata.authors?.author.replacingOccurrences(of: ":", with: " -") {
+            let title = metadata.title.replacingOccurrences(of: ":", with: " -")
+            destination = libraryURL
+                .appendingPathComponent(author, isDirectory: true)
+            if let series = metadata.series {
+                destination = destination
+                    .appendingPathComponent(series.title, isDirectory: true)
+                    .appendingPathComponent("\(series.entry.asString) \(title)", isDirectory: false)
+                    .appendingPathExtension("m4b")
+            } else {
+                destination = destination
+                    .appendingPathComponent(title, isDirectory: false)
+                    .appendingPathExtension("m4b")
+            }
         }
     }
 

@@ -43,7 +43,7 @@ struct SummaryView: View {
 #if DEBUG
     struct SummaryView_Previews: PreviewProvider {
         static var previews: some View {
-            SummaryView(summary: sampleAudiobook.bookDescription!)
+            SummaryView(summary: sampleAudiobook.metadata!.summary!)
         }
     }
 #endif

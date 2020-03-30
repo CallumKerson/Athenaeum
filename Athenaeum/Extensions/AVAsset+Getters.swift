@@ -5,6 +5,7 @@
 
 import AVFoundation
 import Foundation
+import GoodReadsKit
 
 extension AVAsset {
     var commonTitle: String? {
@@ -41,16 +42,7 @@ extension AVAsset {
 
         for item in items {
             if let artistString = item.stringValue {
-                var names = artistString.components(separatedBy: " ")
-                if let lastName = names.last {
-                    names.removeLast(1)
-                    authors
-                        .append(Author(firstName: names.joined(separator: " "),
-                                       lastName: lastName))
-                } else {
-                    authors
-                        .append(Author(firstName: nil, lastName: artistString))
-                }
+                authors.append(Author(fullName: artistString))
             }
         }
 

@@ -25,7 +25,7 @@ func audiobookStateReducer(state: AudiobookState, action: Action) -> AudiobookSt
             .audiobooks[action.audiobook.id] = .errored(action.audiobook,
                                                         message: "File cannot be accessed")
     case let action as AudiobookActions.SetSelectedAudiobook:
-        state.selectedAudiobook = action.audiobook
+        state.selectedAudiobookID = action.id
     case let action as AudiobookActions.SetFixMatchDialogVisible:
         state.fixMatchDialogDisplayed = action.visibility
     case _ as AudiobookActions.ClearErrors:

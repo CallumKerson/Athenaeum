@@ -15,13 +15,6 @@ class FixMatchModalViewModel: ObservableObject {
     init(audiobook: AudioBook, store: Store<GlobalAppState>) {
         self.store = store
         self.audiobook = audiobook
-//        self.didStateChangeCancellable = self.store.stateSubject.sink(receiveValue: {
-//            let incomingFixMatchDialogDisplayed = $0.audiobookState.fixMatchDialogDisplayed
-//            if self.fixMatchDialogDisplayed != incomingFixMatchDialogDisplayed {
-//                self.fixMatchDialogDisplayed = incomingFixMatchDialogDisplayed
-//                self.objectWillChange.send()
-//            }
-//        })
     }
 
     func fixMatchButton(goodReadsID: String) {
