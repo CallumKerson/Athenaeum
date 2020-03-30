@@ -4,7 +4,7 @@
  */
 
 import Cocoa
-import RealmSwift
+
 import SwiftUI
 import SwiftyBeaver
 
@@ -48,17 +48,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.podcast = PodcastFeedService(store: store)
 
         // MARK: Main View
-
-        #if DEBUG
-            do {
-                try FileManager
-                    .default
-                    .removeItem(at: Realm.Configuration.defaultConfiguration.fileURL!)
-            } catch {
-                log.debug("Clearing database")
-            }
-
-        #endif
 
         log.info("Creating main view")
 
