@@ -49,7 +49,7 @@ struct PreferencesKey: RawRepresentable {
 }
 
 extension PreferencesKey {
-    static let libraryPath = Key(rawValue: "libraryPath")
-    static let autoImport = Key(rawValue: "autoImport")
-    static let goodReadsAPIKey = Key(rawValue: "goodReadsAPIKey")
+    static let libraryPath = PreferencesKey(rawValue: "libraryPath")
+    static let autoImport = PreferencesKey(rawValue: "autoImport")
+    static let goodReadsAPIKey = PreferencesKey(rawValue: "goodReadsAPIKey")
 }
