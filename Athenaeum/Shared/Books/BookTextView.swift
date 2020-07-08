@@ -31,7 +31,6 @@ struct BookTextView: View {
             }
         }
         .font(.subheadline)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

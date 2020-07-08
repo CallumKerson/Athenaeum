@@ -16,8 +16,23 @@ struct BookDetailView: View {
     }
 
     var body: some View {
-        VStack(alignment: HorizontalAlignment.leading, spacing: 12) {
-            HStack(alignment: VerticalAlignment.top, spacing: 24) {
+        Group {
+            container
+                .frame(minWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .navigationTitle(book.metadata.title)
+        .toolbar {
+                ToolbarItem {
+                    Button("Edit") {
+                        print("Edited")
+                    }
+                }
+            }
+    }
+    
+    var container: some View {
+        VStack(alignment: HorizontalAlignment.leading) {
+            HStack(alignment: VerticalAlignment.top) {
                 book.image
                     .resizable()
                     .frame(idealWidth: 300, maxWidth: 400, idealHeight: 300, maxHeight: 400)
@@ -25,20 +40,12 @@ struct BookDetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     .accessibility(hidden: true)
 
-                VStack(alignment: HorizontalAlignment.leading) {
-                    BookTextView(metadata: book.metadata)
-                        .frame(minWidth: 100)
-                    Spacer()
-                }
+                BookTextView(metadata: book.metadata)
+                    .frame(minWidth: 100)
+                    .padding()
+                
             }
-        }.padding()
-            .toolbar {
-                ToolbarItem {
-                    Button("Edit") {
-                        print("Edited")
-                    }
-                }
-            }
+        }
     }
 }
 
