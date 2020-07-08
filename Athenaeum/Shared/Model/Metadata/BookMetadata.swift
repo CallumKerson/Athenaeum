@@ -4,6 +4,7 @@
  Licensed under the MIT license.
  */
 
+import AVFoundation
 import Foundation
 
 struct BookMetadata: Equatable, Codable, Hashable {
@@ -21,5 +22,20 @@ struct BookMetadata: Equatable, Codable, Hashable {
 
     init(title: String) {
         self.title = title
+    }
+}
+
+extension BookMetadata {
+    static func fromAudiobook(audiobook audiobookURL: URL) -> BookMetadata? {
+        let audiobookAsset = AVURLAsset(url: audiobookURL)
+        guard let title = audiobookAsset.commonTitle else { return nil }
+
+        var metadata = BookMetadata(title: title)
+        metadata.authors = audiobookAsset.artistsAsAuthors
+
+        if let date = audiobookAsset.commonCreationDate {
+            metadata.publicationDate = try? PublicationDate(from: date)
+        }
+        return metadata
     }
 }

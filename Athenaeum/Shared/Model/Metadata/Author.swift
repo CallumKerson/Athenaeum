@@ -24,28 +24,30 @@ struct Author: Equatable, Codable, Hashable, ExpressibleByStringLiteral {
         self.lastName = lastName
     }
 
-    /// Initalises Author from string, including special cases
-    /// - Parameter fullName: Full name of author
-    public init(fullName: String) {
-        // Exceptions
-        if fullName == "Ursula K. Le Guin" {
-            self.init(firstNames: "Ursula K.", lastName: "Le Guin")
-        } else {
-            self.init(stringLiteral: fullName)
-        }
-    }
+//    /// Initalises Author from string, including special cases
+//    /// - Parameter fullName: Full name of author
+//    public init(fullName: String) {
+//        // Exceptions
+//        if fullName == "Ursula K. Le Guin" {
+//            self.init(firstNames: "Ursula K.", lastName: "Le Guin")
+//        } else {
+//            self.init(stringLiteral: fullName)
+//        }
+//    }
 
     /// Initalises Author from string
     /// - Parameter stringLiteral: full name of author
     public init(stringLiteral value: String) {
-        var names = value.components(separatedBy: " ")
-        if let lastName = names.last {
-            names.removeLast(1)
-            firstNames = names.joined(separator: " ")
-            self.lastName = lastName
+        if value == "Ursula K. Le Guin" {
+            self.init(firstNames: "Ursula K.", lastName: "Le Guin")
         } else {
-            firstNames = nil
-            lastName = value
+            var names = value.components(separatedBy: " ")
+            if let lastName = names.last {
+                names.removeLast(1)
+                self.init(firstNames: names.joined(separator: " "), lastName: lastName)
+            } else {
+                self.init(firstNames: nil, lastName: value)
+            }
         }
     }
 }

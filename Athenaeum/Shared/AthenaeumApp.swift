@@ -8,9 +8,11 @@ import SwiftUI
 
 @main
 struct AthenaeumApp: App {
+    @StateObject private var model = AthenaeumModel()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppNavigationView().environmentObject(model)
         }
     }
 }

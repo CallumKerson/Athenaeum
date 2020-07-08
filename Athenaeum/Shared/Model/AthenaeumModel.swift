@@ -7,11 +7,11 @@
 import Foundation
 
 class AthenaeumModel: ObservableObject {
-    @Published private(set) var books: Set<Book>
+    @Published private(set) var books: [Book]
     @Published private(set) var selectedBookId: Book.ID?
 
     init() {
-        books = []
+        self.books = []
     }
 }
 
@@ -24,5 +24,13 @@ extension AthenaeumModel {
         selectedBookId = id
     }
 
-    func addBook(from _: URL) {}
+    func addAudiobook(from url: URL) {
+        guard url.pathExtension == "m4b" else {
+            return
+        }
+        guard let metadata = BookMetadata.fromAudiobook(audiobook: url) else { return }
+        var newBook = Book(metadata: metadata)
+        newBook.audio = url
+        books.append(newBook)
+    }
 }

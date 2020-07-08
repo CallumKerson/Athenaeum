@@ -9,9 +9,14 @@ import Foundation
 
 struct Book: Identifiable, Equatable, Codable, Hashable {
     let id: UUID
-    let audio: URL?
-    let ebook: URL?
-    let metadata: BookMetadata?
+    var audio: URL?
+    var ebook: URL?
+    var metadata: BookMetadata
+
+    init(metadata: BookMetadata) {
+        id = UUID()
+        self.metadata = metadata
+    }
 }
 
 extension Book {
