@@ -1,8 +1,6 @@
 /**
  BookRowView.swift
- Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
- */
+ Copyright (c) 2020 Callum Kerr-Edwards */
 
 import SwiftUI
 
@@ -65,6 +63,7 @@ struct BookRowView: View {
         .font(.subheadline)
         .padding(.vertical, verticalRowPadding)
         .accessibilityElement(children: .combine)
+        .frame(minWidth: 300)
     }
 }
 

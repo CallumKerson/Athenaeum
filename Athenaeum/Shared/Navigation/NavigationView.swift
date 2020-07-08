@@ -1,26 +1,51 @@
 /**
  NavigationView.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AppNavigationView: View {
-    #if os(iOS)
-        @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    #endif
+    @Environment(\.importFiles) var importFiles
+    @EnvironmentObject private var model: AthenaeumModel
 
     @ViewBuilder var body: some View {
-//        #if os(iOS)
-//        if horizontalSizeClass == .compact {
-//            AppTabNavigation()
-//        } else {
-//            AppSidebarNavigation()
-//        }
-//        #else
         SidebarNavigationView()
             .frame(minWidth: 900, maxWidth: .infinity, minHeight: 500, maxHeight: .infinity)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: {
+                        importFiles.callAsFunction(multipleOfType: [UTType.audio]) { result in
+                            switch result {
+                            case let .success(urls):
+                                urls.printByIndex()
+                                for url in urls {
+                                    model.addAudiobook(from: url)
+                                }
+                            case let .failure(error):
+                                print(error.localizedDescription)
+                            case .none:
+                                print("User cancelled")
+                            }
+                        }
+                        print("Import button was tapped")
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+    }
+}
+
+extension Array {
+    /// Prints self to std output, with one element per line, prefixed by
+    /// the element's index in square brackets.
+
+    public func printByIndex(delimiter: String = " ") {
+        for (index, value) in enumerated() {
+            print("[\(index)]\(delimiter)\(value)")
+        }
     }
 }
 

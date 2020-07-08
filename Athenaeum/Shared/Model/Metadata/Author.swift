@@ -1,7 +1,6 @@
 /**
  Author.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Foundation
@@ -13,9 +12,9 @@ struct Author: Equatable, Codable, Hashable, ExpressibleByStringLiteral {
 
     public var fullName: String {
         if let firstName = firstNames {
-            return "\(firstName) \(lastName)"
+            return "\(firstName) \(self.lastName)"
         } else {
-            return lastName
+            return self.lastName
         }
     }
 

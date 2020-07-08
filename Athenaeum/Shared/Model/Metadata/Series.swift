@@ -1,7 +1,6 @@
 /**
  Series.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Foundation
@@ -16,10 +15,10 @@ struct Series: Codable, Equatable, Hashable {
     }
 
     public var displayName: String {
-        if entry.truncatingRemainder(dividingBy: 1.0) == 0.0 {
-            return "Book \(Int(entry)) of \(title)"
+        if self.entry.truncatingRemainder(dividingBy: 1.0) == 0.0 {
+            return "Book \(Int(self.entry)) of \(self.title)"
         } else {
-            return "Book \(entry) of \(title)"
+            return "Book \(self.entry) of \(self.title)"
         }
     }
 }

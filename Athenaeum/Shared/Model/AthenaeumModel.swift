@@ -1,7 +1,6 @@
 /**
  AthenaeumModel.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import Foundation
@@ -11,17 +10,22 @@ class AthenaeumModel: ObservableObject {
     @Published private(set) var selectedBookId: Book.ID?
 
     init() {
-        self.books = []
+        let url = FileManager.default.urls(for: .musicDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("MotOE.m4b")
+
+        var newBook = Book(metadata: BookMetadata.fromAudiobook(audiobook: url)!)
+        newBook.audio = url
+        self.books = [newBook]
     }
 }
 
 extension AthenaeumModel {
     func selectBook(_ book: Book) {
-        selectBook(id: book.id)
+        self.selectBook(id: book.id)
     }
 
     func selectBook(id: Book.ID) {
-        selectedBookId = id
+        self.selectedBookId = id
     }
 
     func addAudiobook(from url: URL) {
@@ -31,6 +35,7 @@ extension AthenaeumModel {
         guard let metadata = BookMetadata.fromAudiobook(audiobook: url) else { return }
         var newBook = Book(metadata: metadata)
         newBook.audio = url
-        books.append(newBook)
+        self.books.append(newBook)
+        print("Added new book \(newBook.metadata.title)")
     }
 }

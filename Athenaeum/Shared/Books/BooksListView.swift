@@ -1,8 +1,6 @@
 /**
  BooksListView.swift
- Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
- */
+ Copyright (c) 2020 Callum Kerr-Edwards */
 
 import SwiftUI
 
@@ -16,8 +14,7 @@ struct BooksListView: View {
         List(selection: $selection) {
             ForEach(books) { book in
                 NavigationLink(
-                    destination: BookTextView(metadata: book.metadata)
-                        .environmentObject(model),
+                    destination: BookDetailView(book: book),
                     tag: book,
                     selection: $selection
                 ) {
@@ -25,7 +22,8 @@ struct BooksListView: View {
                 }
                 .tag(book)
                 .onReceive(model.$selectedBookId) { newValue in
-                    guard let bookId = newValue, let book = model.books.first(where: { $0.id == bookId }) else { return }
+                    guard let bookId = newValue,
+                        let book = model.books.first(where: { $0.id == bookId }) else { return }
                     selection = book
                 }
             }

@@ -1,7 +1,6 @@
 /**
  SidebarNavigationView.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import SwiftUI
@@ -23,7 +22,7 @@ struct SidebarNavigationView: View {
             }
             .accessibility(label: Text("All Books"))
             .tag(NavigationItem.all)
-            NavigationLink(destination: AllBooksView()) {
+            NavigationLink(destination: GenreBooksView(genre: .sciFi)) {
                 Label("Sci-Fi", systemImage: "bolt")
             }
             .accessibility(label: Text("Sci-Fi"))

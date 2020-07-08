@@ -1,7 +1,6 @@
 /**
  Book.swift
  Copyright (c) 2020 Callum Kerr-Edwards
- Licensed under the MIT license.
  */
 
 import AVFoundation
@@ -14,7 +13,7 @@ struct Book: Identifiable, Equatable, Codable, Hashable {
     var metadata: BookMetadata
 
     init(metadata: BookMetadata) {
-        id = UUID()
+        self.id = UUID()
         self.metadata = metadata
     }
 }
