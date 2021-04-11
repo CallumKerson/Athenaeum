@@ -33,21 +33,31 @@ struct PrefsView: View {
             Section {
                 Picker(selection: $libraryPathSelection, label:
                     Text("Audiobook Library Path:"),
-                       content: {
+                    content: {
                         Text(viewModel.libraryPath).tag(0)
-            })
-            }.padding(.bottom)
+                    })
+            }
+            Divider()
             Section {
                 Toggle("Use Automatic Import",
                        isOn: $viewModel.useAutoImport)
             }
-            .padding(.bottom)
+            Divider()
             Section {
                 TextField("GoodReads API Key",
                           text: $viewModel.goodReadsAPIKey)
             }
+            Divider()
+            Section(header: Text("Podcast Feed Information")) {
+                TextField("Podcast Host URL",
+                          text: $viewModel.podcastHostURL)
+                TextField("Podcast feed author",
+                          text: $viewModel.podcastAuthor)
+                TextField("Podcast feed email",
+                          text: $viewModel.podcastEmail)
+            }
         }
-        .frame(minWidth: 600, maxWidth: 600, minHeight: 160, maxHeight: 160)
+        .frame(minWidth: 600, maxWidth: 600, minHeight: 200, maxHeight: 200)
         .padding()
     }
 

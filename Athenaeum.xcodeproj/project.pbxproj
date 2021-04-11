@@ -53,6 +53,7 @@
 		A5AAC48A23FFE05800542E6D /* Oathbringer.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48923FFE05800542E6D /* Oathbringer.jpg */; };
 		A5AAC48C23FFE08A00542E6D /* The Way of Kings.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48B23FFE08A00542E6D /* The Way of Kings.jpg */; };
 		A5AAC49023FFE49400542E6D /* previewAudiobooks.json in Resources */ = {isa = PBXBuildFile; fileRef = A5AAC48F23FFE49400542E6D /* previewAudiobooks.json */; };
+		A5BC1DC5243383A9008DDA86 /* MonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BC1DC4243383A9008DDA86 /* MonitorService.swift */; };
 		A5BDF5EA23FD75A400DB6170 /* RandomAccessCollection+Indexed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */; };
 		A5E4ECE52413AF23007E0540 /* ErrorsPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECE42413AF23007E0540 /* ErrorsPopoverView.swift */; };
 		A5E4ECE72413B6F8007E0540 /* ErrorPopoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4ECE62413B6F8007E0540 /* ErrorPopoverViewModel.swift */; };
@@ -143,6 +144,7 @@
 		A5AAC48923FFE05800542E6D /* Oathbringer.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Oathbringer.jpg; sourceTree = "<group>"; };
 		A5AAC48B23FFE08A00542E6D /* The Way of Kings.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "The Way of Kings.jpg"; sourceTree = "<group>"; };
 		A5AAC48F23FFE49400542E6D /* previewAudiobooks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = previewAudiobooks.json; sourceTree = "<group>"; };
+		A5BC1DC4243383A9008DDA86 /* MonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorService.swift; sourceTree = "<group>"; };
 		A5BDF5E923FD75A400DB6170 /* RandomAccessCollection+Indexed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+Indexed.swift"; sourceTree = "<group>"; };
 		A5E4ECE42413AF23007E0540 /* ErrorsPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorsPopoverView.swift; sourceTree = "<group>"; };
 		A5E4ECE62413B6F8007E0540 /* ErrorPopoverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPopoverViewModel.swift; sourceTree = "<group>"; };
@@ -274,17 +276,17 @@
 		A511220223CDB05E0063FB32 /* Athenaeum */ = {
 			isa = PBXGroup;
 			children = (
-				A5429E3623EDC28D00B1DF81 /* Extensions */,
-				A511220C23CDB0620063FB32 /* Preview Content */,
 				A507DC3724094EC5000E2861 /* Actions */,
+				A5429E3623EDC28D00B1DF81 /* Extensions */,
 				A507DC3824094ED2000E2861 /* Middleware */,
-				A52019262410F51D001BFBAB /* Services */,
 				A51156D42407FAEC00F55940 /* Model */,
+				A511220C23CDB0620063FB32 /* Preview Content */,
 				A507DC3924094EDC000E2861 /* Reducers */,
 				A507DC3424094DCB000E2861 /* redux */,
+				A52019262410F51D001BFBAB /* Services */,
 				A507DC3A24094F21000E2861 /* State */,
-				A51156DB2408098A00F55940 /* View */,
 				A5BDF5E423FD60E600DB6170 /* System */,
+				A51156DB2408098A00F55940 /* View */,
 			);
 			path = Athenaeum;
 			sourceTree = "<group>";
@@ -364,6 +366,7 @@
 				A520193124115A87001BFBAB /* PersistenceService.swift */,
 				A5E4ECEB241546A1007E0540 /* MetadataService.swift */,
 				A5E4ECED2415559A007E0540 /* PodcastFeedService.swift */,
+				A5BC1DC4243383A9008DDA86 /* MonitorService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -565,6 +568,7 @@
 				A519E33523FFD0890033A6E8 /* PreviewAudiobooks.swift in Sources */,
 				A507DC3324090E9A000E2861 /* AudiobookActions.swift in Sources */,
 				A580AFF8240527B200B91771 /* NSImage+Resize.swift in Sources */,
+				A5BC1DC5243383A9008DDA86 /* MonitorService.swift in Sources */,
 				A5EDFCCC240AC7B200B2D72D /* NavigationHeaderView.swift in Sources */,
 				A52A223123FAB4A200F34A17 /* NSWindow+CreateStandardWindow.swift in Sources */,
 				A5EDFCC8240AC4CE00B2D72D /* AudiobookListViewModel.swift in Sources */,

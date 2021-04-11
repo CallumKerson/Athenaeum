@@ -4,7 +4,6 @@
  */
 
 @testable import Athenaeum
-import RealmSwift
 import XCTest
 
 class LibrarianTests: XCTestCase {

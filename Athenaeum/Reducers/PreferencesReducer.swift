@@ -12,6 +12,12 @@ func preferencesStateReducer(state: PreferencesState, action: Action) -> Prefere
         state.autoImport = action.updatedValue
     case let action as PreferencesActions.SetUpdatedGoodReadsAPIKeyPreference:
         state.goodReadsAPIKey = action.updatedValue
+    case let action as PreferencesActions.SetUpdatedPodcastAuthorPreference:
+        state.podcastAuthor = action.updatedValue
+    case let action as PreferencesActions.SetUpdatedPodcastEmailPreference:
+        state.podcastEmail = action.updatedValue
+    case let action as PreferencesActions.SetUpdatedPodcastHostURL:
+        state.podcastHostURL = action.updatedValue
     default:
         break
     }

@@ -28,11 +28,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let decoder = JSONDecoder()
         if let jsonData = try? Data(contentsOf: PersistenceService.getSaveURL()),
-            let state = try? decoder.decode(GlobalAppState.self, from: jsonData) {
+           let state = try? decoder.decode(GlobalAppState.self, from: jsonData)
+        {
+            log.info("Loading state from \(PersistenceService.getSaveURL().path)")
             store = Store<GlobalAppState>(reducer: appStateReducer,
                                           middleware: [logMiddleware],
                                           state: state)
         } else {
+            log.info("Initalising empty state")
             store = Store<GlobalAppState>(reducer: appStateReducer,
                                           middleware: [logMiddleware],
                                           state: GlobalAppState())
@@ -44,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         self.persistence = PersistenceService(store: store)
-        self.metadata = MetadataService(store: store)
+//        self.metadata = MetadataService(store: store)
         self.podcast = PodcastFeedService(store: store)
 
         // MARK: Main View
@@ -77,7 +80,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             fatalError("Invalid app state store")
         }
         if let prefsView = prefsView,
-            prefsView.prefsWindowDelegate.windowIsOpen {
+           prefsView.prefsWindowDelegate.windowIsOpen
+        {
             prefsView.window.makeKeyAndOrderFront(self)
         } else {
             self.prefsView = PrefsView(PrefsViewModel(withStore: store))

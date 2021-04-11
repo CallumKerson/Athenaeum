@@ -12,16 +12,43 @@ class PrefsViewModel: ObservableObject {
         didSet {
             self.store
                 .dispatch(action: PreferencesActions
-                    .UpdateAutoImportPreference(updateValueTo: self.useAutoImport))
+                    .SetUpdatedAutoImportPreference(updatedValue: self.useAutoImport))
             self.objectWillChange.send()
         }
     }
 
     var goodReadsAPIKey: String = "" {
         didSet {
-            store
+            self.store
                 .dispatch(action: PreferencesActions
-                    .UpdateGoodReadsAPIKeyPreference(updateValueTo: goodReadsAPIKey))
+                    .SetUpdatedGoodReadsAPIKeyPreference(updatedValue: self.goodReadsAPIKey))
+            self.objectWillChange.send()
+        }
+    }
+
+    var podcastAuthor: String = "" {
+        didSet {
+            self.store
+                .dispatch(action: PreferencesActions
+                    .SetUpdatedPodcastAuthorPreference(updatedValue: self.podcastAuthor))
+            self.objectWillChange.send()
+        }
+    }
+
+    var podcastEmail: String = "" {
+        didSet {
+            self.store
+                .dispatch(action: PreferencesActions
+                    .SetUpdatedPodcastEmailPreference(updatedValue: self.podcastEmail))
+            self.objectWillChange.send()
+        }
+    }
+
+    var podcastHostURL: String = "" {
+        didSet {
+            self.store
+                .dispatch(action: PreferencesActions
+                    .SetUpdatedPodcastHostURL(updatedValue: self.podcastHostURL))
             self.objectWillChange.send()
         }
     }
@@ -44,6 +71,14 @@ class PrefsViewModel: ObservableObject {
             }
             if self.goodReadsAPIKey != $0.preferencesState.goodReadsAPIKey {
                 self.goodReadsAPIKey = $0.preferencesState.goodReadsAPIKey
+                self.objectWillChange.send()
+            }
+            if self.podcastAuthor != $0.preferencesState.podcastAuthor {
+                self.podcastAuthor = $0.preferencesState.podcastAuthor
+                self.objectWillChange.send()
+            }
+            if self.podcastEmail != $0.preferencesState.podcastEmail {
+                self.podcastEmail = $0.preferencesState.podcastEmail
                 self.objectWillChange.send()
             }
         })
