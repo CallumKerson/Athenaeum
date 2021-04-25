@@ -1,65 +1,61 @@
-# ================================
-# Build image
-# ================================
-FROM swift:5.3-focal as build
+# FROM golang:1.16-alpine AS build_base
 
-# Install OS updates and, if needed, sqlite3
-RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
-    && apt-get -q update \
-    && apt-get -q dist-upgrade -y \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apk add --no-cache git
 
-# Set up a build area
-WORKDIR /build
+# WORKDIR /tmp/library-app
 
-# First just resolve dependencies.
-# This creates a cached layer that can be reused
-# as long as your Package.swift/Package.resolved
-# files do not change.
-COPY ./Package.* ./
-RUN swift package resolve
+# COPY go.mod .
+# COPY go.sum .
 
-# Copy entire repo into container
+# RUN go mod download
+
+# COPY . .
+
+# RUN CGO_ENABLED=0 go test -v
+
+# RUN go build -o ./out/library-app .
+
+# FROM alpine:3.9 
+# RUN apk add ca-certificates
+
+# COPY --from=build_base /tmp/library-app/out/library-app /app/library-app
+
+# EXPOSE 8080
+
+# CMD ["/app/library-app"]
+
+FROM golang:1.16-alpine AS build
+
+WORKDIR /src/
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
 COPY . .
+RUN CGO_ENABLED=0 go test -v
+RUN go build -o /athenaeum/athenaeumserver .
 
-# Build everything, with optimizations and test discovery
-RUN swift build --enable-test-discovery -c release
+FROM alpine
 
-# Switch to the staging area
-WORKDIR /staging
+RUN mkdir /resources
+RUN mkdir /libhome
+RUN mkdir /database
 
-# Copy main executable to staging area
-RUN cp "$(swift build --package-path /build -c release --show-bin-path)/Run" ./
+COPY resources/ /resources/
+COPY --from=build /athenaeum/athenaeumserver /athenaeum/athenaeumserver
 
-# Copy any resouces from the public directory and views directory if the directories exist
-# Ensure that by default, neither the directory nor any of its contents are writable.
-RUN [ -d /build/Public ] && { mv /build/Public ./Public && chmod -R a-w ./Public; } || true
-RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w ./Resources; } || true
+ENV LOG_LEVEL="info"
 
-# ================================
-# Run image
-# ================================
-FROM swift:5.3-focal-slim
+ENV STATIC_DIR="/resources/static/"
+ENV TEMPLATE_DIR="/resources/templates/"
 
-# Make sure all system packages are up to date.
-RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && \
-    apt-get -q update && apt-get -q dist-upgrade -y && rm -r /var/lib/apt/lists/*
+ENV DB_LOCATION="/database/"
+ENV LIBRARY_HOME="/libhome/"
 
-# Create a vapor user and group with /app as its home directory
-RUN useradd --user-group --create-home --system --skel /dev/null --home-dir /app vapor
-
-# Switch to the new home directory
-WORKDIR /app
-
-# Copy built executable and any staged resources from builder
-COPY --from=build --chown=vapor:vapor /staging /app
-
-# Ensure all further commands run as the vapor user
-USER vapor:vapor
-
-# Let Docker bind to port 8080
+ENV ADDRESS=":8080"
 EXPOSE 8080
 
-# Start the Vapor service when the image is run, default to listening on 8080 in production environment
-ENTRYPOINT ["./Run"]
-CMD ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+ENTRYPOINT ["/athenaeum/athenaeumserver"]
+CMD [""]

@@ -7,9 +7,25 @@ import SwiftUI
 
 @main
 struct AthenaeumApp: App {
+    @State private var selectedBookId: String?
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            #if os(macOS)
+                NavigationView {
+                    Sidebar(selectedBookId: $selectedBookId)
+                    BooksListView(
+                        viewModel: BooksListViewModel(genre: .all),
+                        selectedBookId: $selectedBookId
+                    )
+                    Text("Select book...")
+                }
+            #else
+                NavigationView {
+                    TabBar()
+                        .navigationTitle("Books")
+                }.navigationViewStyle(StackNavigationViewStyle())
+            #endif
         }
     }
 }

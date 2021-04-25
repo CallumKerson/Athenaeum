@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{.AuthorName}}</title>
+    <meta charset='utf-8'>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        .author {
+            width: 330px;
+            padding: 20px 40px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+
+        center {
+            margin: 40px 0;
+        }
+
+        h1 {
+            font-size: 18px;
+            line-height: 26px;
+        }
+
+        p {
+            font-size: 12px;
+        }
+
+        li {
+            font-size: 12px;
+        }
+
+        h2 {
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        h4 {
+            font-size: 12px;
+            line-height: 16px;
+        }
+
+        table {
+            font-family: Helvetica, Arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 700px;
+            min-width: 400px;
+            text-align: center;
+        }
+
+        caption {
+            caption-side: bottom;
+            font-weight: bold;
+            font-style: italic;
+            margin: 4px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid gray;
+        }
+
+        th,
+        td {
+            height: 24px;
+            padding: 4px;
+            vertical-align: middle;
+        }
+
+        .rowtitle {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class=".author">
+        <h1>{{.AuthorName}}</h1>
+        <p><a href="/">Go Home</a></p>
+        <p>Feed <a href="/author/{{ .AuthorName}}/feed.rss">here</a></p>
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Release Date</th>
+            </tr>
+            {{ range .Books}}
+            <tr>
+                <td>{{ .Title }}</td>
+                <td>{{ .ReleaseDate }}</td>
+            </tr>
+            {{ end}}
+        </table>
+    </div>
+</body>
+</html>

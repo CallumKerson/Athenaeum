@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        table {
+            font-family: Helvetica, Arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 700px;
+            min-width: 400px;
+            text-align: center;
+        }
+
+        caption {
+            caption-side: bottom;
+            font-weight: bold;
+            font-style: italic;
+            margin: 4px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid gray;
+        }
+
+        th,
+        td {
+            height: 24px;
+            padding: 4px;
+            vertical-align: middle;
+        }
+
+        .rowtitle {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>All Books</h1>
+    <p><a href="/">Go Home</a></p>
+    <p>Feed <a href="/feed.rss">here</a></p>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Release Date</th>
+        </tr>
+        {{ range .BooksData}}
+        <tr>
+            <td>{{ .Title}}</td>
+            <td>{{ .Author }}</td>
+            <td>{{ .ReleaseDate }}</td>
+        </tr>
+        {{ end}}
+    </table>
+</body>
+
+</html>
