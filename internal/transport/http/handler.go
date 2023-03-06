@@ -28,18 +28,19 @@ func NewHandler(service PodcastService, logger loggerrific.Logger) *Handler {
 	handler.Router = mux.NewRouter()
 	handler.mapRoutes()
 
-	handler.Router.Use(JSONMiddleware)
-	handler.Router.Use(TimeoutMiddleware)
+	handler.Use(JSONMiddleware)
+	handler.Use(TimeoutMiddleware)
+	m := NewMiddlewares(logger)
+	handler.Use(m.LoggingMiddleware)
 
 	return handler
 }
 
 func (h *Handler) mapRoutes() {
-	h.Router.HandleFunc("/health", healthCheck)
-	h.Router.HandleFunc("/ready", h.readiness)
+	h.HandleFunc("/health", healthCheck)
+	h.HandleFunc("/ready", h.readiness)
 
-	apiSubrouter := h.Router.PathPrefix("/api/v1").Subrouter()
-
+	apiSubrouter := h.PathPrefix("/podcast").Subrouter()
 	m := NewMiddlewares(h.Log)
 	apiSubrouter.Use(m.LoggingMiddleware)
 }
