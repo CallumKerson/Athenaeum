@@ -24,7 +24,7 @@ ARG BUSYBOX_VERSION=1.31.0-i686-uclibc
 ADD https://busybox.net/downloads/binaries/$BUSYBOX_VERSION/busybox_WGET /bin/wget
 RUN chmod a+x /bin/wget
 
-FROM gcr.io/distroless/static-debian11:debug-nonroot AS production
+FROM gcr.io/distroless/static-debian11:nonroot AS production
 
 WORKDIR /app
 COPY --from=builder /bin/athenaeum /usr/bin/athenaeum
