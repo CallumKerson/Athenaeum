@@ -15,7 +15,6 @@ func NewLogger() *Logger {
 		logrus.New(),
 	}
 	logrusLogger.SetLevel(logrus.InfoLevel)
-
 	return logrusLogger
 }
 

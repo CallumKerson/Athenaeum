@@ -37,7 +37,6 @@ tasks:
       - task: go:fmt
       - task: go:isort
       - task: go:lint
-      - pre-commit run
 
   build:
     desc: "Builds the go project"
