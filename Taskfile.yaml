@@ -1,0 +1,47 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  #unix setup
+  setup:
+    - brew update
+    - brew install go goimports-reviser golangci-lint pre-commit yq
+    - pre-commit install
+
+  #local tasks
+  go:mod-tidy:
+    - go mod tidy
+
+  go:fmt:
+    - gofmt -l -s -w .
+
+  go:lint:
+    - golangci-lint run
+
+  go:isort:
+    - goimports-reviser -rm-unused -company-prefixes github.com/CallumKerson -project-name github.com/CallumKerson/Athenaeum -use-cache  -format ./...
+
+  test:
+    - go test ./...
+
+  compile:
+    desc: "Compiles for the current OS and architecture"
+    cmds:
+      - go build -ldflags "-s -w" -o bin/ ./...
+
+  tidy:
+    desc: "Tidies the go project"
+    cmds:
+      - task: go:mod-tidy
+      - task: go:fmt
+      - task: go:isort
+      - task: go:lint
+      - pre-commit run
+
+  build:
+    desc: "Builds the go project"
+    cmds:
+      - task: tidy
+      - task: test
+      - task: compile
