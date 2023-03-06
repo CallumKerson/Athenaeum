@@ -6,28 +6,31 @@
 import SwiftUI
 
 struct BookCellView: View {
-    @ObservedObject var viewModel: BookCellViewModel
+    var book: Book
 
-    @ViewBuilder
     var body: some View {
-        if viewModel.loading {
-            ProgressView()
-                .onAppear(perform: { viewModel.reload() })
-        } else if let error = viewModel.error {
-            Label(error.description, systemImage: "exclamationmark.triangle")
-        } else if let item = viewModel.book {
-            VStack(alignment: .leading) {
-                Text(item.title)
-                    .font(.headline)
-                    .lineLimit(3)
-                HStack {
-                    Text(item.authorString)
+        VStack(alignment: .leading) {
+            Text(book.title)
+                .font(.headline)
+                .lineLimit(3)
+            HStack {
+                Text(book.authorString)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                if let releaseDate = book.shortReleaseDate {
+                    Spacer()
+                    Text(releaseDate)
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
             }
-
-            .padding(.vertical, 4)
         }
+        .padding(.vertical, 4)
+    }
+}
+
+struct BookCellView_Previews: PreviewProvider {
+    static var previews: some View {
+        BookCellView(book: MockController.book)
     }
 }

@@ -6,8 +6,18 @@
 import Foundation
 
 struct Series: Codable {
-    let entry: Double?
-    let title: String?
+    let entry: Double
+    let title: String
+}
+
+extension Series: CustomStringConvertible {
+    var description: String {
+        if self.entry.truncatingRemainder(dividingBy: 1.0) == 0.0 {
+            return "\(self.title) Book \(Int(self.entry))"
+        } else {
+            return "\(self.title) Book \(self.entry)"
+        }
+    }
 }
 
 struct Person: Codable, Hashable {
@@ -26,8 +36,27 @@ struct Book: Codable, Identifiable {
     let title: String
     let author: [Person]
     let summary: String?
-    let releaseDate: String?
+    let releaseDate: Date?
+    let genre: [Genre]?
     let series: Series?
+
+    init(
+        id: String,
+        title: String,
+        author: [Person],
+        summary: String? = nil,
+        releaseDate: Date? = nil,
+        genre: [Genre]? = nil,
+        series: Series? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.author = author
+        self.summary = summary
+        self.releaseDate = releaseDate
+        self.genre = genre
+        self.series = series
+    }
 }
 
 extension Book {
@@ -43,4 +72,36 @@ extension Book {
             return "\(commaSeparatedAuthorStrings.joined(separator: ", ")) and \(andAuthor)"
         }
     }
+}
+
+extension Book {
+    var shortReleaseDate: String? {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        guard let releaseDate = self.releaseDate else {
+            logger
+                .error(
+                    "Cannot format shortReleaseDate, the releaseDate of book with \(self.id) is nil"
+                )
+            return nil
+        }
+        return formatter.string(from: releaseDate)
+    }
+
+    var mediumReleaseDate: String? {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        guard let releaseDate = self.releaseDate else {
+            logger
+                .error(
+                    "Cannot format mediumReleaseDate, the releaseDate of book with \(self.id) is nil"
+                )
+            return nil
+        }
+        return formatter.string(from: releaseDate)
+    }
+}
+
+struct Books: Codable {
+    var books: [Book]
 }

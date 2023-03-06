@@ -8,30 +8,56 @@ import Foundation
 
 public class BooksListViewModel: ObservableObject {
     var subscriptions: Set<AnyCancellable> = []
-    private let genre: Genre
+    private let genre: Genre?
+    let booksLogicController: BooksLogicController
 
     @Published var loading: Bool = true
     @Published var error: AthenaeumError?
-    @Published var items: [BookCellViewModel] = []
+    @Published var books: Books = .init(books: [])
 
-    init(genre: Genre) {
+    init(booksLogicController: BooksLogicController, genre: Genre?) {
+        self.booksLogicController = booksLogicController
         self.genre = genre
     }
 
     func reload() {
-        Athenaeum
-            .loadItems()
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] value in
-                guard let self = self else { return }
-                if case let .failure(error) = value {
-                    self.error = error
+        if let genre = genre {
+            self.booksLogicController
+                .getBooks(genre: genre)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case let .failure(error):
+                        logger
+                            .error(
+                                "Failed to reload book list for genre \(genre.rawValue): \(error)"
+                            )
+                    case .finished:
+                        self.loading = false
+                    }
+                }) { books in
+                    logger.info("Reloading List of books for genre \(genre.rawValue)")
+                    self.books = books
                 }
-                self.loading = false
-            }, receiveValue: { [weak self] items in
-                guard let self = self else { return }
-                self.items = items
-            })
-            .store(in: &self.subscriptions)
+                .store(in: &self.subscriptions)
+        } else {
+            self.booksLogicController
+                .getBooks()
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case let .failure(error):
+                        logger.error("Failed to reload book list: \(error)")
+                        self.error = error
+                        self.loading = false
+                    case .finished:
+                        self.loading = false
+                    }
+                }) { books in
+                    logger.info("Reloading List of books")
+                    self.books = books
+                }
+                .store(in: &self.subscriptions)
+        }
     }
 }

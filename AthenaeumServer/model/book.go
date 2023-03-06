@@ -15,7 +15,7 @@ type Book struct {
 	Author          []Person      `json:"author"`
 	Summary         string        `json:"summary,omitempty"`
 	ReleaseDateTime time.Time     `json:"releaseDate"`
-	Genre           string        `json:"genre,omitempty"`
+	Genre           []string      `json:"genre,omitempty"`
 	Series          *Series       `json:"series,omitempty"`
 	File            AudiobookFile `json:"file"`
 }

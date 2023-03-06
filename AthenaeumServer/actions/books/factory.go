@@ -119,9 +119,8 @@ func (factory *Factory) UpdateFrom(target model.Book, source model.Book) error {
 	if !source.ReleaseDateTime.IsZero() {
 		target.ReleaseDateTime = source.ReleaseDateTime
 	}
-	if source.Series != nil {
-		target.Series = source.Series
-	}
+
+	target.Series = source.Series
 	return factory.Update(target)
 }
 

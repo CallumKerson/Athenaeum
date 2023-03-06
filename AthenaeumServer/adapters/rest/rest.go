@@ -21,6 +21,7 @@ func New(logger logging.Logger, bookRetriever retriever, bookUpdater updater, sc
 	// setup api endpoints
 	addBooksAPI(router, bookRetriever, bookUpdater, logger)
 	addScannerAPI(router, scan, logger)
+	addGenreAPI(router, bookRetriever, logger)
 	// addPostsAPI(router, postPub, postsRet, logger)
 
 	return router

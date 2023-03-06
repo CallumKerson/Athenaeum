@@ -121,8 +121,37 @@ func (retriever *Retriever) GetAllByAuthor(author string) ([]model.Book, error) 
 	if len(booksByAuthor) < 1 {
 		return booksByAuthor, errors.ResourceNotFound("model.Book", "authors")
 	}
-
 	return booksByAuthor, nil
+}
+
+func (retriever *Retriever) GetAllByGenre(genre string) ([]model.Book, error) {
+	retriever.logger.Debugf("Getting all books with genre %s from Store", genre)
+	allBooks, err := retriever.store.GetAll()
+	var booksWithGenre []model.Book
+	if err != nil {
+		return booksWithGenre, err
+	}
+	for _, book := range allBooks {
+		if stringInSlice(genre, book.Genre) {
+			booksWithGenre = append(booksWithGenre, book)
+		}
+	}
+	return booksWithGenre, nil
+}
+
+func (retriever *Retriever) GetAllGenres() ([]string, error) {
+	retriever.logger.Debugf("Getting all genres Store")
+	allBooks, err := retriever.store.GetAll()
+	genres := []string{}
+	if err != nil {
+		return genres, err
+	}
+	for _, book := range allBooks {
+		if len(book.Genre) <= 0 {
+			genres = append(genres, book.Genre...)
+		}
+	}
+	return removeDuplicateValues(genres), nil
 }
 
 func (retriever *Retriever) GetAllTitles() ([]string, error) {
@@ -162,4 +191,29 @@ func (retriever *Retriever) GetAllHashes() ([][]byte, error) {
 	}
 	retriever.logger.Debugf("Retrieved all file hashes")
 	return hashes, err
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+func removeDuplicateValues(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+
+	// If the key(values of the slice) is not equal
+	// to the already present value in new slice (list)
+	// then we append it. else we jump on another element.
+	for _, entry := range stringSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }

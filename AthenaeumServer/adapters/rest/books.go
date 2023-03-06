@@ -9,12 +9,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type BooksHolder struct {
-	Books []model.Book `json:"books"`
+type booksController struct {
+	logging.Logger
+	retreve retriever
+	upd     updater
 }
 
 func addBooksAPI(router *mux.Router, ret retriever, up updater, logger logging.Logger) {
-	bookController := &bookController{
+	bookController := &booksController{
 		Logger:  logger,
 		retreve: ret,
 		upd:     up,
@@ -27,13 +29,7 @@ func addBooksAPI(router *mux.Router, ret retriever, up updater, logger logging.L
 	router.HandleFunc("/v1/books/", bookController.getAll).Methods(http.MethodGet)
 }
 
-type bookController struct {
-	logging.Logger
-	retreve retriever
-	upd     updater
-}
-
-func (bController *bookController) get(wr http.ResponseWriter, req *http.Request) {
+func (bController *booksController) get(wr http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bookId := vars["id"]
 	bController.Debugf("Getting book with id %s", bookId)
@@ -46,7 +42,7 @@ func (bController *bookController) get(wr http.ResponseWriter, req *http.Request
 	respond(wr, http.StatusOK, book)
 }
 
-func (bController *bookController) update(wr http.ResponseWriter, req *http.Request) {
+func (bController *booksController) update(wr http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bookId := vars["id"]
 	book, err := bController.retreve.Get(bookId)
@@ -80,7 +76,7 @@ func (bController *bookController) update(wr http.ResponseWriter, req *http.Requ
 	respond(wr, http.StatusOK, book)
 }
 
-func (bController *bookController) getByTitle(wr http.ResponseWriter, req *http.Request) {
+func (bController *booksController) getByTitle(wr http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	book, err := bController.retreve.GetByTitle(vars["title"])
 	if err != nil {
@@ -91,7 +87,7 @@ func (bController *bookController) getByTitle(wr http.ResponseWriter, req *http.
 	respond(wr, http.StatusOK, book)
 }
 
-func (bController *bookController) getAll(wr http.ResponseWriter, req *http.Request) {
+func (bController *booksController) getAll(wr http.ResponseWriter, req *http.Request) {
 	allBooks, err := bController.retreve.GetAll()
 	if err != nil {
 		respondErr(wr, err)
@@ -102,14 +98,4 @@ func (bController *bookController) getAll(wr http.ResponseWriter, req *http.Requ
 	})
 	booksData := BooksHolder{Books: allBooks}
 	respond(wr, http.StatusOK, booksData)
-}
-
-type retriever interface {
-	Get(id string) (*model.Book, error)
-	GetByTitle(name string) (*model.Book, error)
-	GetAll() ([]model.Book, error)
-}
-
-type updater interface {
-	UpdateFrom(target model.Book, source model.Book) error
 }

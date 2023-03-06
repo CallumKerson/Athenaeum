@@ -8,6 +8,7 @@ import SwiftUI
 struct BooksListView: View {
     @ObservedObject var viewModel: BooksListViewModel
     @Binding var selectedBookId: String?
+    @State private var searchText = ""
 
     var body: some View {
         #if os(macOS)
@@ -53,15 +54,35 @@ struct BooksListView: View {
         } else if let error = viewModel.error {
             Label(error.description, systemImage: "exclamationmark.triangle")
         } else {
-            List(viewModel.items) { item in
-                NavigationLink(
-                    destination: BookDetailView(viewModel: BookDetailViewModel(id: item.id)),
-                    tag: item.id,
-                    selection: $selectedBookId
-                ) {
-                    BookCellView(viewModel: BookCellViewModel(id: item.id))
+            VStack {
+                SearchBar(text: $searchText)
+                    .padding(.top)
+                List(viewModel.books.books.filter { book in
+                    filterBooks(searchText: searchText, book: book)
+                }) { item in
+                    NavigationLink(
+                        destination: BookDetailView(
+                            viewModel: BookDetailViewModel(booksLogicController: viewModel
+                                .booksLogicController,
+                                id: item.id)
+                        ) {
+                            viewModel.reload()
+                        },
+                        tag: item.id,
+                        selection: $selectedBookId
+                    ) {
+                        BookCellView(book: item)
+                    }
                 }
             }
         }
+    }
+}
+
+func filterBooks(searchText: String, book: Book) -> Bool {
+    if searchText.isEmpty {
+        return true
+    } else {
+        return book.title.contains(searchText) || book.authorString.contains(searchText)
     }
 }
