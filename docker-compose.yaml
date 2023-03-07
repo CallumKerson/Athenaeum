@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  athenaeum:
+    build: .
+    image: "ghcr.io/callumkerson/athenaeum:development"
+    ports:
+      - "8084:8080"
