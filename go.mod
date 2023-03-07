@@ -4,8 +4,10 @@ go 1.20
 
 require (
 	github.com/CallumKerson/loggerrific v1.0.1
-	github.com/CallumKerson/podcasts v0.0.4
+	github.com/CallumKerson/podcasts v0.0.5
+	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
 	github.com/gorilla/mux v1.8.0
+	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2

@@ -38,6 +38,8 @@ func New(logger loggerrific.Logger) (Config, error) {
 	_ = viper.BindEnv("Podcast.Email")
 	_ = viper.BindEnv("Podcast.Copyright")
 
+	viper.RegisterAlias("Podcast.Link", "Host")
+
 	viper.AutomaticEnv()
 
 	pathToConfig := viper.GetString("Config.Path")

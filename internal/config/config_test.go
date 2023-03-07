@@ -53,6 +53,7 @@ Podcast:
 	assert.Equal(t, "Test Audiobooks", config.Podcast.Title)
 	assert.Equal(t, "A Test Audiobook feed", config.Podcast.Description)
 	assert.Equal(t, false, config.Podcast.Explicit)
+	assert.Equal(t, "http://localhost", config.Podcast.Link)
 }
 
 func TestConfig_EnvironmentOverridesFile(t *testing.T) {

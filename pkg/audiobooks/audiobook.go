@@ -4,19 +4,25 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 // Audiobook - representation of a book.
 type Audiobook struct {
-	Path             string       `json:"path"`
-	Title            string       `json:"title"`
-	Authors          []string     `json:"authors"`
-	Description      *Description `json:"description,omitempty"`
-	ReleaseDate      *ReleaseDate `json:"releaseDate,omitempty"`
-	Genres           []Genre      `json:"genres,omitempty"`
-	Series           Series       `json:"series"`
-	AudiobookMediaID string       `json:"audiobookMediaId"`
-	Narrators        []string     `json:"narrators"`
+	Path             string        `json:"path"`
+	Title            string        `json:"title"`
+	Subtitle         string        `json:"subtitle"`
+	Authors          []string      `json:"authors"`
+	Description      *Description  `json:"description,omitempty"`
+	ReleaseDate      *ReleaseDate  `json:"releaseDate,omitempty"`
+	Genres           []Genre       `json:"genres,omitempty"`
+	Series           *Series       `json:"series,omitempty"`
+	AudiobookMediaID string        `json:"audiobookMediaId"`
+	Narrators        []string      `json:"narrators"`
+	Duration         time.Duration `json:"duration"`
+	FileSize         uint64        `json:"fileSize"`
+	MIMEType         string        `json:"mimeType"`
 }
 
 // Person - representation of a person, for example an author or audiobook narrator.
@@ -24,12 +30,12 @@ type Person string
 
 // Series - representation of a series of books.
 type Series struct {
-	Sequence int    `json:"sequence"`
-	Title    string `json:"title"`
+	Sequence decimal.Decimal `json:"sequence"`
+	Title    string          `json:"title"`
 }
 
 func NewBook(title string, description *Description, authors []string, releaseDate *ReleaseDate,
-	genreList []Genre, series Series) Audiobook {
+	genreList []Genre, series *Series) Audiobook {
 	return Audiobook{
 		Title:       title,
 		Authors:     authors,
