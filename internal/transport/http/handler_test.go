@@ -12,7 +12,11 @@ import (
 	"github.com/CallumKerson/loggerrific/tlogger"
 )
 
-func TestViewIndex(t *testing.T) {
+const (
+	testFeed = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\"></rss>"
+)
+
+func TestHandler(t *testing.T) {
 	testHandler := NewHandler(&DummyService{}, tlogger.NewTLogger(t))
 
 	testServer := httptest.NewServer(testHandler)
@@ -27,12 +31,15 @@ func TestViewIndex(t *testing.T) {
 	}
 
 	tests := []struct {
-		name             string
-		r                *http.Request
-		expectedResponse string
+		name                string
+		r                   *http.Request
+		expectedStatus      int
+		expectedContentType string
+		expectedBody        string
 	}{
-		{name: "health check", r: newReq("GET", testServer.URL+"/health", nil), expectedResponse: "{\n  \"health\": \"ok\"\n}\n"},
-		{name: "readiness check", r: newReq("GET", testServer.URL+"/ready", nil), expectedResponse: "{\n  \"readiness\": \"ok\"\n}\n"},
+		{name: "health check", r: newReq("GET", testServer.URL+"/health", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}\n"},
+		{name: "readiness check", r: newReq("GET", testServer.URL+"/ready", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}\n"},
+		{name: "feed", r: newReq("GET", testServer.URL+"/podcast/feed.rss", nil), expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: testFeed},
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -41,12 +48,18 @@ func TestViewIndex(t *testing.T) {
 			defer resp.Body.Close()
 			b, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err)
-			assert.Equal(t, testCase.expectedResponse, string(b))
+			assert.Equal(t, testCase.expectedStatus, resp.StatusCode)
+			assert.Equal(t, testCase.expectedContentType, resp.Header.Get(ContentTypeHeader))
+			assert.Equal(t, testCase.expectedBody, string(b))
 		})
 	}
 }
 
 type DummyService struct {
+}
+
+func (s *DummyService) GetFeed(ctx context.Context) (string, error) {
+	return testFeed, nil
 }
 
 func (s *DummyService) IsReady(ctx context.Context) (bool, error) {

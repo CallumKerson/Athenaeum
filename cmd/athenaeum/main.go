@@ -11,6 +11,7 @@ import (
 	"github.com/CallumKerson/loggerrific"
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
+	"github.com/CallumKerson/Athenaeum/internal/podcasts"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
 
@@ -26,7 +27,16 @@ func (s *DummyService) IsReady(ctx context.Context) (bool, error) {
 }
 
 func Run(port int, logger loggerrific.Logger) error {
-	podcastService := &DummyService{}
+	opts := &podcasts.FeedOpts{
+		Title:       "Audiobooks",
+		Description: "Like movies for your mind!",
+		Explicit:    true,
+		Language:    "EN",
+		Author:      "A Person",
+		Email:       "person@domain.test",
+		Copyright:   "None",
+	}
+	podcastService := podcasts.NewService(opts, logger)
 	httpHandler := transportHttp.NewHandler(podcastService, logger)
 
 	logger.Debugln("Setting up Server")
