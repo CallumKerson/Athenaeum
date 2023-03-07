@@ -61,13 +61,16 @@ func (s *Service) GetFeed(ctx context.Context) (string, error) {
 		},
 	})
 
-	feed, err := pod.Feed(
-		podcasts.Author(s.Cfg.Author),
-		podcasts.Block,
-		podcasts.Owner(s.Cfg.Author, s.Cfg.Email),
-	)
+	feed, err := pod.Feed(podcasts.Block)
 	if err != nil {
 		return "", nil
+	}
+
+	if s.Cfg.Author != "" {
+		err = feed.SetOptions(podcasts.Author(s.Cfg.Author), podcasts.Owner(s.Cfg.Author, s.Cfg.Email))
+		if err != nil {
+			return "", nil
+		}
 	}
 
 	if s.Cfg.Explicit {
