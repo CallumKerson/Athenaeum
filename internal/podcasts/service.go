@@ -1,9 +1,11 @@
 package podcasts
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/gomarkdown/markdown"
@@ -27,20 +29,15 @@ type Service struct {
 
 var errNoConfig = errors.New("no config")
 
-func (s *Service) GetFeed(ctx context.Context) (string, error) {
+func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobooks.Audiobook, writer io.Writer) error {
 	if s.Cfg == nil {
-		return "", errNoConfig
+		return errNoConfig
 	}
 	pod := &podcasts.Podcast{
 		Title:       s.Cfg.Title,
 		Description: s.Cfg.Description,
 		Language:    s.Cfg.Language,
 		Link:        s.Cfg.Link,
-	}
-
-	books, err := s.GetAllAudiobooks(ctx)
-	if err != nil {
-		return "", nil
 	}
 
 	for bookIndex := range books {
@@ -63,24 +60,39 @@ func (s *Service) GetFeed(ctx context.Context) (string, error) {
 
 	feed, err := pod.Feed(podcasts.Block)
 	if err != nil {
-		return "", nil
+		return err
 	}
 
 	if s.Cfg.Author != "" {
 		err = feed.SetOptions(podcasts.Author(s.Cfg.Author), podcasts.Owner(s.Cfg.Author, s.Cfg.Email))
 		if err != nil {
-			return "", nil
+			return err
 		}
 	}
 
 	if s.Cfg.Explicit {
 		err = feed.SetOptions(podcasts.Explicit)
 		if err != nil {
-			return "", nil
+			return err
 		}
 	}
+	return feed.Write(writer)
+}
 
-	return feed.XML()
+func (s *Service) WriteFeed(ctx context.Context, writer io.Writer) error {
+	books, err := s.GetAllAudiobooks(ctx)
+	if err != nil {
+		return err
+	}
+	return s.WriteFeedFromAudiobooks(ctx, books, writer)
+}
+
+func (s *Service) GetFeed(ctx context.Context) (string, error) {
+	var buf bytes.Buffer
+	if err := s.WriteFeed(ctx, &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 func (s *Service) IsReady(ctx context.Context) (bool, error) {

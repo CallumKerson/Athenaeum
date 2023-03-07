@@ -1,6 +1,7 @@
 package config
 
 import (
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -13,15 +14,33 @@ import (
 
 type Config struct {
 	Host    string
-	Podcast podcasts.FeedOpts
+	Media   Media
+	Podcast Podcast
 }
 
-func New(logger loggerrific.Logger) (Config, error) {
-	viper.SetDefault("Podcast.Title", "Audiobooks")
-	viper.SetDefault("Podcast.Description", "Like movies for your mind!")
-	viper.SetDefault("Podcast.Copyright", "None")
-	viper.SetDefault("Podcast.Explicit", true)
-	viper.SetDefault("Podcast.Language", "EN")
+type Media struct {
+	Root     string
+	HostPath string
+}
+
+type Podcast struct {
+	Root string
+	Opts podcasts.FeedOpts
+}
+
+func (c *Config) GetMediaHost() string {
+	return path.Join(c.Host, c.Media.HostPath)
+}
+
+func New(logger loggerrific.Logger) (*Config, error) {
+	viper.SetDefault("Podcast.Opts.Title", "Audiobooks")
+	viper.SetDefault("Podcast.Opts.Description", "Like movies for your mind!")
+	viper.SetDefault("Podcast.Opts.Copyright", "None")
+	viper.SetDefault("Podcast.Opts.Explicit", true)
+	viper.SetDefault("Podcast.Opts.Language", "EN")
+	viper.SetDefault("Podcast.Root", "/srv/podcasts")
+	viper.SetDefault("Media.HostPath", "media")
+	viper.SetDefault("Media.Root", "/srv/media")
 
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
@@ -29,16 +48,17 @@ func New(logger loggerrific.Logger) (Config, error) {
 	_ = viper.BindEnv("Config.Path")
 
 	_ = viper.BindEnv("Host")
+	_ = viper.BindEnv("Media.Root")
 
-	_ = viper.BindEnv("Podcast.Title")
-	_ = viper.BindEnv("Podcast.Description")
-	_ = viper.BindEnv("Podcast.Explicit")
-	_ = viper.BindEnv("Podcast.Language")
-	_ = viper.BindEnv("Podcast.Author")
-	_ = viper.BindEnv("Podcast.Email")
-	_ = viper.BindEnv("Podcast.Copyright")
+	_ = viper.BindEnv("Podcast.Opts.Title")
+	_ = viper.BindEnv("Podcast.Opts.Description")
+	_ = viper.BindEnv("Podcast.Opts.Explicit")
+	_ = viper.BindEnv("Podcast.Opts.Language")
+	_ = viper.BindEnv("Podcast.Opts.Author")
+	_ = viper.BindEnv("Podcast.Opts.Email")
+	_ = viper.BindEnv("Podcast.Opts.Copyright")
 
-	viper.RegisterAlias("Podcast.Link", "Host")
+	viper.RegisterAlias("Podcast.Opts.Link", "Host")
 
 	viper.AutomaticEnv()
 
@@ -52,11 +72,11 @@ func New(logger loggerrific.Logger) (Config, error) {
 		err := viper.ReadInConfig()
 		if err != nil {
 			logger.WithError(err).Errorln("Cannot read config from file")
-			return Config{}, err
+			return nil, err
 		}
 	}
 
 	var cfg Config
 	err := viper.Unmarshal(&cfg)
-	return cfg, err
+	return &cfg, err
 }

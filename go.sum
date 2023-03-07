@@ -40,8 +40,6 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/CallumKerson/loggerrific v1.0.1 h1:ooe171INnDGUku/7eXe2aX6xJmCNHSLsyZexNJvrTH0=
 github.com/CallumKerson/loggerrific v1.0.1/go.mod h1:jJg0jUNE6bIEqSOuPuNG+YBZVCsTOb80/7x18bz7Sqk=
-github.com/CallumKerson/podcasts v0.0.4 h1:dpyeNHMflXypigzbGPt0oYCPKo5IGV8JRoOZzwMCVCM=
-github.com/CallumKerson/podcasts v0.0.4/go.mod h1:SGDAg6H7VevfPLGtEQ2y5HvA+5h2rJKiCkh+ygGeRhc=
 github.com/CallumKerson/podcasts v0.0.5 h1:Pjt2IIUQIwPbRvaS2OmxWKi2wVF1LrHiOUy55dMzO08=
 github.com/CallumKerson/podcasts v0.0.5/go.mod h1:SGDAg6H7VevfPLGtEQ2y5HvA+5h2rJKiCkh+ygGeRhc=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

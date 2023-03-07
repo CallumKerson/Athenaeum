@@ -14,7 +14,8 @@ import (
 func TestConfig_FromEnvironment(t *testing.T) {
 	// given
 	envVarCleanup := envVarSetter(t, map[string]string{
-		"ATHENAEUM_HOST": "http://localhost",
+		"ATHENAEUM_HOST":       "http://localhost",
+		"ATHENAEUM_MEDIA_ROOT": "/mount/audiobooks",
 	})
 	t.Cleanup(envVarCleanup)
 
@@ -24,6 +25,7 @@ func TestConfig_FromEnvironment(t *testing.T) {
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, "http://localhost", config.Host)
+	assert.Equal(t, "/mount/audiobooks", config.Media.Root)
 }
 
 func TestConfig_FromFile(t *testing.T) {
@@ -37,9 +39,10 @@ func TestConfig_FromFile(t *testing.T) {
 	configYAML := `---
 Host: "http://localhost"
 Podcast:
-  Title: "Test Audiobooks"
-  Description: "A Test Audiobook feed"
-  Explicit: False
+  Opts:
+    Title: "Test Audiobooks"
+    Description: "A Test Audiobook feed"
+    Explicit: False
 `
 	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
 	assert.NoError(t, err)
@@ -50,10 +53,10 @@ Podcast:
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, "http://localhost", config.Host)
-	assert.Equal(t, "Test Audiobooks", config.Podcast.Title)
-	assert.Equal(t, "A Test Audiobook feed", config.Podcast.Description)
-	assert.Equal(t, false, config.Podcast.Explicit)
-	assert.Equal(t, "http://localhost", config.Podcast.Link)
+	assert.Equal(t, "Test Audiobooks", config.Podcast.Opts.Title)
+	assert.Equal(t, "A Test Audiobook feed", config.Podcast.Opts.Description)
+	assert.Equal(t, false, config.Podcast.Opts.Explicit)
+	assert.Equal(t, "http://localhost", config.Podcast.Opts.Link)
 }
 
 func TestConfig_EnvironmentOverridesFile(t *testing.T) {
@@ -85,11 +88,11 @@ func TestConfig_DefaultsOnly(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, "Audiobooks", config.Podcast.Title)
-	assert.Equal(t, "Like movies for your mind!", config.Podcast.Description)
-	assert.Equal(t, "None", config.Podcast.Copyright)
-	assert.Equal(t, true, config.Podcast.Explicit)
-	assert.Equal(t, "EN", config.Podcast.Language)
+	assert.Equal(t, "Audiobooks", config.Podcast.Opts.Title)
+	assert.Equal(t, "Like movies for your mind!", config.Podcast.Opts.Description)
+	assert.Equal(t, "None", config.Podcast.Opts.Copyright)
+	assert.Equal(t, true, config.Podcast.Opts.Explicit)
+	assert.Equal(t, "EN", config.Podcast.Opts.Language)
 }
 
 func TestConfig_BadFile(t *testing.T) {

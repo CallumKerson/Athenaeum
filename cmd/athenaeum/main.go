@@ -20,7 +20,7 @@ func Run(port int, logger loggerrific.Logger) error {
 	if err != nil {
 		return err
 	}
-	podcastService := podcasts.NewService("", &cfg.Podcast, nil, logger)
+	podcastService := podcasts.NewService(cfg.GetMediaHost(), &cfg.Podcast.Opts, nil, logger)
 	httpHandler := transportHttp.NewHandler(podcastService, logger)
 
 	return Serve(httpHandler, port, logger)
