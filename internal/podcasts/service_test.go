@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/CallumKerson/loggerrific/tlogger"
@@ -36,6 +37,7 @@ func (c *testAudiobookClient) GetAllAudiobooks(ctx context.Context) ([]audiobook
 			ReleaseDate: aWizardOfEarthseaReleaseDate,
 			Genres:      []audiobooks.Genre{audiobooks.Childrens, audiobooks.Fantasy},
 			Description: &audiobooks.Description{Text: "<p>Ged, the greatest sorcerer in all Earthsea, was called Sparrowhawk in his reckless youth.</p><p>Hungry for power and knowledge, Sparrowhawk tampered with long-held secrets and loosed a terrible shadow upon the world. This is the tale of his testing, how he mastered the mighty words of power, tamed an ancient dragon, and crossed death's threshold to restore the balance.</p>", Format: audiobooks.HTML},
+			Series:      &audiobooks.Series{Sequence: decimal.NewFromInt(1), Title: "Earthsea"},
 		},
 		{
 			Title:       "This Is How You Lose the Time War",

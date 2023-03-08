@@ -118,6 +118,10 @@ func getHTMLSummary(book *audiobooks.Audiobook) string {
 	if book.Series != nil {
 		_, _ = builder.WriteString(fmt.Sprintf("<h4>%s Book %v</h4>", book.Series.Title, book.Series.Sequence))
 	}
+	if book.GetNarrator() != "" {
+		_, _ = builder.WriteString(fmt.Sprintf("<h4>Narrated by %s</h4>", book.GetNarrator()))
+	}
+
 	if book.Description != nil {
 		switch book.Description.Format {
 		case audiobooks.HTML:
