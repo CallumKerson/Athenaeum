@@ -1,6 +1,5 @@
 FROM golang:1.20-alpine as base
 RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.50.1
-RUN apk add --no-cache upx
 
 FROM base as dependencies
 WORKDIR /app
