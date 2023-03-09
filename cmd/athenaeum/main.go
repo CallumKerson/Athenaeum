@@ -6,7 +6,6 @@ import (
 	"github.com/CallumKerson/loggerrific"
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
-	"github.com/CallumKerson/Athenaeum/internal/config"
 	"github.com/CallumKerson/Athenaeum/internal/podcasts"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
@@ -16,7 +15,7 @@ const (
 )
 
 func Run(port int, logger loggerrific.Logger) error {
-	cfg, err := config.New(logger)
+	cfg, err := NewConfig(port, logger)
 	if err != nil {
 		return err
 	}
