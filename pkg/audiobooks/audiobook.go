@@ -5,24 +5,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pelletier/go-toml/v2"
 	"github.com/shopspring/decimal"
+
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
 )
 
 // Audiobook - representation of a book.
 type Audiobook struct {
-	Path             string        `json:"path"`
-	Title            string        `json:"title"`
-	Subtitle         string        `json:"subtitle"`
-	Authors          []string      `json:"authors"`
-	Description      *Description  `json:"description,omitempty"`
-	ReleaseDate      *ReleaseDate  `json:"releaseDate,omitempty"`
-	Genres           []Genre       `json:"genres,omitempty"`
-	Series           *Series       `json:"series,omitempty"`
-	AudiobookMediaID string        `json:"audiobookMediaId"`
-	Narrators        []string      `json:"narrators"`
-	Duration         time.Duration `json:"duration"`
-	FileSize         uint64        `json:"fileSize"`
-	MIMEType         string        `json:"mimeType"`
+	Path        string                   `json:"path" toml:",omitempty"`
+	Title       string                   `json:"title"`
+	Subtitle    string                   `json:"subtitle" toml:",omitempty"`
+	Authors     []string                 `json:"authors"`
+	Description *description.Description `json:"description,omitempty" toml:",omitempty"`
+	ReleaseDate *toml.LocalDate          `json:"releaseDate,omitempty" toml:",omitempty"`
+	Genres      []Genre                  `json:"genres,omitempty" toml:",omitempty"`
+	Series      *Series                  `json:"series,omitempty" toml:",omitempty"`
+	Narrators   []string                 `json:"narrators" toml:",omitempty"`
+	Duration    time.Duration            `json:"duration" toml:",omitempty"`
+	FileSize    uint64                   `json:"fileSize" toml:",omitempty"`
+	MIMEType    string                   `json:"mimeType" toml:",omitempty"`
 }
 
 // Person - representation of a person, for example an author or audiobook narrator.
@@ -34,22 +36,16 @@ type Series struct {
 	Title    string          `json:"title"`
 }
 
-func NewBook(title string, description *Description, authors []string, releaseDate *ReleaseDate,
+func NewBook(title string, desc *description.Description, authors []string, releaseDate *toml.LocalDate,
 	genreList []Genre, series *Series) Audiobook {
 	return Audiobook{
 		Title:       title,
 		Authors:     authors,
-		Description: description,
+		Description: desc,
 		ReleaseDate: releaseDate,
 		Genres:      genreList,
 		Series:      series,
 	}
-}
-
-// Description - representation of a blurb of a book.
-type Description struct {
-	Text   string `json:"text"`
-	Format Format `json:"format,omitempty"`
 }
 
 func (b *Audiobook) GetAuthor() string {
@@ -69,46 +65,4 @@ func GetPersonsString(persons []string) string {
 	default:
 		return fmt.Sprintf("%s & %s", strings.Join(persons[:len(persons)-1], ", "), persons[len(persons)-1])
 	}
-}
-
-type ReleaseDate struct {
-	time.Time
-}
-
-const releaseDateLayout = "2006-01-02"
-
-func NewReleaseDate(date string) (*ReleaseDate, error) {
-	layout := "2006-01-02"
-
-	dateTime, err := time.Parse(layout, date)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ReleaseDate{Time: dateTime}, nil
-}
-
-func (d *ReleaseDate) UnmarshalJSON(b []byte) (err error) {
-	str := strings.Trim(string(b), "\"")
-	if str == "null" {
-		d.Time = time.Time{}
-		return
-	}
-
-	d.Time, err = time.Parse(releaseDateLayout, str)
-	return
-}
-
-func (d *ReleaseDate) MarshalJSON() ([]byte, error) {
-	if d.Time.UnixNano() == nilTime {
-		return []byte("null"), nil
-	}
-
-	return []byte(fmt.Sprintf("%q", d.Time.Format(releaseDateLayout))), nil
-}
-
-var nilTime = (time.Time{}).UnixNano()
-
-func (d *ReleaseDate) IsSet() bool {
-	return d.UnixNano() != nilTime
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/gomarkdown/markdown"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/CallumKerson/podcasts"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
 )
 
 type AudiobooksClient interface {
@@ -45,7 +47,7 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 		pod.AddItem(&podcasts.Item{
 			Title:       books[bookIndex].Title,
 			Description: &podcasts.CDATAText{Value: fmt.Sprintf("%s by %s", books[bookIndex].Title, books[bookIndex].GetAuthor())},
-			PubDate:     podcasts.NewPubDate(books[bookIndex].ReleaseDate.Time),
+			PubDate:     podcasts.NewPubDate(books[bookIndex].ReleaseDate.AsTime(time.UTC).Add(8 * time.Hour)),
 			Duration:    podcasts.NewDuration(books[bookIndex].Duration),
 			GUID:        hostedFile,
 			Enclosure: &podcasts.Enclosure{
@@ -124,12 +126,12 @@ func getHTMLSummary(book *audiobooks.Audiobook) string {
 
 	if book.Description != nil {
 		switch book.Description.Format {
-		case audiobooks.HTML:
+		case description.HTML:
 			_, _ = builder.WriteString(book.Description.Text)
-		case audiobooks.Markdown:
+		case description.Markdown:
 			md := []byte(book.Description.Text)
 			_, _ = builder.WriteString(string(markdown.ToHTML(md, nil, nil)))
-		case audiobooks.Plain, audiobooks.Undefined:
+		case description.Plain, description.Undefined:
 			lines := strings.Split(book.Description.Text, "\n")
 			for _, line := range lines {
 				_, _ = builder.WriteString(fmt.Sprintf("<p>%s</p>", line))

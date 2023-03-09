@@ -1,7 +1,6 @@
-package audiobooks
+package description
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -49,23 +48,13 @@ func ParseFormat(s string) (Format, error) {
 	return Format(value), nil
 }
 
-// MarshalJSON allows compatibility with marshalling JSON.
-func (g Format) MarshalJSON() ([]byte, error) {
-	return json.Marshal(g.String())
+func (g Format) MarshalText() ([]byte, error) {
+	return []byte(g.String()), nil
 }
 
-// UnmarshalJSON allows compatibility with unmarshalling JSON.
-func (g *Format) UnmarshalJSON(data []byte) (err error) {
-	var textFormat string
-
-	err = json.Unmarshal(data, &textFormat)
-	if err != nil {
+func (g *Format) UnmarshalText(data []byte) (err error) {
+	if *g, err = ParseFormat(string(data)); err != nil {
 		return err
 	}
-
-	if *g, err = ParseFormat(textFormat); err != nil {
-		return err
-	}
-
 	return nil
 }

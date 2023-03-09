@@ -1,7 +1,6 @@
 package audiobooks
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -71,23 +70,13 @@ func ParseGenre(s string) (Genre, error) {
 	return Genre(value), nil
 }
 
-// MarshalJSON allows compatibility with marshalling JSON.
-func (g Genre) MarshalJSON() ([]byte, error) {
-	return json.Marshal(g.String())
+func (g Genre) MarshalText() ([]byte, error) {
+	return []byte(g.String()), nil
 }
 
-// UnmarshalJSON allows compatibility with unmarshalling JSON.
-func (g *Genre) UnmarshalJSON(data []byte) (err error) {
-	var genre string
-
-	err = json.Unmarshal(data, &genre)
-	if err != nil {
+func (g *Genre) UnmarshalText(data []byte) (err error) {
+	if *g, err = ParseGenre(string(data)); err != nil {
 		return err
 	}
-
-	if *g, err = ParseGenre(genre); err != nil {
-		return err
-	}
-
 	return nil
 }
