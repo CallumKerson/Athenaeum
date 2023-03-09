@@ -11,7 +11,7 @@ RUN go mod download
 FROM dependencies as src
 COPY cmd/ ./cmd
 COPY internal/ ./internal
-# COPY pkg/ ./pkg
+COPY pkg/ ./pkg
 
 FROM src as test
 RUN CGO_ENABLED=0 GOOS=linux go test -v ./...
