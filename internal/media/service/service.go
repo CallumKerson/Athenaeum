@@ -1,13 +1,17 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/abema/go-mp4"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/sunfish-shogi/bufseekio"
 
 	"github.com/CallumKerson/loggerrific"
 
@@ -31,25 +35,27 @@ func (s *Service) GetAudiobooks() ([]audiobooks.Audiobook, error) {
 		}
 
 		if filepath.Ext(d.Name()) == ".toml" {
-			hasM4BFile, m4bPathWithoutRoot, m4bSize := s.parseM4BInfo(path)
-			if !hasM4BFile {
+			bookInfo := &audiobooks.Audiobook{}
+
+			err := s.parseM4BInfo(path, bookInfo)
+			if errors.Is(err, os.ErrNotExist) {
 				s.logger.Warnln("Found audiobook config file", path, "without matching .m4b file")
 				return nil
+			} else if err != nil {
+				s.logger.WithError(err).Warnln("Problem with M4B file", getM4BPathFromTOMLPath(path))
 			}
 			s.logger.Infoln("Found audiobook config file", path)
-			bookInfo := &audiobooks.Audiobook{}
 			file, err := os.Open(path)
 			if err != nil {
-				return err
+				s.logger.WithError(err).Warnln("Problem with TOML file", path)
+				return nil
 			}
 			defer file.Close()
 			err = toml.NewDecoder(file).Decode(bookInfo)
 			if err != nil {
-				return err
+				s.logger.WithError(err).Warnln("Problem with TOML file", path)
+				return nil
 			}
-			bookInfo.Path = m4bPathWithoutRoot
-			bookInfo.FileSize = uint64(m4bSize)
-			bookInfo.MIMEType = "audio/mp4a-latm"
 			books = append(books, *bookInfo)
 		}
 		return nil
@@ -57,23 +63,27 @@ func (s *Service) GetAudiobooks() ([]audiobooks.Audiobook, error) {
 	return books, err
 }
 
-// func hasMatchingM4BFile(path string) bool {
-// 	expectedAudiobookPath := fmt.Sprintf("%s.m4b", strings.TrimSuffix(path, filepath.Ext(".toml")))
-// 	if _, err := os.Stat(expectedAudiobookPath); errors.Is(err, os.ErrNotExist) {
-// 		return false
-// 	}
-// 	return true
-// }
-
-func (s *Service) getM4BPath(path string) string {
-	return strings.TrimPrefix(path, s.mediaRoot)
-}
-
-func (s *Service) parseM4BInfo(tomlPath string) (exists bool, pathWithoutRoot string, size int64) {
-	expectedAudiobookPath := fmt.Sprintf("%s.m4b", strings.TrimSuffix(tomlPath, filepath.Ext(".toml")))
+func (s *Service) parseM4BInfo(tomlPath string, audiobook *audiobooks.Audiobook) (err error) {
+	expectedAudiobookPath := getM4BPathFromTOMLPath(tomlPath)
 	fInfo, err := os.Stat(expectedAudiobookPath)
 	if err != nil {
-		return false, "", 0
+		return err
 	}
-	return true, s.getM4BPath(expectedAudiobookPath), fInfo.Size()
+	file, err := os.Open(expectedAudiobookPath)
+	if err != nil {
+		return err
+	}
+	info, err := mp4.Probe(bufseekio.NewReadSeeker(file, 1024, 4))
+	if err != nil {
+		return err
+	}
+	audiobook.Path = strings.TrimPrefix(expectedAudiobookPath, s.mediaRoot)
+	audiobook.FileSize = uint64(fInfo.Size())
+	audiobook.Duration = time.Duration((float32(info.Duration) / float32(info.Timescale)) * float32(time.Second))
+	audiobook.MIMEType = "audio/mp4a-latm"
+	return nil
+}
+
+func getM4BPathFromTOMLPath(tomlPath string) string {
+	return fmt.Sprintf("%s.m4b", strings.TrimSuffix(tomlPath, filepath.Ext(".toml")))
 }

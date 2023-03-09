@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/shopspring/decimal"
@@ -27,6 +28,7 @@ func (c *testAudiobookClient) GetAllAudiobooks(ctx context.Context) ([]audiobook
 			Narrators:   []string{"Kobna Holdbrook-Smith"},
 			Path:        "/a-wizard-of-earthsea.m4b",
 			FileSize:    200061260,
+			Duration:    (7 * time.Hour) + (5 * time.Second),
 			MIMEType:    "audio/mp4a-latm",
 			ReleaseDate: &toml.LocalDate{Year: 1968, Month: 11, Day: 1},
 			Genres:      []audiobooks.Genre{audiobooks.Childrens, audiobooks.Fantasy},
@@ -39,6 +41,7 @@ func (c *testAudiobookClient) GetAllAudiobooks(ctx context.Context) ([]audiobook
 			Narrators:   []string{"Cynthia Farrell", "Emily Woo Zeller"},
 			Path:        "/this-is-how-you-lose-the-time-war.m4b",
 			FileSize:    243930066,
+			Duration:    (4 * time.Hour) + (16 * time.Minute) + (7 * time.Second),
 			MIMEType:    "audio/mp4a-latm",
 			ReleaseDate: &toml.LocalDate{Year: 2019, Month: 07, Day: 16},
 			Genres:      []audiobooks.Genre{audiobooks.SciFi},
