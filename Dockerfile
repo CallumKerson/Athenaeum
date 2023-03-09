@@ -1,5 +1,6 @@
 FROM golang:1.20-alpine as base
-RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.50.1
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | /bin/ash -s v1.50.1
 
 FROM base as dependencies
 WORKDIR /app

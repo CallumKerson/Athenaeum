@@ -6,7 +6,7 @@ tasks:
   #unix setup
   setup:
     - brew update
-    - brew install go goimports-reviser golangci-lint pre-commit yq
+    - brew install go goimports-reviser golangci-lint pre-commit yq hadolint
     - pre-commit install
 
   #local tasks
@@ -36,7 +36,7 @@ tasks:
       - task: go:mod-tidy
       - task: go:fmt
       - task: go:isort
-      - task: go:lint
+      - pre-commit run -a
 
   build:
     desc: "Builds the go project"

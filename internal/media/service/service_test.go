@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -46,7 +47,7 @@ var (
 func TestService_GetAudiobooks(t *testing.T) {
 	svc := New("testdata", tlogger.NewTLogger(t))
 
-	books, err := svc.GetAudiobooks()
+	books, err := svc.GetAllAudiobooks(context.TODO())
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, expectedAudiobooks, books)
 }

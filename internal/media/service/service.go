@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -27,7 +28,7 @@ func New(pathToMediaRoot string, logger loggerrific.Logger) *Service {
 	return &Service{mediaRoot: pathToMediaRoot, logger: logger}
 }
 
-func (s *Service) GetAudiobooks() ([]audiobooks.Audiobook, error) {
+func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	var books []audiobooks.Audiobook
 	err := filepath.WalkDir(s.mediaRoot, func(path string, d fs.DirEntry, e error) error {
 		if e != nil {

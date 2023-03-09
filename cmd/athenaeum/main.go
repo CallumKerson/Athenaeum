@@ -6,6 +6,7 @@ import (
 	"github.com/CallumKerson/loggerrific"
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
+	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	"github.com/CallumKerson/Athenaeum/internal/podcasts"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
@@ -19,7 +20,8 @@ func Run(port int, logger loggerrific.Logger) error {
 	if err != nil {
 		return err
 	}
-	podcastService := podcasts.NewService(cfg.GetMediaHost(), &cfg.Podcast.Opts, nil, logger)
+	mediaSvc := mediaService.New(cfg.Media.Root, logger)
+	podcastService := podcasts.NewService(cfg.GetMediaHost(), &cfg.Podcast.Opts, mediaSvc, logger)
 	httpHandler := transportHttp.NewHandler(podcastService, logger)
 
 	return Serve(httpHandler, port, logger)
