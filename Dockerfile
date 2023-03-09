@@ -18,7 +18,6 @@ RUN CGO_ENABLED=0 GOOS=linux go test -v ./...
 
 FROM test as builder
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o /bin/ ./...
-RUN find /bin -maxdepth 1  -type f -exec sh -c 'upx '{}'' \;
 
 FROM gcr.io/distroless/static-debian11:nonroot AS production
 
