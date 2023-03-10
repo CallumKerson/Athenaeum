@@ -1,12 +1,12 @@
 FROM golang:1.20-alpine as base
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | /bin/ash -s v1.50.1
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.50.1
 
 FROM base as dependencies
 WORKDIR /app
 COPY go.mod ./
 COPY go.sum ./
-RUN go mod download
+RUN CGO_ENABLED=0 go mod download
 
 FROM dependencies as src
 COPY cmd/ ./cmd
