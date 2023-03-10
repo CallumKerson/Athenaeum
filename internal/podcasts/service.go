@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 	"time"
 
@@ -43,15 +44,19 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 	}
 
 	for bookIndex := range books {
-		hostedFile := fmt.Sprintf("%s%s", s.HostPrefix, books[bookIndex].Path)
+		hostedFile, err := url.Parse(fmt.Sprintf("%s%s", s.HostPrefix, books[bookIndex].Path))
+		if err != nil {
+			return err
+		}
+
 		pod.AddItem(&podcasts.Item{
 			Title:       books[bookIndex].Title,
 			Description: &podcasts.CDATAText{Value: fmt.Sprintf("%s by %s", books[bookIndex].Title, books[bookIndex].GetAuthor())},
 			PubDate:     podcasts.NewPubDate(books[bookIndex].ReleaseDate.AsTime(time.UTC).Add(8 * time.Hour)),
 			Duration:    podcasts.NewDuration(books[bookIndex].Duration),
-			GUID:        hostedFile,
+			GUID:        hostedFile.String(),
 			Enclosure: &podcasts.Enclosure{
-				URL:    hostedFile,
+				URL:    hostedFile.String(),
 				Length: fmt.Sprintf("%d", books[bookIndex].FileSize),
 				Type:   books[bookIndex].MIMEType,
 			},
