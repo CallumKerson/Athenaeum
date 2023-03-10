@@ -45,7 +45,7 @@ var (
 )
 
 func TestService_GetAudiobooks(t *testing.T) {
-	svc := New("testdata", tlogger.NewTLogger(t))
+	svc := New(tlogger.NewTLogger(t), WithPathToMediaRoot("testdata"))
 
 	books, err := svc.GetAllAudiobooks(context.TODO())
 	assert.NoError(t, err)

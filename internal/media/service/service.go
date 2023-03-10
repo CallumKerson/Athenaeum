@@ -24,12 +24,17 @@ type Service struct {
 	logger    loggerrific.Logger
 }
 
-func New(pathToMediaRoot string, logger loggerrific.Logger) *Service {
-	return &Service{mediaRoot: pathToMediaRoot, logger: logger}
+func New(logger loggerrific.Logger, opts ...Option) *Service {
+	svc := &Service{logger: logger}
+	for _, opt := range opts {
+		opt(svc)
+	}
+	return svc
 }
 
 func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	var books []audiobooks.Audiobook
+	s.logger.Infoln("Starting scan of directory", s.mediaRoot, "for M4B audiobook files and associated TOML configuration files.")
 	err := filepath.WalkDir(s.mediaRoot, func(path string, d fs.DirEntry, e error) error {
 		if e != nil {
 			return e

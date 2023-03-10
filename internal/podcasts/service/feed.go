@@ -1,4 +1,4 @@
-package podcasts
+package service
 
 import (
 	"bytes"
@@ -12,39 +12,27 @@ import (
 
 	"github.com/gomarkdown/markdown"
 
-	"github.com/CallumKerson/loggerrific"
 	"github.com/CallumKerson/podcasts"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
 )
 
-type AudiobooksClient interface {
-	GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error)
-}
-
-type Service struct {
-	Log        loggerrific.Logger
-	Cfg        *FeedOpts
-	HostPrefix string
-	AudiobooksClient
-}
-
 var errNoConfig = errors.New("no config")
 
-func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobooks.Audiobook, writer io.Writer) error {
-	if s.Cfg == nil {
+func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobooks.Audiobook, feedOpts *FeedOpts, writer io.Writer) error {
+	if feedOpts == nil {
 		return errNoConfig
 	}
 	pod := &podcasts.Podcast{
-		Title:       s.Cfg.Title,
-		Description: s.Cfg.Description,
-		Language:    s.Cfg.Language,
-		Link:        s.Cfg.Link,
+		Title:       feedOpts.Title,
+		Description: feedOpts.Description,
+		Language:    feedOpts.Language,
+		Link:        feedOpts.Link,
 	}
 
 	for bookIndex := range books {
-		hostedFile, err := url.Parse(fmt.Sprintf("%s%s", s.HostPrefix, books[bookIndex].Path))
+		hostedFile, err := url.Parse(fmt.Sprintf("%s/%s%s", s.host, s.mediaPath, books[bookIndex].Path))
 		if err != nil {
 			return err
 		}
@@ -70,14 +58,14 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 		return err
 	}
 
-	if s.Cfg.Author != "" {
-		err = feed.SetOptions(podcasts.Author(s.Cfg.Author), podcasts.Owner(s.Cfg.Author, s.Cfg.Email))
+	if feedOpts.Author != "" {
+		err = feed.SetOptions(podcasts.Author(feedOpts.Author), podcasts.Owner(feedOpts.Author, feedOpts.Email))
 		if err != nil {
 			return err
 		}
 	}
 
-	if s.Cfg.Explicit {
+	if feedOpts.Explicit {
 		err = feed.SetOptions(podcasts.Explicit)
 		if err != nil {
 			return err
@@ -86,33 +74,20 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 	return feed.Write(writer)
 }
 
-func (s *Service) WriteFeed(ctx context.Context, writer io.Writer) error {
+func (s *Service) WriteFeed(ctx context.Context, feedOpts *FeedOpts, writer io.Writer) error {
 	books, err := s.GetAllAudiobooks(ctx)
 	if err != nil {
 		return err
 	}
-	return s.WriteFeedFromAudiobooks(ctx, books, writer)
+	return s.WriteFeedFromAudiobooks(ctx, books, feedOpts, writer)
 }
 
-func (s *Service) GetFeed(ctx context.Context) (string, error) {
+func (s *Service) GetFeed(ctx context.Context, feedOpts *FeedOpts) (string, error) {
 	var buf bytes.Buffer
-	if err := s.WriteFeed(ctx, &buf); err != nil {
+	if err := s.WriteFeed(ctx, feedOpts, &buf); err != nil {
 		return "", err
 	}
 	return buf.String(), nil
-}
-
-func (s *Service) IsReady(ctx context.Context) (bool, error) {
-	return true, nil
-}
-
-func NewService(hostPrefix string, opts *FeedOpts, audiobooksClient AudiobooksClient, logger loggerrific.Logger) *Service {
-	return &Service{
-		HostPrefix:       hostPrefix,
-		Log:              logger,
-		Cfg:              opts,
-		AudiobooksClient: audiobooksClient,
-	}
 }
 
 func getHTMLSummary(book *audiobooks.Audiobook) string {

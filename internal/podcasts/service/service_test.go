@@ -1,6 +1,7 @@
-package podcasts
+package service
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -54,20 +55,18 @@ func TestGetFeed(t *testing.T) {
 	expectedTestFeed, err := os.ReadFile(filepath.Join("testdata", "feed1.rss"))
 	assert.NoError(t, err)
 
-	testOpts := &FeedOpts{
-		Title:       "Audiobooks",
-		Description: "Like movies for your mind!",
-		Explicit:    true,
-		Language:    "EN",
-		Author:      "A Person",
-		Email:       "person@domain.test",
-		Copyright:   "None",
-		Link:        "http://www.example-podcast.com/audiobooks",
-	}
+	svc := New(&testAudiobookClient{},
+		tlogger.NewTLogger(t),
+		WithHost("http://www.example-podcast.com/audiobooks"),
+		WithMediaPath("media"),
+		WithPodcastFeedInfo(true, "EN", "A Person", "person@domain.test", "None"))
 
-	svc := NewService("http://www.example-podcast.com/audiobooks/media", testOpts, &testAudiobookClient{}, tlogger.NewTLogger(t))
+	var buf bytes.Buffer
 
-	feed, err := svc.GetFeed(context.TODO())
+	// when
+	err = svc.WriteAllAudiobooksFeed(context.TODO(), &buf)
+
+	// then
 	assert.NoError(t, err)
-	assert.Equal(t, strings.Trim(string(expectedTestFeed), "\n"), feed)
+	assert.Equal(t, strings.Trim(string(expectedTestFeed), "\n"), buf.String())
 }

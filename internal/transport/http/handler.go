@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,20 +11,20 @@ import (
 	"github.com/CallumKerson/loggerrific"
 )
 
-type PodcastService interface {
-	GetFeed(ctx context.Context) (string, error)
+type AudiobooksPodcastService interface {
+	WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error
 	IsReady(ctx context.Context) (bool, error)
 }
 
 type Handler struct {
 	*mux.Router
-	Service        PodcastService
+	Service        AudiobooksPodcastService
 	Log            loggerrific.Logger
 	mediaRoot      string
 	mediaServePath string
 }
 
-func NewHandler(service PodcastService, logger loggerrific.Logger, opts ...HandlerOption) *Handler {
+func NewHandler(service AudiobooksPodcastService, logger loggerrific.Logger, opts ...HandlerOption) *Handler {
 	handler := &Handler{
 		Service: service,
 		Log:     logger,
@@ -77,16 +78,12 @@ func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
-	feed, err := h.Service.GetFeed(request.Context())
+	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
+	writer.WriteHeader(http.StatusOK)
+	err := h.Service.WriteAllAudiobooksFeed(request.Context(), writer)
 	if err != nil {
 		SendJSONError(writer, http.StatusInternalServerError, err)
 		return
-	}
-	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
-	writer.WriteHeader(http.StatusOK)
-	_, err = writer.Write([]byte(feed))
-	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
 	}
 }
 

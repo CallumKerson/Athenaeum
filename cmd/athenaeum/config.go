@@ -9,7 +9,8 @@ import (
 
 	"github.com/CallumKerson/loggerrific"
 
-	"github.com/CallumKerson/Athenaeum/internal/podcasts"
+	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
+	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
 
@@ -25,24 +26,36 @@ type Media struct {
 }
 
 type Podcast struct {
-	Root string
-	Opts podcasts.FeedOpts
+	Root      string
+	Copyright string
+	Explicit  bool
+	Language  string
+	Author    string
+	Email     string
 }
 
 func (c *Config) GetMediaHost() string {
 	return fmt.Sprintf("%s/%s", c.Host, c.Media.HostPath)
 }
 
-func (c *Config) GetMediaHandlerOpt() transportHttp.HandlerOption {
-	return transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath)
+func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
+	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath)}
+}
+
+func (c *Config) GetMediaServiceOpts() []mediaService.Option {
+	return []mediaService.Option{mediaService.WithPathToMediaRoot(c.Media.Root)}
+}
+
+func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
+	return []podcastService.Option{podcastService.WithHost(c.Host),
+		podcastService.WithMediaPath(c.Media.HostPath),
+		podcastService.WithPodcastFeedInfo(c.Podcast.Explicit, c.Podcast.Language, c.Podcast.Author, c.Podcast.Email, c.Podcast.Copyright)}
 }
 
 func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
-	viper.SetDefault("Podcast.Opts.Title", "Audiobooks")
-	viper.SetDefault("Podcast.Opts.Description", "Like movies for your mind!")
-	viper.SetDefault("Podcast.Opts.Copyright", "None")
-	viper.SetDefault("Podcast.Opts.Explicit", true)
-	viper.SetDefault("Podcast.Opts.Language", "EN")
+	viper.SetDefault("Podcast.Copyright", "None")
+	viper.SetDefault("Podcast.Explicit", true)
+	viper.SetDefault("Podcast.Language", "EN")
 	viper.SetDefault("Podcast.Root", "/srv/podcasts")
 	viper.SetDefault("Media.HostPath", "/media")
 	viper.SetDefault("Media.Root", "/srv/media")
@@ -56,15 +69,11 @@ func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
 	_ = viper.BindEnv("Host")
 	_ = viper.BindEnv("Media.Root")
 
-	_ = viper.BindEnv("Podcast.Opts.Title")
-	_ = viper.BindEnv("Podcast.Opts.Description")
-	_ = viper.BindEnv("Podcast.Opts.Explicit")
-	_ = viper.BindEnv("Podcast.Opts.Language")
-	_ = viper.BindEnv("Podcast.Opts.Author")
-	_ = viper.BindEnv("Podcast.Opts.Email")
-	_ = viper.BindEnv("Podcast.Opts.Copyright")
-
-	viper.RegisterAlias("Podcast.Opts.Link", "Host")
+	_ = viper.BindEnv("Podcast.Explicit")
+	_ = viper.BindEnv("Podcast.Language")
+	_ = viper.BindEnv("Podcast.Author")
+	_ = viper.BindEnv("Podcast.Email")
+	_ = viper.BindEnv("Podcast.Copyright")
 
 	viper.AutomaticEnv()
 

@@ -59,8 +59,9 @@ func TestHandler(t *testing.T) {
 type DummyService struct {
 }
 
-func (s *DummyService) GetFeed(ctx context.Context) (string, error) {
-	return testFeed, nil
+func (s *DummyService) WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error {
+	_, err := w.Write([]byte(testFeed))
+	return err
 }
 
 func (s *DummyService) IsReady(ctx context.Context) (bool, error) {

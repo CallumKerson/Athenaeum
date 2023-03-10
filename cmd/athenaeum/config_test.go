@@ -42,9 +42,6 @@ func TestConfig_FromFile(t *testing.T) {
 	configYAML := `---
 Host: "http://localhost:8082"
 Podcast:
-  Opts:
-    Title: "Test Audiobooks"
-    Description: "A Test Audiobook feed"
     Explicit: False
 `
 	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
@@ -56,10 +53,7 @@ Podcast:
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, "http://localhost:8082", config.Host)
-	assert.Equal(t, "Test Audiobooks", config.Podcast.Opts.Title)
-	assert.Equal(t, "A Test Audiobook feed", config.Podcast.Opts.Description)
-	assert.Equal(t, false, config.Podcast.Opts.Explicit)
-	assert.Equal(t, "http://localhost:8082", config.Podcast.Opts.Link)
+	assert.Equal(t, false, config.Podcast.Explicit)
 }
 
 func TestConfig_EnvironmentOverridesFile(t *testing.T) {
@@ -95,11 +89,9 @@ func TestConfig_DefaultsOnly(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, "Audiobooks", config.Podcast.Opts.Title)
-	assert.Equal(t, "Like movies for your mind!", config.Podcast.Opts.Description)
-	assert.Equal(t, "None", config.Podcast.Opts.Copyright)
-	assert.Equal(t, true, config.Podcast.Opts.Explicit)
-	assert.Equal(t, "EN", config.Podcast.Opts.Language)
+	assert.Equal(t, "None", config.Podcast.Copyright)
+	assert.Equal(t, true, config.Podcast.Explicit)
+	assert.Equal(t, "EN", config.Podcast.Language)
 	assert.Equal(t, "/media", config.Media.HostPath)
 	assert.Equal(t, "/srv/media", config.Media.Root)
 	assert.Equal(t, "http://localhost:8080", config.Host)
