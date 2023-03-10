@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/CallumKerson/loggerrific"
 
 	"github.com/CallumKerson/Athenaeum/internal/podcasts"
+	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
 
 type Config struct {
@@ -30,7 +30,11 @@ type Podcast struct {
 }
 
 func (c *Config) GetMediaHost() string {
-	return path.Join(c.Host, c.Media.HostPath)
+	return fmt.Sprintf("%s/%s", c.Host, c.Media.HostPath)
+}
+
+func (c *Config) GetMediaHandlerOpt() transportHttp.HandlerOption {
+	return transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath)
 }
 
 func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
@@ -40,7 +44,7 @@ func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
 	viper.SetDefault("Podcast.Opts.Explicit", true)
 	viper.SetDefault("Podcast.Opts.Language", "EN")
 	viper.SetDefault("Podcast.Root", "/srv/podcasts")
-	viper.SetDefault("Media.HostPath", "media")
+	viper.SetDefault("Media.HostPath", "/media")
 	viper.SetDefault("Media.Root", "/srv/media")
 	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", port))
 

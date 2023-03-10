@@ -17,22 +17,23 @@ type PodcastService interface {
 
 type Handler struct {
 	*mux.Router
-	Service PodcastService
-	Log     loggerrific.Logger
+	Service        PodcastService
+	Log            loggerrific.Logger
+	mediaRoot      string
+	mediaServePath string
 }
 
-func NewHandler(service PodcastService, logger loggerrific.Logger) *Handler {
+func NewHandler(service PodcastService, logger loggerrific.Logger, opts ...HandlerOption) *Handler {
 	handler := &Handler{
 		Service: service,
 		Log:     logger,
 	}
+	for _, opt := range opts {
+		opt(handler)
+	}
 	handler.Router = mux.NewRouter()
 	handler.mapRoutes()
-
 	handler.Use(TimeoutMiddleware)
-	m := NewMiddlewares(logger)
-	handler.Use(m.LoggingMiddleware)
-
 	return handler
 }
 
@@ -40,10 +41,15 @@ func (h *Handler) mapRoutes() {
 	h.HandleFunc("/health", healthCheck)
 	h.HandleFunc("/ready", h.readiness)
 
+	middleware := NewMiddlewares(h.Log)
+
 	podcastSubrouter := h.PathPrefix("/podcast").Subrouter()
-	m := NewMiddlewares(h.Log)
-	podcastSubrouter.Use(m.LoggingMiddleware)
+	podcastSubrouter.Use(middleware.LoggingMiddleware)
 	podcastSubrouter.HandleFunc("/feed.rss", h.getFeed)
+
+	fs := http.StripPrefix(h.mediaServePath, http.FileServer(http.Dir(h.mediaRoot)))
+	h.Log.Infoln("Serving files from local path", h.mediaRoot, "at", h.mediaServePath)
+	h.Router.PathPrefix(h.mediaServePath).Handler(middleware.LoggingMiddleware(fs))
 }
 
 func healthCheck(writer http.ResponseWriter, request *http.Request) {

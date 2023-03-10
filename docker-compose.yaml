@@ -4,5 +4,7 @@ services:
   athenaeum:
     build: .
     image: "ghcr.io/callumkerson/athenaeum:development"
+    volumes:
+      - ./internal/media/service/testdata:/srv/media
     ports:
-      - "8084:8080"
+      - "8080:8080"

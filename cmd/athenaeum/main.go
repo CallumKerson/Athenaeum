@@ -22,7 +22,7 @@ func Run(port int, logger loggerrific.Logger) error {
 	}
 	mediaSvc := mediaService.New(cfg.Media.Root, logger)
 	podcastService := podcasts.NewService(cfg.GetMediaHost(), &cfg.Podcast.Opts, mediaSvc, logger)
-	httpHandler := transportHttp.NewHandler(podcastService, logger)
+	httpHandler := transportHttp.NewHandler(podcastService, logger, cfg.GetMediaHandlerOpt())
 
 	return Serve(httpHandler, port, logger)
 }

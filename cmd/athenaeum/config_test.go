@@ -100,7 +100,7 @@ func TestConfig_DefaultsOnly(t *testing.T) {
 	assert.Equal(t, "None", config.Podcast.Opts.Copyright)
 	assert.Equal(t, true, config.Podcast.Opts.Explicit)
 	assert.Equal(t, "EN", config.Podcast.Opts.Language)
-	assert.Equal(t, "media", config.Media.HostPath)
+	assert.Equal(t, "/media", config.Media.HostPath)
 	assert.Equal(t, "/srv/media", config.Media.Root)
 	assert.Equal(t, "http://localhost:8080", config.Host)
 }

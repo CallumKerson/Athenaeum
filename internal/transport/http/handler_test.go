@@ -17,7 +17,7 @@ const (
 )
 
 func TestHandler(t *testing.T) {
-	testHandler := NewHandler(&DummyService{}, tlogger.NewTLogger(t))
+	testHandler := NewHandler(&DummyService{}, tlogger.NewTLogger(t), WithMediaConfig("testdata", "/media/"))
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
@@ -40,6 +40,7 @@ func TestHandler(t *testing.T) {
 		{name: "health check", r: newReq("GET", testServer.URL+"/health", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}\n"},
 		{name: "readiness check", r: newReq("GET", testServer.URL+"/ready", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}\n"},
 		{name: "feed", r: newReq("GET", testServer.URL+"/podcast/feed.rss", nil), expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: testFeed},
+		{name: "media", r: newReq("GET", testServer.URL+"/media/media.txt", nil), expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file\n"},
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
