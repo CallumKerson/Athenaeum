@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  athenaeum:
+    build: .
+    image: "ghcr.io/callumkerson/athenaeum:development"
+    volumes:
+      - ./internal/media/service/testdata:/srv/media
+    ports:
+      - "8080:8080"
