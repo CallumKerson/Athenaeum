@@ -48,8 +48,8 @@ func (s *Service) WriteAllAudiobooksFeed(ctx context.Context, writer io.Writer) 
 	return s.WriteFeedFromAudiobooks(ctx, books, allAudiobooksFeedOpts, writer)
 }
 
-func (s *Service) IsReady(ctx context.Context) (bool, error) {
-	return true, nil
+func (s *Service) IsReady(ctx context.Context) bool {
+	return true
 }
 
 func New(audiobooksClient AudiobooksClient, logger loggerrific.Logger, opts ...Option) *Service {

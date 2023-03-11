@@ -29,11 +29,11 @@ func Run(port int, logger loggerrific.Logger) error {
 		return err
 	}
 	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, logger)
-	if errScan := audiobookSvc.ScanAndUpdateAudiobooks(context.Background()); errScan != nil {
+	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
 		return errScan
 	}
 	podcastSvc := podcastService.New(audiobookSvc, logger, cfg.GetPodcastServiceOpts()...)
-	httpHandler := transportHttp.NewHandler(podcastSvc, logger, cfg.GetHTTPHandlerOpts()...)
+	httpHandler := transportHttp.NewHandler(podcastSvc, audiobookSvc, logger, cfg.GetHTTPHandlerOpts()...)
 
 	return Serve(httpHandler, port, logger)
 }

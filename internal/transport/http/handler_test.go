@@ -17,7 +17,7 @@ const (
 )
 
 func TestHandler(t *testing.T) {
-	testHandler := NewHandler(&DummyService{}, tlogger.NewTLogger(t), WithMediaConfig("testdata", "/media/"))
+	testHandler := NewHandler(&DummyPodcastService{}, &DummyUpdateService{}, tlogger.NewTLogger(t), WithMediaConfig("testdata", "/media/"))
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
@@ -41,6 +41,8 @@ func TestHandler(t *testing.T) {
 		{name: "readiness check", r: newReq("GET", testServer.URL+"/ready", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}\n"},
 		{name: "feed", r: newReq("GET", testServer.URL+"/podcast/feed.rss", nil), expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: testFeed},
 		{name: "media", r: newReq("GET", testServer.URL+"/media/media.txt", nil), expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file\n"},
+		{name: "update", r: newReq("POST", testServer.URL+"/update", nil), expectedStatus: 204, expectedContentType: "", expectedBody: ""},
+		{name: "update on get fails", r: newReq("GET", testServer.URL+"/update", nil), expectedStatus: 405, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Method Not Allowed\n"},
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -56,14 +58,25 @@ func TestHandler(t *testing.T) {
 	}
 }
 
-type DummyService struct {
+type DummyPodcastService struct {
 }
 
-func (s *DummyService) WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error {
+func (s *DummyPodcastService) WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error {
 	_, err := w.Write([]byte(testFeed))
 	return err
 }
 
-func (s *DummyService) IsReady(ctx context.Context) (bool, error) {
-	return true, nil
+func (s *DummyPodcastService) IsReady(ctx context.Context) bool {
+	return true
+}
+
+type DummyUpdateService struct {
+}
+
+func (s *DummyUpdateService) UpdateAudiobooks(ctx context.Context) error {
+	return nil
+}
+
+func (s *DummyUpdateService) IsReady(ctx context.Context) bool {
+	return true
 }

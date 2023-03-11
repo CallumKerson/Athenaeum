@@ -28,7 +28,7 @@ func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, logger logger
 	return &Service{mediaScanner: mediaScanner, audiobookStore: audiobookStore, logger: logger}
 }
 
-func (s *Service) ScanAndUpdateAudiobooks(ctx context.Context) error {
+func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 	audiobooksFromScan, err := s.mediaScanner.GetAllAudiobooks(ctx)
 	if err != nil {
 		return err

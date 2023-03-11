@@ -13,21 +13,29 @@ import (
 
 type AudiobooksPodcastService interface {
 	WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error
-	IsReady(ctx context.Context) (bool, error)
+	IsReady(ctx context.Context) bool
+}
+
+type AudiobooksUpdateService interface {
+	UpdateAudiobooks(ctx context.Context) error
+	IsReady(ctx context.Context) bool
 }
 
 type Handler struct {
 	*mux.Router
-	Service        AudiobooksPodcastService
+	PodcastService AudiobooksPodcastService
+	UpdateService  AudiobooksUpdateService
 	Log            loggerrific.Logger
 	mediaRoot      string
 	mediaServePath string
 }
 
-func NewHandler(service AudiobooksPodcastService, logger loggerrific.Logger, opts ...HandlerOption) *Handler {
+func NewHandler(podcastService AudiobooksPodcastService, updateService AudiobooksUpdateService,
+	logger loggerrific.Logger, opts ...HandlerOption) *Handler {
 	handler := &Handler{
-		Service: service,
-		Log:     logger,
+		PodcastService: podcastService,
+		UpdateService:  updateService,
+		Log:            logger,
 	}
 	for _, opt := range opts {
 		opt(handler)
@@ -48,6 +56,10 @@ func (h *Handler) mapRoutes() {
 	podcastSubrouter.Use(middleware.LoggingMiddleware)
 	podcastSubrouter.HandleFunc("/feed.rss", h.getFeed)
 
+	updateRouter := h.PathPrefix("/update").Subrouter()
+	updateRouter.Use(SevereRateLimitMiddleware, middleware.LoggingMiddleware)
+	updateRouter.HandleFunc("", h.updateAudiobooks)
+
 	fs := http.StripPrefix(h.mediaServePath, http.FileServer(http.Dir(h.mediaRoot)))
 	h.Log.Infoln("Serving files from local path", h.mediaRoot, "at", h.mediaServePath)
 	h.Router.PathPrefix(h.mediaServePath).Handler(middleware.LoggingMiddleware(fs))
@@ -60,13 +72,7 @@ func healthCheck(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
-	ready, err := h.Service.IsReady(request.Context())
-	if err != nil {
-		SendJSONError(writer, http.StatusInternalServerError, err)
-		return
-	}
-
-	if ready {
+	if h.PodcastService.IsReady(request.Context()) && h.UpdateService.IsReady(request.Context()) {
 		SendJSON(writer, http.StatusOK, Payload{
 			"readiness": "ok",
 		})
@@ -80,10 +86,24 @@ func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
 func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
 	writer.WriteHeader(http.StatusOK)
-	err := h.Service.WriteAllAudiobooksFeed(request.Context(), writer)
+	err := h.PodcastService.WriteAllAudiobooksFeed(request.Context(), writer)
 	if err != nil {
 		SendJSONError(writer, http.StatusInternalServerError, err)
 		return
+	}
+}
+
+func (h *Handler) updateAudiobooks(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == http.MethodPost {
+		if err := h.UpdateService.UpdateAudiobooks(request.Context()); err != nil {
+			SendJSONError(writer, http.StatusInternalServerError, err)
+			return
+		}
+		writer.WriteHeader(http.StatusNoContent)
+		_, _ = writer.Write([]byte{})
+	} else {
+		writer.Header().Add("Allow", http.MethodPost)
+		http.Error(writer, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
 }
 

@@ -15,6 +15,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	github.com/sunfish-shogi/bufseekio v0.1.0
 	go.etcd.io/bbolt v1.3.7
+	golang.org/x/time v0.3.0
 )
 
 require (
