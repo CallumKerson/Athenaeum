@@ -21,11 +21,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o /bin/ ./...
 
 FROM gcr.io/distroless/static-debian11:nonroot AS production
 
-WORKDIR /app
 COPY --from=builder /bin/athenaeum /usr/bin/athenaeum
 COPY --from=busybox:1.35.0-uclibc /bin/wget /usr/bin/wget
 
 EXPOSE 8080
+ENV ATHENAEUM_DB_ROOT=/home/nonroot/athenaeum
 
 HEALTHCHECK --interval=3s \
     --timeout=2s \

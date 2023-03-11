@@ -9,6 +9,7 @@ import (
 
 	"github.com/CallumKerson/loggerrific"
 
+	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
@@ -16,8 +17,13 @@ import (
 
 type Config struct {
 	Host    string
+	DB      DB
 	Media   Media
 	Podcast Podcast
+}
+
+type DB struct {
+	Root string
 }
 
 type Media struct {
@@ -38,18 +44,22 @@ func (c *Config) GetMediaHost() string {
 	return fmt.Sprintf("%s/%s", c.Host, c.Media.HostPath)
 }
 
-func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
-	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath)}
-}
-
 func (c *Config) GetMediaServiceOpts() []mediaService.Option {
 	return []mediaService.Option{mediaService.WithPathToMediaRoot(c.Media.Root)}
+}
+
+func (c *Config) GetBoltDBOps() []bolt.Option {
+	return []bolt.Option{bolt.WithDBDefaults(), bolt.WithPathToDBDirectory(c.DB.Root)}
 }
 
 func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
 	return []podcastService.Option{podcastService.WithHost(c.Host),
 		podcastService.WithMediaPath(c.Media.HostPath),
 		podcastService.WithPodcastFeedInfo(c.Podcast.Explicit, c.Podcast.Language, c.Podcast.Author, c.Podcast.Email, c.Podcast.Copyright)}
+}
+
+func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
+	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath)}
 }
 
 func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
@@ -59,6 +69,7 @@ func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
 	viper.SetDefault("Podcast.Root", "/srv/podcasts")
 	viper.SetDefault("Media.HostPath", "/media")
 	viper.SetDefault("Media.Root", "/srv/media")
+	viper.SetDefault("DB.Root", "/usr/local/athenaeum")
 	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", port))
 
 	replacer := strings.NewReplacer(".", "_")
@@ -67,6 +78,7 @@ func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
 	_ = viper.BindEnv("Config.Path")
 
 	_ = viper.BindEnv("Host")
+	_ = viper.BindEnv("DB.Root")
 	_ = viper.BindEnv("Media.Root")
 
 	_ = viper.BindEnv("Podcast.Explicit")
