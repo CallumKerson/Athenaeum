@@ -26,6 +26,7 @@ type Handler struct {
 	PodcastService AudiobooksPodcastService
 	UpdateService  AudiobooksUpdateService
 	Log            loggerrific.Logger
+	version        string
 	mediaRoot      string
 	mediaServePath string
 }
@@ -49,6 +50,7 @@ func NewHandler(podcastService AudiobooksPodcastService, updateService Audiobook
 func (h *Handler) mapRoutes() {
 	h.HandleFunc("/health", healthCheck)
 	h.HandleFunc("/ready", h.readiness)
+	h.HandleFunc("/version", h.printVersion)
 
 	middleware := NewMiddlewares(h.Log)
 
@@ -81,6 +83,12 @@ func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
 			"readiness": "not ready",
 		})
 	}
+}
+
+func (h *Handler) printVersion(writer http.ResponseWriter, request *http.Request) {
+	SendJSON(writer, http.StatusOK, Payload{
+		"version": h.version,
+	})
 }
 
 func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {

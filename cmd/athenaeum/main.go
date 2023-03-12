@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
+
+	flag "github.com/spf13/pflag"
 
 	"github.com/CallumKerson/loggerrific"
 
@@ -16,6 +19,12 @@ import (
 
 const (
 	defaultPort = 8080
+)
+
+var (
+	Version = "development"
+	Commit  = "development"
+	Date    = "development"
 )
 
 func Run(port int, logger loggerrific.Logger) error {
@@ -39,6 +48,15 @@ func Run(port int, logger loggerrific.Logger) error {
 }
 
 func main() {
+	showVersion := flag.BoolP("version", "v", false, "prints version and exits")
+	flag.Parse()
+	if *showVersion {
+		fmt.Println("version: ", Version)
+		fmt.Println("commit:  ", Commit)
+		fmt.Println("built at:", Date)
+		return
+	}
+
 	logger := logrus.NewLogger()
 
 	if err := Run(defaultPort, logger); err != nil {

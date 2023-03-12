@@ -16,3 +16,9 @@ func WithMediaConfig(mediaRoot, mediaServePath string) HandlerOption {
 		h.mediaServePath = mediaServePath
 	}
 }
+
+func WithVersion(version string) HandlerOption {
+	return func(h *Handler) {
+		h.version = version
+	}
+}

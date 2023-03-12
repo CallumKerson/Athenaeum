@@ -59,7 +59,7 @@ func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
 }
 
 func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
-	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath)}
+	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath), transportHttp.WithVersion(Version)}
 }
 
 func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {

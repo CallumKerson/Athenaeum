@@ -17,7 +17,8 @@ const (
 )
 
 func TestHandler(t *testing.T) {
-	testHandler := NewHandler(&DummyPodcastService{}, &DummyUpdateService{}, tlogger.NewTLogger(t), WithMediaConfig("testdata", "/media/"))
+	testHandler := NewHandler(&DummyPodcastService{}, &DummyUpdateService{}, tlogger.NewTLogger(t),
+		WithMediaConfig("testdata", "/media/"), WithVersion("1.0.0-test"))
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
@@ -39,6 +40,7 @@ func TestHandler(t *testing.T) {
 	}{
 		{name: "health check", r: newReq("GET", testServer.URL+"/health", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}\n"},
 		{name: "readiness check", r: newReq("GET", testServer.URL+"/ready", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}\n"},
+		{name: "version", r: newReq("GET", testServer.URL+"/version", nil), expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}\n"},
 		{name: "feed", r: newReq("GET", testServer.URL+"/podcast/feed.rss", nil), expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: testFeed},
 		{name: "media", r: newReq("GET", testServer.URL+"/media/media.txt", nil), expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file\n"},
 		{name: "update", r: newReq("POST", testServer.URL+"/update", nil), expectedStatus: 204, expectedContentType: "", expectedBody: ""},
