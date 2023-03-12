@@ -28,7 +28,12 @@ tasks:
   compile:
     desc: "Compiles for the current OS and architecture"
     cmds:
-      - go build -ldflags "-s -w" -o bin/ ./...
+      - go build -ldflags "-s -w" -o . ./...
+
+  linux-compile:
+    desc: "Compiles for Linux"
+    cmds:
+      - GOOS=linux go build -ldflags "-s -w" -o . ./...
 
   tidy:
     desc: "Tidies the go project"
@@ -42,5 +47,11 @@ tasks:
     desc: "Builds the go project"
     cmds:
       - task: tidy
-      - task: test
       - task: compile
+
+  docker:
+    desc: "Build and run container"
+    cmds:
+      - task: tidy
+      - task: linux-compile
+      - docker compose up --build
