@@ -20,6 +20,11 @@ type Config struct {
 	DB      DB
 	Media   Media
 	Podcast Podcast
+	Log     Log
+}
+
+type Log struct {
+	Level string
 }
 
 type DB struct {
@@ -58,6 +63,10 @@ func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
 		podcastService.WithPodcastFeedInfo(c.Podcast.Explicit, c.Podcast.Language, c.Podcast.Author, c.Podcast.Email, c.Podcast.Copyright)}
 }
 
+func (c *Config) GetLogLevel() string {
+	return c.Log.Level
+}
+
 func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
 	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath), transportHttp.WithVersion(Version)}
 }
@@ -71,6 +80,7 @@ func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
 	viper.SetDefault("Media.Root", "/srv/media")
 	viper.SetDefault("DB.Root", "/usr/local/athenaeum")
 	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", port))
+	viper.SetDefault("Log.Level", "INFO")
 
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
@@ -78,6 +88,7 @@ func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
 	_ = viper.BindEnv("Config.Path")
 
 	_ = viper.BindEnv("Host")
+	_ = viper.BindEnv("Log.Level")
 	_ = viper.BindEnv("DB.Root")
 	_ = viper.BindEnv("Media.Root")
 
