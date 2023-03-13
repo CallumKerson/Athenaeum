@@ -79,6 +79,7 @@ func (s *Service) parseM4BInfo(tomlPath string, audiobook *audiobooks.Audiobook)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 	info, err := mp4.Probe(bufseekio.NewReadSeeker(file, 1024, 4))
 	if err != nil {
 		return err
