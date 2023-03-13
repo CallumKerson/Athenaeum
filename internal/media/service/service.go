@@ -10,9 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/abema/go-mp4"
+	"github.com/alfg/mp4"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/sunfish-shogi/bufseekio"
 
 	"github.com/CallumKerson/loggerrific"
 
@@ -76,20 +75,21 @@ func (s *Service) parseM4BInfo(tomlPath string, audiobook *audiobooks.Audiobook)
 	if err != nil {
 		return err
 	}
-	s.logger.Debugln("Opening file", expectedAudiobookPath)
 	file, err := os.Open(expectedAudiobookPath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	info, err := mp4.Probe(bufseekio.NewReadSeeker(file, 1024, 4))
+	info, err := mp4.OpenFromReader(file, fInfo.Size())
 	if err != nil {
 		return err
 	}
-	s.logger.Debugln("Read metadata from", expectedAudiobookPath)
 	audiobook.Path = strings.TrimPrefix(expectedAudiobookPath, s.mediaRoot)
 	audiobook.FileSize = uint64(fInfo.Size())
-	audiobook.Duration = time.Duration((float32(info.Duration) / float32(info.Timescale)) * float32(time.Second))
+	if info.Moov != nil && info.Moov.Mvhd != nil {
+		audiobook.Duration = time.Duration(
+			(float32(info.Moov.Mvhd.Duration) / float32(info.Moov.Mvhd.Timescale)) * float32(time.Second))
+	}
 	audiobook.MIMEType = "audio/mp4a-latm"
 	return nil
 }

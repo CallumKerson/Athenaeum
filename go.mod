@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/CallumKerson/loggerrific v1.0.1
 	github.com/CallumKerson/podcasts v0.0.5
-	github.com/abema/go-mp4 v0.10.1
+	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
 	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
 	github.com/gorilla/mux v1.8.0
 	github.com/pelletier/go-toml/v2 v2.0.7
@@ -14,7 +14,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
-	github.com/sunfish-shogi/bufseekio v0.1.0
 	go.etcd.io/bbolt v1.3.7
 	golang.org/x/time v0.3.0
 )
@@ -22,7 +21,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/google/uuid v1.1.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
