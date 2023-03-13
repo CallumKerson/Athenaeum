@@ -57,8 +57,8 @@ func TestGetFeed(t *testing.T) {
 
 	svc := New(&testAudiobookClient{},
 		tlogger.NewTLogger(t),
-		WithHost("http://www.example-podcast.com/audiobooks"),
-		WithMediaPath("media"),
+		WithHost("http://www.example-podcast.com/audiobooks/"),
+		WithMediaPath("/media/"),
 		WithPodcastFeedInfo(true, "EN", "A Person", "person@domain.test", "None"))
 
 	var buf bytes.Buffer
