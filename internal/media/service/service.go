@@ -71,6 +71,7 @@ func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook,
 
 func (s *Service) parseM4BInfo(tomlPath string, audiobook *audiobooks.Audiobook) (err error) {
 	expectedAudiobookPath := getM4BPathFromTOMLPath(tomlPath)
+	defer s.trackM4BParseTime(time.Now(), expectedAudiobookPath)
 	fInfo, err := os.Stat(expectedAudiobookPath)
 	if err != nil {
 		return err
@@ -95,4 +96,9 @@ func (s *Service) parseM4BInfo(tomlPath string, audiobook *audiobooks.Audiobook)
 
 func getM4BPathFromTOMLPath(tomlPath string) string {
 	return fmt.Sprintf("%s.m4b", strings.TrimSuffix(tomlPath, filepath.Ext(".toml")))
+}
+
+func (s *Service) trackM4BParseTime(start time.Time, filename string) {
+	elapsed := time.Since(start)
+	s.logger.Debugln("Processing", filename, "took", elapsed.String())
 }
