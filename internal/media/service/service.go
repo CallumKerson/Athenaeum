@@ -75,6 +75,7 @@ func (s *Service) parseM4BInfo(tomlPath string, audiobook *audiobooks.Audiobook)
 	if err != nil {
 		return err
 	}
+	s.logger.Debugln("Opening file", expectedAudiobookPath)
 	file, err := os.Open(expectedAudiobookPath)
 	if err != nil {
 		return err
@@ -84,6 +85,7 @@ func (s *Service) parseM4BInfo(tomlPath string, audiobook *audiobooks.Audiobook)
 	if err != nil {
 		return err
 	}
+	s.logger.Debugln("Read metadata from", expectedAudiobookPath)
 	audiobook.Path = strings.TrimPrefix(expectedAudiobookPath, s.mediaRoot)
 	audiobook.FileSize = uint64(fInfo.Size())
 	audiobook.Duration = time.Duration((float32(info.Duration) / float32(info.Timescale)) * float32(time.Second))
