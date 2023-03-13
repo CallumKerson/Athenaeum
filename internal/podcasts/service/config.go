@@ -1,16 +1,18 @@
 package service
 
+import "strings"
+
 type Option func(s *Service)
 
 func WithHost(host string) Option {
 	return func(s *Service) {
-		s.host = host
+		s.host = strings.TrimSuffix(host, "/")
 	}
 }
 
 func WithMediaPath(mediaPath string) Option {
 	return func(s *Service) {
-		s.mediaPath = mediaPath
+		s.mediaPath = strings.Trim(mediaPath, "/")
 	}
 }
 
