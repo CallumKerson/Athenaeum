@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	flag "github.com/spf13/pflag"
 
@@ -27,11 +28,7 @@ var (
 	Date    = "development"
 )
 
-func Run(port int, logger loggerrific.Logger) error {
-	cfg, err := NewConfig(port, logger)
-	if err != nil {
-		return err
-	}
+func Run(cfg *Config, port int, logger loggerrific.Logger) error {
 	mediaSvc := mediaService.New(logger, cfg.GetMediaServiceOpts()...)
 	boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
 	if err != nil {
@@ -58,9 +55,29 @@ func main() {
 	}
 
 	logger := logrus.NewLogger()
+	cfg, err := NewConfig(defaultPort, logger)
+	if err != nil {
+		logger.WithError(err).Errorln("Error getting config")
+		os.Exit(1)
+	}
+	setLogLevel(logger, cfg.GetLogLevel())
 
-	if err := Run(defaultPort, logger); err != nil {
+	if err := Run(cfg, defaultPort, logger); err != nil {
 		logger.WithError(err).Errorln("Error starting up server")
 		os.Exit(1)
+	}
+}
+
+func setLogLevel(logger *logrus.Logger, level string) {
+	level = strings.ToLower(level)
+	switch level {
+	case "debug":
+		logger.SetLevelDebug()
+	case "info":
+		logger.SetLevelInfo()
+	case "warn":
+		logger.SetLevelWarn()
+	case "error":
+		logger.SetLevelError()
 	}
 }
