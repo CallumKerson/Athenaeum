@@ -86,14 +86,13 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	}
 
 	if pathToConfigFile == "" {
-		fmt.Fprintln(out, "No valid config path found from environment variable ATHENAEUM_CONFIG_PATH,",
+		fmt.Fprintln(out, "No valid config path provided by flag or found from environment variable ATHENAEUM_CONFIG_PATH,",
 			"reading config from environment variables only")
 	} else {
 		viper.SetConfigFile(pathToConfigFile)
 		err := viper.ReadInConfig()
 		if err != nil {
-			fmt.Fprintln(out, "Cannot read config from file:", err)
-			return err
+			return fmt.Errorf("config error: %w", err)
 		}
 	}
 
