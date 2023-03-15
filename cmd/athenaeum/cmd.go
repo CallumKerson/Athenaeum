@@ -59,6 +59,7 @@ func NewRootCommand() *cobra.Command {
 
 	// Define cobra flags, the default value has the lowest (least significant) precedence
 	rootCmd.PersistentFlags().StringVarP(&pathToConfig, "config", "c", pathToConfig, "path to config file")
+	rootCmd.SilenceUsage = true
 
 	rootCmd.Version = Version
 
