@@ -28,7 +28,12 @@ tasks:
   compile:
     desc: "Compiles for the current OS and architecture"
     cmds:
-      - go build -ldflags "-s -w" -o . ./...
+      - go build -ldflags "-s -w -X main.Version={{.VERSION}} -X main.Commit={{.COMMIT}} -X main.Date={{now | date "2006-01-02T15:04:05-0700"}}" -o . ./...
+    vars:
+      COMMIT:
+        sh: git rev-parse HEAD
+      VERSION:
+        sh: echo "$(git describe --tags)-dev+$(git rev-parse --short HEAD)"
 
   linux-compile:
     desc: "Compiles for Linux"

@@ -2,21 +2,21 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
+	"io"
 	"strings"
 
 	"github.com/spf13/viper"
 
-	"github.com/CallumKerson/loggerrific"
-
-	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
-	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
-	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
+)
+
+const (
+	defaultPort = 8080
 )
 
 type Config struct {
 	Host    string
+	Port    int
 	DB      DB
 	Media   Media
 	Podcast Podcast
@@ -37,30 +37,11 @@ type Media struct {
 }
 
 type Podcast struct {
-	Root      string
 	Copyright string
 	Explicit  bool
 	Language  string
 	Author    string
 	Email     string
-}
-
-func (c *Config) GetMediaHost() string {
-	return fmt.Sprintf("%s/%s", c.Host, c.Media.HostPath)
-}
-
-func (c *Config) GetMediaServiceOpts() []mediaService.Option {
-	return []mediaService.Option{mediaService.WithPathToMediaRoot(c.Media.Root)}
-}
-
-func (c *Config) GetBoltDBOps() []bolt.Option {
-	return []bolt.Option{bolt.WithDBDefaults(), bolt.WithPathToDBDirectory(c.DB.Root)}
-}
-
-func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
-	return []podcastService.Option{podcastService.WithHost(c.Host),
-		podcastService.WithMediaPath(c.Media.HostPath),
-		podcastService.WithPodcastFeedInfo(c.Podcast.Explicit, c.Podcast.Language, c.Podcast.Author, c.Podcast.Email, c.Podcast.Copyright)}
 }
 
 func (c *Config) GetLogLevel() string {
@@ -71,15 +52,15 @@ func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
 	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath), transportHttp.WithVersion(Version)}
 }
 
-func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
+func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Podcast.Copyright", "None")
 	viper.SetDefault("Podcast.Explicit", true)
 	viper.SetDefault("Podcast.Language", "EN")
-	viper.SetDefault("Podcast.Root", "/srv/podcasts")
 	viper.SetDefault("Media.HostPath", "/media")
 	viper.SetDefault("Media.Root", "/srv/media")
 	viper.SetDefault("DB.Root", "/usr/local/athenaeum")
-	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", port))
+	viper.SetDefault("Port", defaultPort)
+	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", defaultPort))
 	viper.SetDefault("Log.Level", "INFO")
 
 	replacer := strings.NewReplacer(".", "_")
@@ -100,21 +81,22 @@ func NewConfig(port int, logger loggerrific.Logger) (*Config, error) {
 
 	viper.AutomaticEnv()
 
-	pathToConfig := viper.GetString("Config.Path")
+	if pathToConfigFile == "" {
+		pathToConfigFile = viper.GetString("Config.Path")
+	}
 
-	if !filepath.IsAbs(pathToConfig) {
-		logger.Infoln("No valid config path found from environment variable ATHENAEUM_CONFIG_PATH,",
+	if pathToConfigFile == "" {
+		fmt.Fprintln(out, "No valid config path found from environment variable ATHENAEUM_CONFIG_PATH,",
 			"reading config from environment variables only")
 	} else {
-		viper.SetConfigFile(pathToConfig)
+		viper.SetConfigFile(pathToConfigFile)
 		err := viper.ReadInConfig()
 		if err != nil {
-			logger.WithError(err).Errorln("Cannot read config from file")
-			return nil, err
+			fmt.Fprintln(out, "Cannot read config from file:", err)
+			return err
 		}
 	}
 
-	var cfg Config
-	err := viper.Unmarshal(&cfg)
-	return &cfg, err
+	err := viper.Unmarshal(cfg)
+	return err
 }

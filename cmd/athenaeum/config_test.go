@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -8,8 +9,6 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/CallumKerson/loggerrific/tlogger"
 )
 
 func TestConfig_FromEnvironment(t *testing.T) {
@@ -20,9 +19,10 @@ func TestConfig_FromEnvironment(t *testing.T) {
 	})
 	t.Cleanup(envVarCleanup)
 	viper.Reset()
+	var config Config
 
 	// when
-	config, err := NewConfig(defaultPort, tlogger.NewTLogger(t))
+	err := InitConfig(&config, "", &bytes.Buffer{})
 
 	// then
 	assert.NoError(t, err)
@@ -31,6 +31,29 @@ func TestConfig_FromEnvironment(t *testing.T) {
 }
 
 func TestConfig_FromFile(t *testing.T) {
+	// given
+	configFilePath := filepath.Join(t.TempDir(), "config.yaml")
+	viper.Reset()
+
+	configYAML := `---
+Host: "http://localhost:8088"
+Podcast:
+    Language: FR
+`
+	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
+	assert.NoError(t, err)
+	var config Config
+
+	// when
+	err = InitConfig(&config, configFilePath, &bytes.Buffer{})
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, "http://localhost:8088", config.Host)
+	assert.Equal(t, "FR", config.Podcast.Language)
+}
+
+func TestConfig_FromFile_DefiniedInEnvironment(t *testing.T) {
 	// given
 	configFilePath := filepath.Join(t.TempDir(), "config.yaml")
 	envVarCleanup := envVarSetter(t, map[string]string{
@@ -46,9 +69,10 @@ Podcast:
 `
 	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
 	assert.NoError(t, err)
+	var config Config
 
 	// when
-	config, err := NewConfig(defaultPort, tlogger.NewTLogger(t))
+	err = InitConfig(&config, "", &bytes.Buffer{})
 
 	// then
 	assert.NoError(t, err)
@@ -71,9 +95,10 @@ Host: "http://localhost:8083"
 `
 	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
 	assert.NoError(t, err)
+	var config Config
 
 	// when
-	config, err := NewConfig(defaultPort, tlogger.NewTLogger(t))
+	err = InitConfig(&config, "", &bytes.Buffer{})
 
 	// then
 	assert.NoError(t, err)
@@ -83,9 +108,10 @@ Host: "http://localhost:8083"
 func TestConfig_DefaultsOnly(t *testing.T) {
 	// given
 	viper.Reset()
+	var config Config
 
 	// when
-	config, err := NewConfig(defaultPort, tlogger.NewTLogger(t))
+	err := InitConfig(&config, "", &bytes.Buffer{})
 
 	// then
 	assert.NoError(t, err)
@@ -106,9 +132,10 @@ func TestConfig_BadFile(t *testing.T) {
 	})
 	t.Cleanup(envVarCleanup)
 	viper.Reset()
+	var config Config
 
 	// when
-	_, err := NewConfig(defaultPort, tlogger.NewTLogger(t))
+	err := InitConfig(&config, "", &bytes.Buffer{})
 
 	// then
 	if assert.Error(t, err) {
