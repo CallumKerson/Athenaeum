@@ -16,15 +16,21 @@ import (
 	"github.com/CallumKerson/loggerrific"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
+	"github.com/CallumKerson/Athenaeum/pkg/m4b"
 )
 
-type Service struct {
-	mediaRoot string
-	logger    loggerrific.Logger
+type M4BMetadataReader interface {
+	Read(pathToM4BFile string) (*m4b.Metadata, error)
 }
 
-func New(logger loggerrific.Logger, opts ...Option) *Service {
-	svc := &Service{logger: logger}
+type Service struct {
+	m4bMetadataReader M4BMetadataReader
+	mediaRoot         string
+	logger            loggerrific.Logger
+}
+
+func New(m4bMetadataReader M4BMetadataReader, logger loggerrific.Logger, opts ...Option) *Service {
+	svc := &Service{m4bMetadataReader: m4bMetadataReader, logger: logger}
 	for _, opt := range opts {
 		opt(svc)
 	}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
+	"github.com/CallumKerson/Athenaeum/pkg/m4b"
 )
 
 var (
@@ -45,9 +46,15 @@ var (
 )
 
 func TestService_GetAudiobooks(t *testing.T) {
-	svc := New(tlogger.NewTLogger(t), WithPathToMediaRoot("testdata"))
+	svc := New(&DummyM4BService{}, tlogger.NewTLogger(t), WithPathToMediaRoot("testdata"))
 
 	books, err := svc.GetAllAudiobooks(context.TODO())
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, expectedAudiobooks, books)
+}
+
+type DummyM4BService struct{}
+
+func (s *DummyM4BService) Read(pathToM4BFile string) (*m4b.Metadata, error) {
+	return &m4b.Metadata{Duration: time.Nanosecond * 4671000064}, nil
 }

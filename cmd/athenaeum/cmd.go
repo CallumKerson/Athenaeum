@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/CallumKerson/Athenaeum/internal/adapters/alfgmp4"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	audiobooksService "github.com/CallumKerson/Athenaeum/internal/audiobooks/service"
@@ -74,7 +75,8 @@ func NewRunCommand() *cobra.Command {
 func runServer(cfg *Config) error {
 	logger := logrus.NewLogger()
 	setLogLevel(logger, cfg.GetLogLevel())
-	mediaSvc := mediaService.New(logger, cfg.GetMediaServiceOpts()...)
+	m4bMetadataReader := alfgmp4.NewMetadataReader()
+	mediaSvc := mediaService.New(m4bMetadataReader, logger, cfg.GetMediaServiceOpts()...)
 	boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
 	if err != nil {
 		return err
