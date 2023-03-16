@@ -19,6 +19,11 @@ const (
 	shortHelp = "an audiobook server that provides a podcast feed"
 )
 
+var (
+	pathToConfig = ""
+	cfg          Config
+)
+
 func main() {
 	cmd := NewRootCommand()
 	if err := cmd.Execute(); err != nil {
@@ -28,43 +33,60 @@ func main() {
 
 // Build the cobra command that handles our command line tool.
 func NewRootCommand() *cobra.Command {
-	pathToConfig := ""
-	var cfg Config
-
 	// Define our command
 	rootCmd := &cobra.Command{
-		Use:   "athenaeum",
-		Short: shortHelp,
-		PreRunE: func(cmd *cobra.Command, args []string) error {
+		Use:          "athenaeum",
+		Short:        shortHelp,
+		SilenceUsage: true,
+		Version:      Version,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return InitConfig(&cfg, pathToConfig, cmd.OutOrStderr())
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger := logrus.NewLogger()
-			setLogLevel(logger, cfg.GetLogLevel())
-			mediaSvc := mediaService.New(logger, cfg.GetMediaServiceOpts()...)
-			boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
-			if err != nil {
-				return err
-			}
-			audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, logger)
-			if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
-				return errScan
-			}
-			podcastSvc := podcastService.New(audiobookSvc, logger, cfg.GetPodcastServiceOpts()...)
-			httpHandler := transportHttp.NewHandler(podcastSvc, audiobookSvc, logger, cfg.GetHTTPHandlerOpts()...)
-
-			return transportHttp.Serve(httpHandler, cfg.Port, logger)
+			return runServer(&cfg)
 		},
 	}
 
 	// Define cobra flags, the default value has the lowest (least significant) precedence
 	rootCmd.PersistentFlags().StringVarP(&pathToConfig, "config", "c", pathToConfig, "path to config file")
-	rootCmd.SilenceUsage = true
-
-	rootCmd.Version = Version
 
 	rootCmd.AddCommand(NewVersionCommand())
+	rootCmd.AddCommand(NewRunCommand())
 	return rootCmd
+}
+
+func NewRunCommand() *cobra.Command {
+	pathToConfig := ""
+	var cfg Config
+	return &cobra.Command{
+		Use:          "run",
+		Short:        "Run the server",
+		SilenceUsage: true,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return InitConfig(&cfg, pathToConfig, cmd.OutOrStderr())
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runServer(&cfg)
+		},
+	}
+}
+
+func runServer(cfg *Config) error {
+	logger := logrus.NewLogger()
+	setLogLevel(logger, cfg.GetLogLevel())
+	mediaSvc := mediaService.New(logger, cfg.GetMediaServiceOpts()...)
+	boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
+	if err != nil {
+		return err
+	}
+	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, logger)
+	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
+		return errScan
+	}
+	podcastSvc := podcastService.New(audiobookSvc, logger, cfg.GetPodcastServiceOpts()...)
+	httpHandler := transportHttp.NewHandler(podcastSvc, audiobookSvc, logger, cfg.GetHTTPHandlerOpts()...)
+
+	return transportHttp.Serve(httpHandler, cfg.Port, logger)
 }
 
 func setLogLevel(logger *logrus.Logger, level string) {
