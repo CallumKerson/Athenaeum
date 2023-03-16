@@ -15,6 +15,8 @@ import (
 
 	"github.com/avast/retry-go"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/CallumKerson/Athenaeum/internal/testing/dataloader"
 )
 
 var (
@@ -29,7 +31,7 @@ func TestRootCommand(t *testing.T) {
 		"ATHENAEUM_HOST":       host,
 		"ATHENAEUM_PORT":       fmt.Sprintf("%d", port),
 		"ATHENAEUM_DB_ROOT":    tempDir,
-		"ATHENAEUM_MEDIA_ROOT": filepath.Join("testdata", "media"),
+		"ATHENAEUM_MEDIA_ROOT": dataloader.GetRootTestdata(t),
 	})
 	t.Cleanup(envVarCleanup)
 
