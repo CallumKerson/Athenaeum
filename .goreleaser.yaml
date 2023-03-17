@@ -82,12 +82,12 @@ brews:
       ****************************************************************
       ****************************************************************
       Below are services commands to run to manage the athenaeum service.
-      If you wish to run the collector at boot prefix these commands with sudo
+      If you wish to run the athenaeum at boot prefix these commands with sudo
       otherwise the service will run at login.
-      To start the collector service run:
+      To start the athenaeum service run:
         brew services start CallumKerson/homebrew-tap/athenaeum
-      To stop the collector service run:
+      To stop the athenaeum service run:
         brew services stop CallumKerson/homebrew-tap/athenaeum
-      To restart the collector service run:
+      To restart the athenaeum service run:
         brew services restart CallumKerson/homebrew-tap/athenaeum
       ****************************************************************
