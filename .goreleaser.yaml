@@ -77,6 +77,8 @@ brews:
     service: |
       run [opt_bin/"athenaeum", "run" ,"--config", opt_prefix/"config.yaml"]
       keep_alive true
+      error_log_path var/"log/athenaeum.log"
+      log_path var/"log/athenaeum.log"
     caveats: |
       ****************************************************************
       The configuration file that is run by the service is located at #{prefix}/config.yaml.
