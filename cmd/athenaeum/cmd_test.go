@@ -24,6 +24,38 @@ var (
 )
 
 func TestRootCommand(t *testing.T) {
+	host := startRunCommand(t)
+
+	tests := []struct {
+		name                string
+		r                   *http.Request
+		expectedStatus      int
+		expectedContentType string
+		expectedBody        string
+	}{
+		{
+			name:                "feed",
+			r:                   newRequest(t, "GET", host+"/podcast/feed.rss"),
+			expectedStatus:      200,
+			expectedContentType: "application/xml; charset=utf-8",
+			expectedBody:        getExpectedFeed(t, host)},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			resp, err := http.DefaultClient.Do(testCase.r)
+			assert.NoError(t, err)
+			defer resp.Body.Close()
+			b, err := io.ReadAll(resp.Body)
+			assert.NoError(t, err)
+			assert.Equal(t, testCase.expectedStatus, resp.StatusCode)
+			assert.Equal(t, testCase.expectedContentType, resp.Header.Get("Content-Type"))
+			assert.Equal(t, testCase.expectedBody, string(b))
+		})
+	}
+}
+
+func startRunCommand(t *testing.T) string {
 	port := getFreePort(t)
 	host := fmt.Sprintf("http://localhost:%d", port)
 	tempDir := t.TempDir()
@@ -57,17 +89,7 @@ func TestRootCommand(t *testing.T) {
 		},
 	)
 	assert.NoError(t, err)
-
-	req := newRequest(t, "GET", fmt.Sprintf("%s/podcast/feed.rss", host))
-	resp, err := http.DefaultClient.Do(req)
-	assert.NoError(t, err)
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, 200, resp.StatusCode)
-	assert.Equal(t, "application/xml; charset=utf-8", resp.Header.Get("Content-Type"))
-	assert.Equal(t, getExpectedFeed(t, host), string(body))
+	return host
 }
 
 func getFreePort(t *testing.T) int {
