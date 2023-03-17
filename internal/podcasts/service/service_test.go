@@ -59,7 +59,9 @@ func TestGetFeed(t *testing.T) {
 		tlogger.NewTLogger(t),
 		WithHost("http://www.example-podcast.com/audiobooks/"),
 		WithMediaPath("/media/"),
-		WithPodcastFeedInfo(true, "EN", "A Person", "person@domain.test", "None", "http://www.example-podcast.com/images/itunes.jpg"))
+		WithPodcastFeedInfo(true, "EN", "A Person", "person@domain.test", "None", "http://www.example-podcast.com/images/itunes.jpg"),
+		WithHandlePreUnixEpoch(true),
+	)
 
 	var buf bytes.Buffer
 

@@ -27,6 +27,12 @@ func WithPodcastFeedInfo(explicit bool, language, author, email, copyright, imag
 	}
 }
 
+func WithHandlePreUnixEpoch(handle bool) Option {
+	return func(service *Service) {
+		service.handlePreUnixEpochDates = handle
+	}
+}
+
 type FeedOpts struct {
 	Title       string
 	Description string

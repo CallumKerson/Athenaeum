@@ -18,12 +18,16 @@ import (
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
 )
 
-var errNoConfig = errors.New("no config")
+var (
+	errNoConfig = errors.New("no config")
+	unixEpoch   = time.Unix(0, 0).UTC()
+)
 
 func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobooks.Audiobook, feedOpts *FeedOpts, writer io.Writer) error {
 	if feedOpts == nil {
 		return errNoConfig
 	}
+
 	pod := &podcasts.Podcast{
 		Title:       feedOpts.Title,
 		Description: feedOpts.Description,
@@ -37,10 +41,16 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 			return err
 		}
 
+		pubDate := books[bookIndex].ReleaseDate.AsTime(time.UTC)
+		if s.handlePreUnixEpochDates && unixEpoch.After(pubDate) {
+			pubDate = unixEpoch
+		}
+		pubDate = pubDate.Add(8 * time.Hour)
+
 		pod.AddItem(&podcasts.Item{
 			Title:       books[bookIndex].Title,
 			Description: &podcasts.CDATAText{Value: fmt.Sprintf("%s by %s", books[bookIndex].Title, books[bookIndex].GetAuthor())},
-			PubDate:     podcasts.NewPubDate(books[bookIndex].ReleaseDate.AsTime(time.UTC).Add(8 * time.Hour)),
+			PubDate:     podcasts.NewPubDate(pubDate),
 			Duration:    podcasts.NewDuration(books[bookIndex].Duration),
 			GUID:        hostedFile.String(),
 			Enclosure: &podcasts.Enclosure{

@@ -30,7 +30,8 @@ func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
 	return []podcastService.Option{podcastService.WithHost(c.Host),
 		podcastService.WithMediaPath(c.Media.HostPath),
 		podcastService.WithPodcastFeedInfo(c.Podcast.Explicit, c.Podcast.Language, c.Podcast.Author, c.Podcast.Email, c.Podcast.Copyright,
-			strings.Join([]string{c.Host, staticPath, "itunes_image.jpg"}, "/"))}
+			strings.Join([]string{c.Host, staticPath, "itunes_image.jpg"}, "/")),
+		podcastService.WithHandlePreUnixEpoch(c.Podcast.PreUnixEpoch.Handle)}
 }
 
 func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {

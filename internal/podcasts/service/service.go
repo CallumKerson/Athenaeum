@@ -19,15 +19,16 @@ type AudiobooksClient interface {
 }
 
 type Service struct {
-	Log             loggerrific.Logger
-	host            string
-	fedImageLink    string
-	mediaPath       string
-	feedExplicit    bool
-	feedLanguage    string
-	feedAuthor      string
-	feedAuthorEmail string
-	feedCopyright   string
+	Log                     loggerrific.Logger
+	host                    string
+	fedImageLink            string
+	mediaPath               string
+	feedExplicit            bool
+	feedLanguage            string
+	feedAuthor              string
+	feedAuthorEmail         string
+	feedCopyright           string
+	handlePreUnixEpochDates bool
 	AudiobooksClient
 }
 
