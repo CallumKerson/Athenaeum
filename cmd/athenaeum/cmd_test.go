@@ -40,14 +40,17 @@ func TestRootCommand(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			baloo.New(host).
-				Method(testCase.method).
-				Path(testCase.path).
-				Request().
-				Expect(t).
-				Status(testCase.expectedStatus).
-				Type(testCase.expectedBody).
-				BodyEquals(testCase.expectedBody)
+			assert.NoError(t,
+				baloo.New(host).
+					Method(testCase.method).
+					Path(testCase.path).
+					Request().
+					Expect(t).
+					Status(testCase.expectedStatus).
+					Type(testCase.expectedContentType).
+					BodyEquals(testCase.expectedBody).
+					Done(),
+			)
 		})
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"gopkg.in/h2non/baloo.v3"
 
 	"github.com/CallumKerson/loggerrific/tlogger"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -30,24 +31,27 @@ func TestHandler(t *testing.T) {
 		expectedContentType string
 		expectedBody        string
 	}{
-		{name: "health check", method: "GET", path: "/health", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}\n"},
-		{name: "readiness check", method: "GET", path: "/ready", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}\n"},
-		{name: "version", method: "GET", path: "/version", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}\n"},
+		{name: "health check", method: "GET", path: "/health", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}"},
+		{name: "readiness check", method: "GET", path: "/ready", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}"},
+		{name: "version", method: "GET", path: "/version", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}"},
 		{name: "feed", method: "GET", path: "/podcast/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: testFeed},
-		{name: "media", method: "GET", path: "/media/media.txt", expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file\n"},
+		{name: "media", method: "GET", path: "/media/media.txt", expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file"},
 		{name: "update", method: "POST", path: "/update", expectedStatus: 204, expectedContentType: "", expectedBody: ""},
-		{name: "update on get fails", method: "GET", path: "/update", expectedStatus: 405, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Method Not Allowed\n"},
+		{name: "update on get fails", method: "GET", path: "/update", expectedStatus: 405, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Method Not Allowed"},
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			baloo.New(testServer.URL).
-				Method(testCase.method).
-				Path(testCase.path).
-				Request().
-				Expect(t).
-				Status(testCase.expectedStatus).
-				Type(testCase.expectedBody).
-				BodyEquals(testCase.expectedBody)
+			assert.NoError(t,
+				baloo.New(testServer.URL).
+					Method(testCase.method).
+					Path(testCase.path).
+					Request().
+					Expect(t).
+					Status(testCase.expectedStatus).
+					Type(testCase.expectedContentType).
+					BodyEquals(testCase.expectedBody).
+					Done(),
+			)
 		})
 	}
 }
