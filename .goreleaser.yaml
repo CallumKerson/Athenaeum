@@ -63,3 +63,31 @@ docker_manifests:
       - "ghcr.io/callumkerson/{{ .ProjectName }}:latest-arm64"
 changelog:
   use: github-native
+brews:
+  - tap:
+      owner: CallumKerson
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/CallumKerson/Athenaeum"
+    license: "MIT"
+    test: |
+      system "#{bin}/athenaeum --version"
+    service: |
+      run [opt_bin/"athenaeum", "run" ,"--config", opt_prefix/"config.yaml"]
+      keep_alive true
+    caveats: |
+      ****************************************************************
+      The configuration file that is run by the service is located at #{prefix}/config.yaml.
+      ****************************************************************
+      ****************************************************************
+      Below are services commands to run to manage the athenaeum service.
+      If you wish to run the collector at boot prefix these commands with sudo
+      otherwise the service will run at login.
+      To start the collector service run:
+        brew services start CallumKerson/homebrew-tap/athenaeum
+      To stop the collector service run:
+        brew services stop CallumKerson/homebrew-tap/athenaeum
+      To restart the collector service run:
+        brew services restart CallumKerson/homebrew-tap/athenaeum
+      ****************************************************************
