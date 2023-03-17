@@ -71,6 +71,13 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 			return err
 		}
 	}
+
+	if feedOpts.ImageLink != "" {
+		err = feed.SetOptions(podcasts.Image(feedOpts.ImageLink))
+		if err != nil {
+			return err
+		}
+	}
 	return feed.Write(writer)
 }
 

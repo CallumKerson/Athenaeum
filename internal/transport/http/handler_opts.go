@@ -35,6 +35,9 @@ func WithStaticPath(staticServePath string) HandlerOption {
 		if !strings.HasSuffix(staticServePath, "/") {
 			staticServePath = fmt.Sprintf("%s/", staticServePath)
 		}
+		if !strings.HasPrefix(staticServePath, "/") {
+			staticServePath = fmt.Sprintf("/%s", staticServePath)
+		}
 		handler.staticServePath = staticServePath
 	}
 }

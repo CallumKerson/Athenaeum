@@ -13,6 +13,7 @@
       <itunes:name>A Person</itunes:name>
       <itunes:email>person@domain.test</itunes:email>
     </itunes:owner>
+    <itunes:image href="http://www.example-podcast.com/images/itunes.jpg"></itunes:image>
     <item>
       <title>A Wizard of Earthsea</title>
       <guid>http://www.example-podcast.com/audiobooks/media/a%20wizard%20of%20earthsea.m4b</guid>

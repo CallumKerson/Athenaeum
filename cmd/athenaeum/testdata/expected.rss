@@ -8,6 +8,7 @@
     <description>Like movies in your mind!</description>
     <itunes:block>yes</itunes:block>
     <itunes:explicit>yes</itunes:explicit>
+    <itunes:image href="{{.}}/static/itunes_image.jpg"></itunes:image>
     <item>
       <title>This Is How You Lose the Time War</title>
       <guid>{{.}}/media/Amal%20El-Mohtar%20and%20Max%20Gladstone/This%20Is%20How%20You%20Lose%20the%20Time%20War/This%20Is%20How%20You%20Lose%20the%20Time%20War.m4b</guid>

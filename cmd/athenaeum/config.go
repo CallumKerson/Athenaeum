@@ -40,6 +40,7 @@ type Podcast struct {
 	Language  string
 	Author    string
 	Email     string
+	ImagePath string
 }
 
 func (c *Config) GetLogLevel() string {
