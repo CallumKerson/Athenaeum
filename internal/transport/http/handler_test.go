@@ -4,6 +4,9 @@ import (
 	"context"
 	"io"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,10 +21,13 @@ const (
 
 func TestHandler(t *testing.T) {
 	testHandler := NewHandler(&DummyPodcastService{}, &DummyUpdateService{}, tlogger.NewTLogger(t),
-		WithMediaConfig("testdata", "/media/"), WithVersion("1.0.0-test"))
+		WithMediaConfig(filepath.Join("testdata", "media"), "/media/"), WithVersion("1.0.0-test"), WithStaticPath("/static"))
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
+
+	expectedIndex, err := os.ReadFile(filepath.Join("testdata", "expected-index.html"))
+	assert.NoError(t, err)
 
 	tests := []struct {
 		name                string
@@ -31,6 +37,7 @@ func TestHandler(t *testing.T) {
 		expectedContentType string
 		expectedBody        string
 	}{
+		{name: "index", method: "GET", path: "", expectedStatus: 200, expectedContentType: ContentTypeHTML, expectedBody: strings.TrimSpace(string(expectedIndex))},
 		{name: "health check", method: "GET", path: "/health", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}"},
 		{name: "readiness check", method: "GET", path: "/ready", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}"},
 		{name: "version", method: "GET", path: "/version", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}"},
@@ -50,6 +57,37 @@ func TestHandler(t *testing.T) {
 					Status(testCase.expectedStatus).
 					Type(testCase.expectedContentType).
 					BodyEquals(testCase.expectedBody).
+					Done(),
+			)
+		})
+	}
+}
+
+func TestHandler_Static(t *testing.T) {
+	testHandler := NewHandler(&DummyPodcastService{}, &DummyUpdateService{}, tlogger.NewTLogger(t),
+		WithMediaConfig("testdata", "/media/"), WithVersion("1.0.0-test"), WithStaticPath("/static"))
+
+	testServer := httptest.NewServer(testHandler)
+	defer testServer.Close()
+
+	tests := []struct {
+		name                string
+		path                string
+		expectedContentType string
+		expectedBodyLength  int
+	}{
+		{name: "itunes image", path: "/static/itunes_image.jpg", expectedContentType: "image/jpeg", expectedBodyLength: 261235},
+		{name: "itunes image small", path: "/static/itunes_image_small.jpg", expectedContentType: "image/jpeg", expectedBodyLength: 73150},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.NoError(t,
+				baloo.New(testServer.URL).
+					Get(testCase.path).
+					Expect(t).
+					Status(200).
+					Type(testCase.expectedContentType).
+					BodyLength(testCase.expectedBodyLength).
 					Done(),
 			)
 		})

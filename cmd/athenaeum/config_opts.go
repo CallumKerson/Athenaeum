@@ -6,6 +6,7 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
+	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
 
 func (c *Config) GetMediaHost() string {
@@ -24,4 +25,12 @@ func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
 	return []podcastService.Option{podcastService.WithHost(c.Host),
 		podcastService.WithMediaPath(c.Media.HostPath),
 		podcastService.WithPodcastFeedInfo(c.Podcast.Explicit, c.Podcast.Language, c.Podcast.Author, c.Podcast.Email, c.Podcast.Copyright)}
+}
+
+func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
+	return []transportHttp.HandlerOption{
+		transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath),
+		transportHttp.WithVersion(Version),
+		transportHttp.WithStaticPath("/static"),
+	}
 }

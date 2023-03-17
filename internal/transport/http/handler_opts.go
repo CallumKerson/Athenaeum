@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+const (
+	defaultStaticPath = "/static"
+)
+
 type HandlerOption func(h *Handler)
 
 func WithMediaConfig(mediaRoot, mediaServePath string) HandlerOption {
@@ -20,5 +24,17 @@ func WithMediaConfig(mediaRoot, mediaServePath string) HandlerOption {
 func WithVersion(version string) HandlerOption {
 	return func(h *Handler) {
 		h.version = version
+	}
+}
+
+func WithStaticPath(staticServePath string) HandlerOption {
+	return func(handler *Handler) {
+		if staticServePath == "" {
+			staticServePath = defaultStaticPath
+		}
+		if !strings.HasSuffix(staticServePath, "/") {
+			staticServePath = fmt.Sprintf("%s/", staticServePath)
+		}
+		handler.staticServePath = staticServePath
 	}
 }
