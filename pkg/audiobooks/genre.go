@@ -42,6 +42,7 @@ var (
 		11: "Historical Fiction",
 		12: "Thriller",
 		13: "Horror",
+		14: "LGBT+",
 	}
 	genreValue = map[string]uint8{
 		"literary":           1,
@@ -63,6 +64,8 @@ var (
 		"historical fiction": 11,
 		"thriller":           12,
 		"horror":             13,
+		"lgbt":               14,
+		"lgbt+":              14,
 	}
 )
 
