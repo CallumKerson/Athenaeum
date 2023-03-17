@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-
-	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
 
 const (
@@ -46,10 +44,6 @@ type Podcast struct {
 
 func (c *Config) GetLogLevel() string {
 	return c.Log.Level
-}
-
-func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
-	return []transportHttp.HandlerOption{transportHttp.WithMediaConfig(c.Media.Root, c.Media.HostPath), transportHttp.WithVersion(Version)}
 }
 
 func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {

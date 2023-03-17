@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <title>{{.Title}} 🎧📚</title>
+    <meta charset='utf-8'>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        .message {
+            width: 330px;
+            padding: 20px 40px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+
+        center {
+            margin: 40px 0;
+        }
+
+        h1 {
+            font-size: 18px;
+            line-height: 26px;
+        }
+
+        p {
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="message">
+        <h1>{{.Title}} 🎧📚</h1>
+        <img src="{{.StaticServePath}}/itunes_image_small.jpg" alt="Audiobooks" width="300" border="4">
+        <p>{{.Description}}</p>
+        <p>Feed link <a href="{{.FeedLink}}">here</a>.</p>
+    </div>
+</body>
+
+</html>

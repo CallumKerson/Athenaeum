@@ -11,7 +11,7 @@ import (
 
 const (
 	allAudiobooksFeedTitle       = "Audiobooks"
-	allAudiobooksFeedDescription = "Like movies for your mind!"
+	allAudiobooksFeedDescription = "Like movies in your mind!"
 )
 
 type AudiobooksClient interface {

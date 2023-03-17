@@ -2,13 +2,14 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
 
 	"github.com/CallumKerson/loggerrific"
+
+	"github.com/CallumKerson/Athenaeum/static"
 )
 
 type AudiobooksPodcastService interface {
@@ -23,12 +24,15 @@ type AudiobooksUpdateService interface {
 
 type Handler struct {
 	*mux.Router
-	PodcastService AudiobooksPodcastService
-	UpdateService  AudiobooksUpdateService
-	Log            loggerrific.Logger
-	version        string
-	mediaRoot      string
-	mediaServePath string
+	PodcastService   AudiobooksPodcastService
+	UpdateService    AudiobooksUpdateService
+	Log              loggerrific.Logger
+	version          string
+	mediaRoot        string
+	mediaServePath   string
+	staticServePath  string
+	podcastServePath string
+	mainFeedPath     string
 }
 
 func NewHandler(podcastService AudiobooksPodcastService, updateService AudiobooksUpdateService,
@@ -41,6 +45,8 @@ func NewHandler(podcastService AudiobooksPodcastService, updateService Audiobook
 	for _, opt := range opts {
 		opt(handler)
 	}
+	handler.podcastServePath = "/podcast"
+	handler.mainFeedPath = "/feed.rss"
 	handler.Router = mux.NewRouter()
 	handler.mapRoutes()
 	handler.Use(TimeoutMiddleware)
@@ -54,83 +60,21 @@ func (h *Handler) mapRoutes() {
 
 	middleware := NewMiddlewares(h.Log)
 
-	podcastSubrouter := h.PathPrefix("/podcast").Subrouter()
+	podcastSubrouter := h.PathPrefix(h.podcastServePath).Subrouter()
 	podcastSubrouter.Use(middleware.LoggingMiddleware)
-	podcastSubrouter.HandleFunc("/feed.rss", h.getFeed)
+	podcastSubrouter.HandleFunc(h.mainFeedPath, h.getFeed)
 
 	updateRouter := h.PathPrefix("/update").Subrouter()
 	updateRouter.Use(SevereRateLimitMiddleware, middleware.LoggingMiddleware)
 	updateRouter.HandleFunc("", h.updateAudiobooks)
 
-	fs := http.StripPrefix(h.mediaServePath, http.FileServer(http.Dir(h.mediaRoot)))
-	h.Log.Infoln("Serving files from local path", h.mediaRoot, "at", h.mediaServePath)
-	h.Router.PathPrefix(h.mediaServePath).Handler(middleware.LoggingMiddleware(fs))
-}
+	mediaFS := http.StripPrefix(h.mediaServePath, http.FileServer(http.Dir(h.mediaRoot)))
+	h.Log.Infoln("Serving media files from local path", h.mediaRoot, "at", h.mediaServePath)
+	h.Router.PathPrefix(h.mediaServePath).Handler(middleware.LoggingMiddleware(mediaFS))
 
-func healthCheck(writer http.ResponseWriter, request *http.Request) {
-	SendJSON(writer, http.StatusOK, Payload{
-		"health": "ok",
-	})
-}
+	staticFS := http.StripPrefix(h.staticServePath, http.FileServer(http.FS(static.Assets)))
+	h.Log.Infoln("Serving static files at", h.staticServePath)
+	h.Router.PathPrefix(h.staticServePath).Handler(middleware.LoggingMiddleware(staticFS))
 
-func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
-	if h.PodcastService.IsReady(request.Context()) && h.UpdateService.IsReady(request.Context()) {
-		SendJSON(writer, http.StatusOK, Payload{
-			"readiness": "ok",
-		})
-	} else {
-		SendJSON(writer, http.StatusInternalServerError, Payload{
-			"readiness": "not ready",
-		})
-	}
-}
-
-func (h *Handler) printVersion(writer http.ResponseWriter, request *http.Request) {
-	SendJSON(writer, http.StatusOK, Payload{
-		"version": h.version,
-	})
-}
-
-func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
-	writer.WriteHeader(http.StatusOK)
-	err := h.PodcastService.WriteAllAudiobooksFeed(request.Context(), writer)
-	if err != nil {
-		SendJSONError(writer, http.StatusInternalServerError, err)
-		return
-	}
-}
-
-func (h *Handler) updateAudiobooks(writer http.ResponseWriter, request *http.Request) {
-	if request.Method == http.MethodPost {
-		if err := h.UpdateService.UpdateAudiobooks(request.Context()); err != nil {
-			SendJSONError(writer, http.StatusInternalServerError, err)
-			return
-		}
-		writer.WriteHeader(http.StatusNoContent)
-		_, _ = writer.Write([]byte{})
-	} else {
-		writer.Header().Add("Allow", http.MethodPost)
-		http.Error(writer, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-	}
-}
-
-type Payload map[string]any
-
-func SendJSONError(w http.ResponseWriter, status int, err error) {
-	SendJSON(w, status, Payload{
-		"status": status,
-		"error":  err.Error(),
-	})
-}
-
-func SendJSON(writer http.ResponseWriter, status int, p any) {
-	writer.Header().Set(ContentTypeHeader, ContentTypeJSON)
-	writer.WriteHeader(status)
-	encoder := json.NewEncoder(writer)
-	encoder.SetIndent("", "  ")
-	err := encoder.Encode(p)
-	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-	}
+	h.Handle("/", middleware.LoggingMiddleware(http.HandlerFunc(h.serveHTML)))
 }
