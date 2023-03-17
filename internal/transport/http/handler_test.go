@@ -6,10 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/baloo.v3"
 
 	"github.com/CallumKerson/loggerrific/tlogger"
-	"github.com/stretchr/testify/assert"
 )
 
 const (
