@@ -3,24 +3,19 @@ package main
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"net"
-	"net/http"
 	"path/filepath"
 	"strings"
 	"testing"
 	"text/template"
 
-	"github.com/avast/retry-go"
+	"github.com/carlmjohnson/requests"
 	"github.com/stretchr/testify/assert"
+	"github.com/ybbus/httpretry"
+	"gopkg.in/h2non/baloo.v3"
 
 	"github.com/CallumKerson/Athenaeum/internal/testing/dataloader"
-)
-
-var (
-	errServerNotReady = errors.New("server not ready")
 )
 
 func TestRootCommand(t *testing.T) {
@@ -28,14 +23,16 @@ func TestRootCommand(t *testing.T) {
 
 	tests := []struct {
 		name                string
-		r                   *http.Request
+		path                string
+		method              string
 		expectedStatus      int
 		expectedContentType string
 		expectedBody        string
 	}{
 		{
 			name:                "feed",
-			r:                   newRequest(t, "GET", host+"/podcast/feed.rss"),
+			path:                "/podcast/feed.rss",
+			method:              "GET",
 			expectedStatus:      200,
 			expectedContentType: "application/xml; charset=utf-8",
 			expectedBody:        getExpectedFeed(t, host)},
@@ -43,14 +40,14 @@ func TestRootCommand(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			resp, err := http.DefaultClient.Do(testCase.r)
-			assert.NoError(t, err)
-			defer resp.Body.Close()
-			b, err := io.ReadAll(resp.Body)
-			assert.NoError(t, err)
-			assert.Equal(t, testCase.expectedStatus, resp.StatusCode)
-			assert.Equal(t, testCase.expectedContentType, resp.Header.Get("Content-Type"))
-			assert.Equal(t, testCase.expectedBody, string(b))
+			baloo.New(host).
+				Method(testCase.method).
+				Path(testCase.path).
+				Request().
+				Expect(t).
+				Status(testCase.expectedStatus).
+				Type(testCase.expectedBody).
+				BodyEquals(testCase.expectedBody)
 		})
 	}
 }
@@ -74,21 +71,13 @@ func startRunCommand(t *testing.T) string {
 		_ = cmd.Execute()
 	}()
 
-	err := retry.Do(
-		func() error {
-			req := newRequest(t, "GET", fmt.Sprintf("%s/health", host))
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return err
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != 200 {
-				return errServerNotReady
-			}
-			return nil
-		},
+	assert.NoError(t,
+		requests.
+			URL(host).
+			Client(httpretry.NewDefaultClient()).
+			Path("health").
+			Fetch(context.Background()),
 	)
-	assert.NoError(t, err)
 	return host
 }
 
@@ -100,12 +89,6 @@ func getFreePort(t *testing.T) int {
 	assert.NoError(t, err)
 	defer l.Close()
 	return l.Addr().(*net.TCPAddr).Port
-}
-
-func newRequest(t *testing.T, method, url string) *http.Request {
-	r, err := http.NewRequestWithContext(context.TODO(), method, url, http.NoBody)
-	assert.NoError(t, err)
-	return r
 }
 
 func getExpectedFeed(t *testing.T, host interface{}) string {
