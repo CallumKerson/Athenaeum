@@ -20,36 +20,49 @@ const (
 	SciFi
 	Fantasy
 	NonFiction
+	Biography
+	Historical
+	Thriller
+	Horror
 )
 
 var (
 	errParsingGenre = errors.New("cannot parse genre")
 	genreName       = map[uint8]string{
-		1: "Literary",
-		2: "Mystery",
-		3: "Romance",
-		4: "Comedy",
-		5: "Children's",
-		6: "Young Adult",
-		7: "Science Fiction",
-		8: "Fantasy",
-		9: "Non-fiction",
+		1:  "Literary",
+		2:  "Mystery",
+		3:  "Romance",
+		4:  "Comedy",
+		5:  "Children's",
+		6:  "Young Adult",
+		7:  "Science Fiction",
+		8:  "Fantasy",
+		9:  "Non-fiction",
+		10: "Biography",
+		11: "Historical Fiction",
+		12: "Thriller",
+		13: "Horror",
 	}
 	genreValue = map[string]uint8{
-		"literary":        1,
-		"mystery":         2,
-		"romance":         3,
-		"comedy":          4,
-		"children's":      5,
-		"children":        5,
-		"young adult":     6,
-		"ya":              6,
-		"science fiction": 7,
-		"sci-fi":          7,
-		"scifi":           7,
-		"fantasy":         8,
-		"non-fiction":     9,
-		"nonfiction":      9,
+		"literary":           1,
+		"mystery":            2,
+		"romance":            3,
+		"comedy":             4,
+		"children's":         5,
+		"children":           5,
+		"young adult":        6,
+		"ya":                 6,
+		"science fiction":    7,
+		"sci-fi":             7,
+		"scifi":              7,
+		"fantasy":            8,
+		"non-fiction":        9,
+		"nonfiction":         9,
+		"biography":          10,
+		"historical":         11,
+		"historical fiction": 11,
+		"thriller":           12,
+		"horror":             13,
 	}
 )
 
