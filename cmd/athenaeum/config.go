@@ -35,12 +35,17 @@ type Media struct {
 }
 
 type Podcast struct {
-	Copyright string
-	Explicit  bool
-	Language  string
-	Author    string
-	Email     string
-	ImagePath string
+	Copyright    string
+	Explicit     bool
+	Language     string
+	Author       string
+	Email        string
+	ImagePath    string
+	PreUnixEpoch PreUnixEpoch
+}
+
+type PreUnixEpoch struct {
+	Handle bool
 }
 
 func (c *Config) GetLogLevel() string {
@@ -51,6 +56,7 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Podcast.Copyright", "None")
 	viper.SetDefault("Podcast.Explicit", true)
 	viper.SetDefault("Podcast.Language", "EN")
+	viper.SetDefault("Podcast.PreUnixEpoch.Handle", true)
 	viper.SetDefault("Media.HostPath", "/media")
 	viper.SetDefault("Media.Root", "/srv/media")
 	viper.SetDefault("DB.Root", "/usr/local/athenaeum")
