@@ -71,6 +71,7 @@ brews:
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     homepage: "https://github.com/CallumKerson/Athenaeum"
     license: "MIT"
+    folder: Formula
     test: |
       system "#{bin}/athenaeum --version"
     service: |
