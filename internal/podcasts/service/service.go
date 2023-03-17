@@ -21,6 +21,7 @@ type AudiobooksClient interface {
 type Service struct {
 	Log             loggerrific.Logger
 	host            string
+	fedImageLink    string
 	mediaPath       string
 	feedExplicit    bool
 	feedLanguage    string
@@ -39,6 +40,7 @@ func (s *Service) WriteAllAudiobooksFeed(ctx context.Context, writer io.Writer) 
 		Title:       allAudiobooksFeedTitle,
 		Description: allAudiobooksFeedDescription,
 		Link:        s.host,
+		ImageLink:   s.fedImageLink,
 		Explicit:    s.feedExplicit,
 		Language:    s.feedLanguage,
 		Author:      s.feedAuthor,
