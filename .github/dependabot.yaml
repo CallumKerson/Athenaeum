@@ -1,0 +1,30 @@
+version: 2
+
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "12:00"
+      timezone: Europe/London
+    commit_message:
+      prefix: "fix"
+      include_scope: true
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "12:00"
+      timezone: Europe/London
+    commit_message:
+      prefix: "fix"
+      include_scope: true
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "12:00"
+      timezone: Europe/London
