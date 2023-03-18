@@ -13,12 +13,13 @@ const (
 )
 
 type Config struct {
-	Host    string
-	Port    int
-	DB      DB
-	Media   Media
-	Podcast Podcast
-	Log     Log
+	Host       string
+	Port       int
+	DB         DB
+	Media      Media
+	Podcast    Podcast
+	ThirdParty ThirdParty
+	Log        Log
 }
 
 type Log struct {
@@ -32,6 +33,10 @@ type DB struct {
 type Media struct {
 	Root     string
 	HostPath string
+}
+
+type ThirdParty struct {
+	UpdateOvercast bool
 }
 
 type Podcast struct {
@@ -60,6 +65,7 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Media.HostPath", "/media")
 	viper.SetDefault("Media.Root", "/srv/media")
 	viper.SetDefault("DB.Root", "/usr/local/athenaeum")
+	viper.SetDefault("ThirdParty.UpdateOvercast", false)
 	viper.SetDefault("Port", defaultPort)
 	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", defaultPort))
 	viper.SetDefault("Log.Level", "INFO")
