@@ -19,14 +19,25 @@ type AudiobookStore interface {
 	IsReady(context.Context) bool
 }
 
-type Service struct {
-	mediaScanner   MediaScanner
-	audiobookStore AudiobookStore
-	logger         loggerrific.Logger
+type ThirdPartyUpdateService interface {
+	Update(context.Context) error
 }
 
-func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, logger loggerrific.Logger) *Service {
-	return &Service{mediaScanner: mediaScanner, audiobookStore: audiobookStore, logger: logger}
+type Service struct {
+	mediaScanner             MediaScanner
+	audiobookStore           AudiobookStore
+	thirdPartyUpdateServices []ThirdPartyUpdateService
+	logger                   loggerrific.Logger
+}
+
+func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, logger loggerrific.Logger,
+	thirdPartyUpdateServices ...ThirdPartyUpdateService) *Service {
+	return &Service{
+		mediaScanner:             mediaScanner,
+		audiobookStore:           audiobookStore,
+		logger:                   logger,
+		thirdPartyUpdateServices: thirdPartyUpdateServices,
+	}
 }
 
 func (s *Service) UpdateAudiobooks(ctx context.Context) error {
@@ -34,7 +45,18 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return s.audiobookStore.StoreAll(ctx, audiobooksFromScan)
+	err = s.audiobookStore.StoreAll(ctx, audiobooksFromScan)
+	if err != nil {
+		return err
+	}
+	for svcIndex := range s.thirdPartyUpdateServices {
+		go func(svc ThirdPartyUpdateService) {
+			if updateErr := svc.Update(ctx); updateErr != nil {
+				s.logger.WithError(err).Warnln("Update")
+			}
+		}(s.thirdPartyUpdateServices[svcIndex])
+	}
+	return nil
 }
 
 func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
