@@ -57,15 +57,10 @@ func NewRootCommand() *cobra.Command {
 }
 
 func NewRunCommand() *cobra.Command {
-	pathToConfig := ""
-	var cfg Config
 	return &cobra.Command{
 		Use:          "run",
 		Short:        "Run the server",
 		SilenceUsage: true,
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return InitConfig(&cfg, pathToConfig, cmd.OutOrStderr())
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runServer(&cfg)
 		},
