@@ -21,6 +21,7 @@ type AudiobookStore interface {
 
 type ThirdPartyUpdateService interface {
 	Update(context.Context) error
+	String() string
 }
 
 type Service struct {
@@ -50,11 +51,11 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 		return err
 	}
 	for svcIndex := range s.thirdPartyUpdateServices {
-		go func(svc ThirdPartyUpdateService) {
+		go func(ctx context.Context, svc ThirdPartyUpdateService) {
 			if updateErr := svc.Update(ctx); updateErr != nil {
-				s.logger.WithError(err).Warnln("Update")
+				s.logger.WithError(updateErr).Warnln("Update failed for", svc)
 			}
-		}(s.thirdPartyUpdateServices[svcIndex])
+		}(context.TODO(), s.thirdPartyUpdateServices[svcIndex])
 	}
 	return nil
 }

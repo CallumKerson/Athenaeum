@@ -38,6 +38,10 @@ func (u *DummyUpdater) Update(context.Context) error {
 	return nil
 }
 
+func (u *DummyUpdater) String() string {
+	return "dummy"
+}
+
 type DummyMediaScanner struct {
 }
 

@@ -2,6 +2,7 @@ package updater
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/carlmjohnson/requests"
@@ -21,12 +22,12 @@ type Updater struct {
 }
 
 func New(urlPrefix string, logger loggerrific.Logger) *Updater {
-	logger.Infoln("Will update Overcast for URL prefix", urlPrefix)
-	return &Updater{host: OvercastHost, urlPrefix: urlPrefix, logger: logger}
+	upd := &Updater{host: OvercastHost, urlPrefix: urlPrefix, logger: logger}
+	logger.Infoln("Will update", upd, "for URL prefix", urlPrefix)
+	return upd
 }
 
 func (u *Updater) Update(ctx context.Context) error {
-	body := ""
 	err := requests.
 		URL(u.host).
 		Client(httpretry.NewDefaultClient(
@@ -37,11 +38,14 @@ func (u *Updater) Update(ctx context.Context) error {
 		)).
 		Param("urlprefix", u.urlPrefix).
 		Path("ping").
-		ToString(&body).
 		Fetch(ctx)
 	if err != nil {
 		return err
 	}
-	u.logger.Infoln("Updated Overcast with urlprefix", u.urlPrefix, "response", body)
+	u.logger.Infoln("Updated", u, "with urlprefix", u.urlPrefix)
 	return nil
+}
+
+func (u *Updater) String() string {
+	return fmt.Sprintf("Overcast (%s)", u.host)
 }
