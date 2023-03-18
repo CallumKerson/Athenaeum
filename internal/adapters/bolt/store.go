@@ -105,6 +105,29 @@ func (s *AudiobookStore) GetAll(context.Context) ([]audiobooks.Audiobook, error)
 	})
 }
 
+func (s *AudiobookStore) Get(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
+	boldDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer boldDB.Close()
+	var allAudiobooks []audiobooks.Audiobook
+	return allAudiobooks, boldDB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(s.dbDefaultBucketName)
+		return b.ForEach(func(k, v []byte) error {
+			audiobook := audiobooks.Audiobook{}
+			err = json.Unmarshal(v, &audiobook)
+			if err != nil {
+				return err
+			}
+			if filter(&audiobook) {
+				allAudiobooks = append(allAudiobooks, audiobook)
+			}
+			return nil
+		})
+	})
+}
+
 func (s *AudiobookStore) IsReady(context.Context) bool {
 	return true
 }
