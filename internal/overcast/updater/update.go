@@ -2,6 +2,7 @@ package updater
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/carlmjohnson/requests"
@@ -44,4 +45,8 @@ func (u *Updater) Update(ctx context.Context) error {
 	}
 	u.logger.Infoln("Updated Overcast with urlprefix", u.urlPrefix, "response", body)
 	return nil
+}
+
+func (u *Updater) String() string {
+	return fmt.Sprintf("Overcast (%s)", u.host)
 }
