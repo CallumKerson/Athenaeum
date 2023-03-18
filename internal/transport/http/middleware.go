@@ -19,9 +19,13 @@ func NewMiddlewares(logger loggerrific.Logger) *Middlewares {
 }
 
 func (m *Middlewares) LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		m.Logger.WithFields(map[string]interface{}{"method": r.Method, "path": r.URL.Path}).Infoln("Handled Request")
-		next.ServeHTTP(w, r)
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		m.Logger.WithFields(map[string]interface{}{
+			"method":    request.Method,
+			"path":      request.URL.Path,
+			"userAgent": request.UserAgent(),
+		}).Infoln("Handled Request")
+		next.ServeHTTP(writer, request)
 	})
 }
 
