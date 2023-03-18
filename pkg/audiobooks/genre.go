@@ -51,6 +51,7 @@ var (
 		"comedy":             4,
 		"children's":         5,
 		"children":           5,
+		"childrens":          5,
 		"young adult":        6,
 		"ya":                 6,
 		"science fiction":    7,
