@@ -75,14 +75,12 @@ brews:
     test: |
       system "#{bin}/athenaeum --version"
     service: |
-      run [opt_bin/"athenaeum", "run" ,"--config", opt_prefix/"config.yaml"]
+      run [opt_bin/"athenaeum", "run" ,"--config", etc/"athenaeum.yaml"]
+      environment_variables ATHENAEUM_DB_ROOT var/"athenaeum"
       keep_alive true
       error_log_path var/"log/athenaeum.log"
       log_path var/"log/athenaeum.log"
     caveats: |
-      ****************************************************************
-      The configuration file that is run by the service is located at #{prefix}/config.yaml.
-      ****************************************************************
       ****************************************************************
       Below are services commands to run to manage the athenaeum service.
       If you wish to run the athenaeum at boot prefix these commands with sudo
