@@ -1,4 +1,4 @@
-package updater
+package notifier
 
 import (
 	"context"
@@ -15,19 +15,19 @@ const (
 	OvercastHost = "https://overcast.fm"
 )
 
-type Updater struct {
+type Notifier struct {
 	host      string
 	urlPrefix string
 	logger    loggerrific.Logger
 }
 
-func New(urlPrefix string, logger loggerrific.Logger) *Updater {
-	upd := &Updater{host: OvercastHost, urlPrefix: urlPrefix, logger: logger}
+func New(urlPrefix string, logger loggerrific.Logger) *Notifier {
+	upd := &Notifier{host: OvercastHost, urlPrefix: urlPrefix, logger: logger}
 	logger.Infoln("Will update", upd, "for URL prefix", urlPrefix)
 	return upd
 }
 
-func (u *Updater) Update(ctx context.Context) error {
+func (u *Notifier) Notify(ctx context.Context) error {
 	err := requests.
 		URL(u.host).
 		Client(httpretry.NewDefaultClient(
@@ -42,10 +42,10 @@ func (u *Updater) Update(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	u.logger.Infoln("Updated", u, "with urlprefix", u.urlPrefix)
+	u.logger.Infoln("Notified", u, "with urlprefix", u.urlPrefix)
 	return nil
 }
 
-func (u *Updater) String() string {
+func (u *Notifier) String() string {
 	return fmt.Sprintf("Overcast (%s)", u.host)
 }

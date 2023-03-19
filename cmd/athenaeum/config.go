@@ -36,7 +36,9 @@ type Media struct {
 }
 
 type ThirdParty struct {
+	// Deprecated
 	UpdateOvercast bool
+	NotifyOvercast bool
 }
 
 type Podcast struct {
@@ -66,6 +68,7 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Media.Root", "/srv/media")
 	viper.SetDefault("DB.Root", "/usr/local/athenaeum")
 	viper.SetDefault("ThirdParty.UpdateOvercast", false)
+	viper.SetDefault("ThirdParty.NotifyOvercast", false)
 	viper.SetDefault("Port", defaultPort)
 	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", defaultPort))
 	viper.SetDefault("Log.Level", "INFO")
