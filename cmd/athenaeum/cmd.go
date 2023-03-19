@@ -12,7 +12,7 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	audiobooksService "github.com/CallumKerson/Athenaeum/internal/audiobooks/service"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
-	overcastUpdater "github.com/CallumKerson/Athenaeum/internal/overcast/updater"
+	overcastNotifier "github.com/CallumKerson/Athenaeum/internal/overcast/notifier"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 )
@@ -77,9 +77,9 @@ func runServer(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	var updaters []audiobooksService.ThirdPartyUpdateService
-	if cfg.ThirdParty.UpdateOvercast {
-		updaters = append(updaters, overcastUpdater.New(cfg.Host, logger))
+	var updaters []audiobooksService.ThirdPartyNotifier
+	if cfg.ThirdParty.UpdateOvercast || cfg.ThirdParty.NotifyOvercast {
+		updaters = append(updaters, overcastNotifier.New(cfg.Host, logger))
 	}
 	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, logger, updaters...)
 	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {

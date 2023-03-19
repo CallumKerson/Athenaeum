@@ -18,7 +18,7 @@ var (
 )
 
 func TestUpdate(t *testing.T) {
-	testSvc := New(&DummyMediaScanner{}, &DummyAudiobookStore{}, tlogger.NewTLogger(t), &DummyUpdater{})
+	testSvc := New(&DummyMediaScanner{}, &DummyAudiobookStore{}, tlogger.NewTLogger(t), &DummyNotifier{})
 	err := testSvc.UpdateAudiobooks(context.TODO())
 
 	// checks updater gets called in background
@@ -29,16 +29,16 @@ func TestUpdate(t *testing.T) {
 	assert.True(t, updatedThirdParty, "called updater")
 }
 
-type DummyUpdater struct {
+type DummyNotifier struct {
 }
 
-func (u *DummyUpdater) Update(context.Context) error {
+func (u *DummyNotifier) Notify(context.Context) error {
 	time.Sleep(100 * time.Millisecond)
 	updatedThirdParty = true
 	return nil
 }
 
-func (u *DummyUpdater) String() string {
+func (u *DummyNotifier) String() string {
 	return "dummy"
 }
 

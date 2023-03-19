@@ -1,4 +1,4 @@
-package updater
+package notifier
 
 import (
 	"context"
@@ -21,8 +21,8 @@ func TestUpdater(t *testing.T) {
 	}))
 	defer server.Close()
 
-	testOvercastUpdater := &Updater{host: server.URL, urlPrefix: testURLPrefix, logger: tlogger.NewTLogger(t)}
+	testNotifier := &Notifier{host: server.URL, urlPrefix: testURLPrefix, logger: tlogger.NewTLogger(t)}
 
-	err := testOvercastUpdater.Update(context.TODO())
+	err := testNotifier.Notify(context.TODO())
 	assert.NoError(t, err)
 }

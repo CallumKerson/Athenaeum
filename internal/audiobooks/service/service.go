@@ -19,20 +19,20 @@ type AudiobookStore interface {
 	IsReady(context.Context) bool
 }
 
-type ThirdPartyUpdateService interface {
-	Update(context.Context) error
+type ThirdPartyNotifier interface {
+	Notify(context.Context) error
 	String() string
 }
 
 type Service struct {
 	mediaScanner             MediaScanner
 	audiobookStore           AudiobookStore
-	thirdPartyUpdateServices []ThirdPartyUpdateService
+	thirdPartyUpdateServices []ThirdPartyNotifier
 	logger                   loggerrific.Logger
 }
 
 func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, logger loggerrific.Logger,
-	thirdPartyUpdateServices ...ThirdPartyUpdateService) *Service {
+	thirdPartyUpdateServices ...ThirdPartyNotifier) *Service {
 	return &Service{
 		mediaScanner:             mediaScanner,
 		audiobookStore:           audiobookStore,
@@ -51,9 +51,9 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 		return err
 	}
 	for svcIndex := range s.thirdPartyUpdateServices {
-		go func(ctx context.Context, svc ThirdPartyUpdateService) {
-			if updateErr := svc.Update(ctx); updateErr != nil {
-				s.logger.WithError(updateErr).Warnln("Update failed for", svc)
+		go func(ctx context.Context, notifier ThirdPartyNotifier) {
+			if updateErr := notifier.Notify(ctx); updateErr != nil {
+				s.logger.WithError(updateErr).Warnln("Notifying", notifier, "failed")
 			}
 		}(context.TODO(), s.thirdPartyUpdateServices[svcIndex])
 	}
