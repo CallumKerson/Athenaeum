@@ -59,7 +59,7 @@ func (s *Service) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.
 	if err != nil {
 		return err
 	}
-	allAudiobooksFeedOpts := &FeedOpts{
+	genreFeedOpts := &FeedOpts{
 		Title:       genre.String(),
 		Description: fmt.Sprintf(genreFeedDescriptionFormat, genre),
 		Link:        s.host,
@@ -70,7 +70,7 @@ func (s *Service) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.
 		Email:       s.feedAuthorEmail,
 		Copyright:   s.feedCopyright,
 	}
-	return s.WriteFeedFromAudiobooks(ctx, books, allAudiobooksFeedOpts, writer)
+	return s.WriteFeedFromAudiobooks(ctx, books, genreFeedOpts, writer)
 }
 
 func (s *Service) IsReady(ctx context.Context) bool {
