@@ -31,9 +31,9 @@ func (u *Notifier) Notify(ctx context.Context) error {
 	err := requests.
 		URL(u.host).
 		Client(httpretry.NewDefaultClient(
-			httpretry.WithMaxRetryCount(6),
+			httpretry.WithMaxRetryCount(8),
 			httpretry.WithBackoffPolicy(
-				httpretry.ExponentialBackoff(1*time.Minute, 15*time.Minute, 0),
+				httpretry.ExponentialBackoff(3*time.Minute, 120*time.Minute, 0),
 			),
 		)).
 		Param("urlprefix", u.urlPrefix).
