@@ -1,0 +1,14 @@
+{
+    "cSpell.words": [
+        "baloo",
+        "buildx",
+        "gofmt",
+        "goimports",
+        "golangci",
+        "goreleaser",
+        "hadolint",
+        "isort",
+        "ldflags"
+    ],
+    "cSpell.language": "en,en-GB"
+}
