@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
 )
 
 const (
-	defaultPort = 8080
+	defaultPort      = 8080
+	defaultConfigDir = ".athenaeum"
 )
 
 type Config struct {
@@ -66,7 +69,6 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Podcast.PreUnixEpoch.Handle", true)
 	viper.SetDefault("Media.HostPath", "/media")
 	viper.SetDefault("Media.Root", "/srv/media")
-	viper.SetDefault("DB.Root", "/usr/local/athenaeum")
 	viper.SetDefault("ThirdParty.UpdateOvercast", false)
 	viper.SetDefault("ThirdParty.NotifyOvercast", false)
 	viper.SetDefault("Port", defaultPort)
@@ -96,14 +98,28 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	}
 
 	if pathToConfigFile == "" {
-		fmt.Fprintln(out, "No valid config path provided by flag or found from environment variable ATHENAEUM_CONFIG_PATH,",
-			"reading config from environment variables only")
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		viper.AddConfigPath(filepath.Join(home, defaultConfigDir))
+		viper.SetConfigType("yaml")
+		viper.SetConfigName("config")
 	} else {
 		viper.SetConfigFile(pathToConfigFile)
-		err := viper.ReadInConfig()
+	}
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Fprintln(out, "Using config file:", viper.ConfigFileUsed())
+	} else {
+		fmt.Fprintln(out, "No valid config path provided by flag or found from environment variable ATHENAEUM_CONFIG_PATH,",
+			"reading config from environment variables only")
+	}
+	if viper.GetString("DB.Root") == "" {
+		home, err := os.UserHomeDir()
 		if err != nil {
-			return fmt.Errorf("config error: %w", err)
+			return err
 		}
+		viper.SetDefault("DB.Root", filepath.Join(home, defaultConfigDir, "data"))
 	}
 
 	err := viper.Unmarshal(cfg)

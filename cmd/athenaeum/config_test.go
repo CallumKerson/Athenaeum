@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -138,10 +137,7 @@ func TestConfig_BadFile(t *testing.T) {
 	err := InitConfig(&config, "", &bytes.Buffer{})
 
 	// then
-	if assert.Error(t, err) {
-		var expectedErr *fs.PathError
-		assert.ErrorAs(t, err, &expectedErr)
-	}
+	assert.NoError(t, err)
 }
 
 func envVarSetter(t *testing.T, envs map[string]string) (closer func()) {
