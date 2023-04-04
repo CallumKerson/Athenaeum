@@ -75,8 +75,7 @@ brews:
     test: |
       system "#{bin}/athenaeum --version"
     service: |
-      run [opt_bin/"athenaeum", "run" ,"--config", etc/"athenaeum.yaml"]
-      environment_variables ATHENAEUM_DB_ROOT: var/"athenaeum"
+      run [opt_bin/"athenaeum", "run"]
       keep_alive true
       error_log_path var/"log/athenaeum.log"
       log_path var/"log/athenaeum.log"
