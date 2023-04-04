@@ -97,6 +97,7 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 		pathToConfigFile = viper.GetString("Config.Path")
 	}
 
+	configReadFromFile := false
 	if pathToConfigFile == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
@@ -105,13 +106,19 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 		viper.AddConfigPath(filepath.Join(home, defaultConfigDir))
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("config")
+		if err := viper.ReadInConfig(); err == nil {
+			configReadFromFile = true
+		}
 	} else {
 		viper.SetConfigFile(pathToConfigFile)
+		if err := viper.ReadInConfig(); err == nil {
+			fmt.Fprintln(out, "Using config file:", viper.ConfigFileUsed())
+			configReadFromFile = true
+		}
 	}
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(out, "Using config file:", viper.ConfigFileUsed())
-	} else {
-		fmt.Fprintln(out, "No valid config path provided by flag or found from environment variable ATHENAEUM_CONFIG_PATH,",
+	if !configReadFromFile {
+		fmt.Fprintln(out, "No valid config path provided by flag, from ~/.athenaeum/config.yaml ",
+			"or found from environment variable ATHENAEUM_CONFIG_PATH,",
 			"reading config from environment variables only")
 	}
 	if viper.GetString("DB.Root") == "" {

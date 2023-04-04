@@ -2,19 +2,19 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/alfgmp4"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
-	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	audiobooksService "github.com/CallumKerson/Athenaeum/internal/audiobooks/service"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	overcastNotifier "github.com/CallumKerson/Athenaeum/internal/overcast/notifier"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
+	"github.com/CallumKerson/Athenaeum/pkg/client"
 )
 
 const (
@@ -54,6 +54,7 @@ func NewRootCommand() *cobra.Command {
 
 	rootCmd.AddCommand(NewVersionCommand())
 	rootCmd.AddCommand(NewRunCommand())
+	rootCmd.AddCommand(NewUpdateCommand())
 	return rootCmd
 }
 
@@ -68,9 +69,25 @@ func NewRunCommand() *cobra.Command {
 	}
 }
 
+func NewUpdateCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:          "update",
+		Short:        "Triggers an update on the running athenaeum instance.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			athenaeumClient := client.New((&cfg).GetClientOpts()...)
+			err := athenaeumClient.Update(context.Background())
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprintf(cmd.OutOrStdout(), "Updated Athenaeum at %s\n", cfg.Host)
+			return err
+		},
+	}
+}
+
 func runServer(cfg *Config) error {
-	logger := logrus.NewLogger()
-	setLogLevel(logger, cfg.GetLogLevel())
+	logger := cfg.GetLogger()
 	m4bMetadataReader := alfgmp4.NewMetadataReader()
 	mediaSvc := mediaService.New(m4bMetadataReader, logger, cfg.GetMediaServiceOpts()...)
 	boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
@@ -89,18 +106,4 @@ func runServer(cfg *Config) error {
 	httpHandler := transportHttp.NewHandler(podcastSvc, audiobookSvc, logger, cfg.GetHTTPHandlerOpts()...)
 
 	return transportHttp.Serve(httpHandler, cfg.Port, logger)
-}
-
-func setLogLevel(logger *logrus.Logger, level string) {
-	level = strings.ToLower(level)
-	switch level {
-	case "debug":
-		logger.SetLevelDebug()
-	case "warn":
-		logger.SetLevelWarn()
-	case "error":
-		logger.SetLevelError()
-	default:
-		logger.SetLevelInfo()
-	}
 }
