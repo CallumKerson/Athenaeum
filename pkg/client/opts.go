@@ -7,3 +7,9 @@ func WithHost(host string) Option {
 		c.host = host
 	}
 }
+
+func WithVersion(version string) Option {
+	return func(c *Client) {
+		c.version = version
+	}
+}
