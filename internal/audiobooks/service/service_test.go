@@ -17,16 +17,30 @@ var (
 	updatedThirdParty = false
 )
 
-func TestUpdate(t *testing.T) {
-	testSvc := New(&DummyMediaScanner{}, &DummyAudiobookStore{}, tlogger.NewTLogger(t), &DummyNotifier{})
-	err := testSvc.UpdateAudiobooks(context.TODO())
+func TestUpdate_Changes(t *testing.T) {
+	tests := []struct {
+		name                     string
+		scanner                  MediaScanner
+		expectedToCallThirdParty bool
+	}{
+		{name: "changes detected", scanner: &NewBooksMediaScanner{}, expectedToCallThirdParty: true},
+		{name: "no changes detected", scanner: &NoChangesMediaScanner{}, expectedToCallThirdParty: false},
+	}
 
-	// checks updater gets called in background
-	assert.False(t, updatedThirdParty, "updated not yet called")
-	time.Sleep(300 * time.Millisecond)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			updatedThirdParty = false
 
-	assert.NoError(t, err)
-	assert.True(t, updatedThirdParty, "called updater")
+			testSvc := New(testCase.scanner, &DummyAudiobookStore{}, tlogger.NewTLogger(t), &DummyNotifier{})
+			err := testSvc.UpdateAudiobooks(context.TODO())
+
+			assert.False(t, updatedThirdParty, "updated not yet called")
+			time.Sleep(300 * time.Millisecond)
+
+			assert.NoError(t, err)
+			assert.Equal(t, testCase.expectedToCallThirdParty, updatedThirdParty)
+		})
+	}
 }
 
 type DummyNotifier struct {
@@ -42,11 +56,26 @@ func (u *DummyNotifier) String() string {
 	return "dummy"
 }
 
-type DummyMediaScanner struct {
+type NewBooksMediaScanner struct {
 }
 
-func (s *DummyMediaScanner) GetAllAudiobooks(context.Context) ([]audiobooks.Audiobook, error) {
+func (s *NewBooksMediaScanner) GetAllAudiobooks(context.Context) ([]audiobooks.Audiobook, error) {
 	return testbooks.Audiobooks, nil
+}
+
+func (s *NewBooksMediaScanner) ScanForNewAndUpdatedAudiobooks(context.Context, []audiobooks.Audiobook) ([]audiobooks.Audiobook, bool, error) {
+	return testbooks.Audiobooks, true, nil
+}
+
+type NoChangesMediaScanner struct {
+}
+
+func (s *NoChangesMediaScanner) GetAllAudiobooks(context.Context) ([]audiobooks.Audiobook, error) {
+	return testbooks.Audiobooks, nil
+}
+
+func (s *NoChangesMediaScanner) ScanForNewAndUpdatedAudiobooks(context.Context, []audiobooks.Audiobook) ([]audiobooks.Audiobook, bool, error) {
+	return testbooks.Audiobooks, false, nil
 }
 
 type DummyAudiobookStore struct {

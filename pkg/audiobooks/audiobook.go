@@ -1,6 +1,8 @@
 package audiobooks
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -65,4 +67,10 @@ func GetPersonsString(persons []string) string {
 	default:
 		return fmt.Sprintf("%s & %s", strings.Join(persons[:len(persons)-1], ", "), persons[len(persons)-1])
 	}
+}
+
+func Equal(a, b *Audiobook) bool {
+	aBytes, _ := json.Marshal(a)
+	bBytes, _ := json.Marshal(b)
+	return bytes.Equal(aBytes, bBytes)
 }

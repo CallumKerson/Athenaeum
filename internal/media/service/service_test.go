@@ -11,6 +11,7 @@ import (
 
 	"github.com/CallumKerson/Athenaeum/internal/testing/dataloader"
 	"github.com/CallumKerson/Athenaeum/internal/testing/testbooks"
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/pkg/m4b"
 )
 
@@ -19,6 +20,15 @@ func TestService_GetAudiobooks(t *testing.T) {
 
 	books, err := svc.GetAllAudiobooks(context.TODO())
 	assert.NoError(t, err)
+	assert.ElementsMatch(t, testbooks.Audiobooks, books)
+}
+
+func TestService_UpdateAudiobooks(t *testing.T) {
+	svc := New(&DummyM4BService{}, tlogger.NewTLogger(t), WithPathToMediaRoot(dataloader.GetRootTestdata(t)))
+
+	books, changed, err := svc.ScanForNewAndUpdatedAudiobooks(context.TODO(), []audiobooks.Audiobook{testbooks.Audiobooks[0]})
+	assert.NoError(t, err)
+	assert.True(t, changed)
 	assert.ElementsMatch(t, testbooks.Audiobooks, books)
 }
 

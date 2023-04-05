@@ -10,9 +10,11 @@ import (
 
 type MediaScanner interface {
 	GetAllAudiobooks(context.Context) ([]audiobooks.Audiobook, error)
+	ScanForNewAndUpdatedAudiobooks(context.Context, []audiobooks.Audiobook) ([]audiobooks.Audiobook, bool, error)
 }
 
 type AudiobookStore interface {
+	// StoreAll should remove any audiobooks not in the current slice and store those in the slice
 	StoreAll(context.Context, []audiobooks.Audiobook) error
 	GetAll(context.Context) ([]audiobooks.Audiobook, error)
 	Get(context.Context, func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error)
@@ -42,20 +44,30 @@ func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, logger logger
 }
 
 func (s *Service) UpdateAudiobooks(ctx context.Context) error {
-	audiobooksFromScan, err := s.mediaScanner.GetAllAudiobooks(ctx)
+	s.logger.Infoln("Updating audiobooks")
+	existingAudiobooks, err := s.GetAllAudiobooks(ctx)
 	if err != nil {
 		return err
 	}
-	err = s.audiobookStore.StoreAll(ctx, audiobooksFromScan)
+	audiobooksFromScan, changed, err := s.mediaScanner.ScanForNewAndUpdatedAudiobooks(ctx, existingAudiobooks)
 	if err != nil {
 		return err
 	}
-	for svcIndex := range s.thirdPartyUpdateServices {
-		go func(ctx context.Context, notifier ThirdPartyNotifier) {
-			if updateErr := notifier.Notify(ctx); updateErr != nil {
-				s.logger.WithError(updateErr).Warnln("Notifying", notifier, "failed")
-			}
-		}(context.TODO(), s.thirdPartyUpdateServices[svcIndex])
+	if changed {
+		err = s.audiobookStore.StoreAll(ctx, audiobooksFromScan)
+		if err != nil {
+			return err
+		}
+		for svcIndex := range s.thirdPartyUpdateServices {
+			go func(ctx context.Context, notifier ThirdPartyNotifier) {
+				if updateErr := notifier.Notify(ctx); updateErr != nil {
+					s.logger.WithError(updateErr).Warnln("Notifying", notifier, "failed")
+				}
+			}(context.TODO(), s.thirdPartyUpdateServices[svcIndex])
+		}
+		s.logger.Infoln("Update complete")
+	} else {
+		s.logger.Infoln("No updates detected")
 	}
 	return nil
 }

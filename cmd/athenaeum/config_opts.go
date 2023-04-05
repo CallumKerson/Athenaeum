@@ -45,7 +45,7 @@ func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
 }
 
 func (c *Config) GetClientOpts() []client.Option {
-	return []client.Option{client.WithHost(c.Host)}
+	return []client.Option{client.WithHost(c.Host), client.WithVersion(Version)}
 }
 
 func (c *Config) GetLogger() *logrus.Logger {

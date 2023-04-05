@@ -96,3 +96,17 @@ func TestAudiobookStore_GetAudiobooks(t *testing.T) {
 	assert.Len(t, retrievedBooks, 1)
 	assert.Equal(t, testbooks.Audiobooks[0], retrievedBooks[0])
 }
+
+func TestAudiobookStore_GetAllAudiobooks_WhenEmpty(t *testing.T) {
+	// given
+	dbRoot := t.TempDir()
+	store, err := bolt.NewAudiobookStore(tlogger.NewTLogger(t), true, bolt.WithPathToDBDirectory(dbRoot), bolt.WithDBDefaults())
+	assert.NoError(t, err)
+
+	// when
+	retrievedBooks, err := store.GetAll(context.TODO())
+
+	// then
+	assert.NoError(t, err)
+	assert.Empty(t, retrievedBooks)
+}

@@ -51,7 +51,7 @@ func (s *AudiobookStore) Initialise() error {
 	defer boltDB.Close()
 	s.log.Infoln("Setting up database at", s.getDBPath())
 	return boltDB.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte("DB"))
+		_, err := tx.CreateBucketIfNotExists(s.dbDefaultBucketName)
 		if err != nil {
 			return fmt.Errorf("could not create bucket %s: %w", string(s.dbDefaultBucketName), err)
 		}
@@ -66,6 +66,7 @@ func (s *AudiobookStore) StoreAll(ctx context.Context, allAudiobooks []audiobook
 	}
 	defer boltDB.Close()
 	return boltDB.Update(func(tx *bolt.Tx) error {
+		_ = tx.DeleteBucket(s.dbDefaultBucketName)
 		bucket, err := tx.CreateBucketIfNotExists(s.dbDefaultBucketName)
 		if err != nil {
 			return err
