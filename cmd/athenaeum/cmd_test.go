@@ -35,7 +35,16 @@ func TestRootCommand(t *testing.T) {
 			method:              "GET",
 			expectedStatus:      200,
 			expectedContentType: "application/xml; charset=utf-8",
-			expectedBody:        getExpectedFeed(t, host)},
+			expectedBody:        getExpectedFeed(t, "expected.rss", host),
+		},
+		{
+			name:                "sci-fi feed",
+			path:                "/podcast/genre/lgbt+/feed.rss",
+			method:              "GET",
+			expectedStatus:      200,
+			expectedContentType: "application/xml; charset=utf-8",
+			expectedBody:        getExpectedFeed(t, "lgbt.rss", host),
+		},
 	}
 
 	for _, testCase := range tests {
@@ -94,9 +103,9 @@ func getFreePort(t *testing.T) int {
 	return l.Addr().(*net.TCPAddr).Port
 }
 
-func getExpectedFeed(t *testing.T, host interface{}) string {
+func getExpectedFeed(t *testing.T, filename string, host interface{}) string {
 	var b bytes.Buffer
-	tpl, err := template.ParseFiles(filepath.Join("testdata", "expected.rss"))
+	tpl, err := template.ParseFiles(filepath.Join("testdata", filename))
 	assert.NoError(t, err)
 	err = tpl.Execute(&b, host)
 	assert.NoError(t, err)

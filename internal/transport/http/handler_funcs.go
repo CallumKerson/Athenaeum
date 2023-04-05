@@ -3,8 +3,12 @@ package http
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"text/template"
 
+	"github.com/gorilla/mux"
+
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/templates"
 )
 
@@ -36,6 +40,23 @@ func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
 	writer.WriteHeader(http.StatusOK)
 	err := h.PodcastService.WriteAllAudiobooksFeed(request.Context(), writer)
+	if err != nil {
+		SendJSONError(writer, http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
+	writer.WriteHeader(http.StatusOK)
+	vars := mux.Vars(request)
+	genreStr, _ := url.PathUnescape(vars["genre"])
+	genre, err := audiobooks.ParseGenre(genreStr)
+	if err != nil {
+		SendJSONError(writer, http.StatusNotFound, err)
+		return
+	}
+	err = h.PodcastService.WriteGenreAudiobookFeed(request.Context(), genre, writer)
 	if err != nil {
 		SendJSONError(writer, http.StatusInternalServerError, err)
 		return

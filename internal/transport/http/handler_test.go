@@ -13,10 +13,14 @@ import (
 	"gopkg.in/h2non/baloo.v3"
 
 	"github.com/CallumKerson/loggerrific/tlogger"
+
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
 const (
-	testFeed = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\"></rss>"
+	testFeed  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\"></rss>"
+	sciFiFeed = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\">" +
+		"<channel><title>Science Fiction</title></channel></rss>"
 )
 
 func TestHandler(t *testing.T) {
@@ -42,6 +46,7 @@ func TestHandler(t *testing.T) {
 		{name: "readiness check", method: "GET", path: "/ready", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}"},
 		{name: "version", method: "GET", path: "/version", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}"},
 		{name: "feed", method: "GET", path: "/podcast/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: testFeed},
+		{name: "feed", method: "GET", path: "/podcast/genre/scifi/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: sciFiFeed},
 		{name: "media", method: "GET", path: "/media/media.txt", expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file"},
 		{name: "update", method: "POST", path: "/update", expectedStatus: 204, expectedContentType: "", expectedBody: ""},
 		{name: "update on get fails", method: "GET", path: "/update", expectedStatus: 405, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Method Not Allowed"},
@@ -100,6 +105,16 @@ type DummyPodcastService struct {
 func (s *DummyPodcastService) WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error {
 	_, err := w.Write([]byte(testFeed))
 	return err
+}
+
+func (s *DummyPodcastService) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.Genre, w io.Writer) error {
+	if genre == audiobooks.SciFi {
+		_, err := w.Write([]byte(sciFiFeed))
+		return err
+	} else {
+		_, err := w.Write([]byte(testFeed))
+		return err
+	}
 }
 
 func (s *DummyPodcastService) IsReady(ctx context.Context) bool {

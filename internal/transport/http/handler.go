@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -9,11 +10,13 @@ import (
 
 	"github.com/CallumKerson/loggerrific"
 
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/static"
 )
 
 type AudiobooksPodcastService interface {
 	WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error
+	WriteGenreAudiobookFeed(context.Context, audiobooks.Genre, io.Writer) error
 	IsReady(ctx context.Context) bool
 }
 
@@ -63,6 +66,7 @@ func (h *Handler) mapRoutes() {
 	podcastSubrouter := h.PathPrefix(h.podcastServePath).Subrouter()
 	podcastSubrouter.Use(middleware.LoggingMiddleware)
 	podcastSubrouter.HandleFunc(h.mainFeedPath, h.getFeed)
+	podcastSubrouter.HandleFunc(fmt.Sprintf("/genre/{genre}%s", h.mainFeedPath), h.getGenreFeed)
 
 	updateRouter := h.PathPrefix("/update").Subrouter()
 	updateRouter.Use(SevereRateLimitMiddleware, middleware.LoggingMiddleware)

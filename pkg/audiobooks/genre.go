@@ -24,6 +24,7 @@ const (
 	Historical
 	Thriller
 	Horror
+	LGBT
 )
 
 var (
@@ -53,8 +54,10 @@ var (
 		"children":           5,
 		"childrens":          5,
 		"young adult":        6,
+		"youngadult":         6,
 		"ya":                 6,
 		"science fiction":    7,
+		"sciencefiction":     7,
 		"sci-fi":             7,
 		"scifi":              7,
 		"fantasy":            8,
@@ -63,6 +66,7 @@ var (
 		"biography":          10,
 		"historical":         11,
 		"historical fiction": 11,
+		"historicalfiction":  11,
 		"thriller":           12,
 		"horror":             13,
 		"lgbt":               14,
