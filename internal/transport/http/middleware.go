@@ -12,10 +12,11 @@ import (
 
 type Middlewares struct {
 	loggerrific.Logger
+	CacheStore
 }
 
-func NewMiddlewares(logger loggerrific.Logger) *Middlewares {
-	return &Middlewares{Logger: logger}
+func NewMiddlewares(logger loggerrific.Logger, cacheStore CacheStore) *Middlewares {
+	return &Middlewares{Logger: logger, CacheStore: cacheStore}
 }
 
 func (m *Middlewares) LoggingMiddleware(next http.Handler) http.Handler {

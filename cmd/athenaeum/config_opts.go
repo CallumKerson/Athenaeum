@@ -7,6 +7,7 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
+	"github.com/CallumKerson/Athenaeum/internal/memcache"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 	"github.com/CallumKerson/Athenaeum/pkg/client"
@@ -46,6 +47,11 @@ func (c *Config) GetHTTPHandlerOpts() []transportHttp.HandlerOption {
 
 func (c *Config) GetClientOpts() []client.Option {
 	return []client.Option{client.WithHost(c.Host), client.WithVersion(Version)}
+}
+
+func (c *Config) GetMemcacheOpts() []memcache.Option {
+	ttl, _ := c.Cache.GetTTL()
+	return []memcache.Option{memcache.WithTTL(ttl), memcache.WithCapacity(c.Cache.Length)}
 }
 
 func (c *Config) GetLogger() *logrus.Logger {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -17,18 +18,22 @@ import (
 type AudiobooksPodcastService interface {
 	WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error
 	WriteGenreAudiobookFeed(context.Context, audiobooks.Genre, io.Writer) error
+	UpdateFeeds(context.Context) error
 	IsReady(ctx context.Context) bool
 }
 
-type AudiobooksUpdateService interface {
-	UpdateAudiobooks(ctx context.Context) error
-	IsReady(ctx context.Context) bool
+type CacheStore interface {
+	Get(key uint64) ([]byte, bool)
+	Set(key uint64, content []byte, expiration time.Time)
+	Release(key uint64)
+	ReleaseAll()
+	GetTTL() time.Duration
 }
 
 type Handler struct {
 	*mux.Router
 	PodcastService   AudiobooksPodcastService
-	UpdateService    AudiobooksUpdateService
+	CacheStore       CacheStore
 	Log              loggerrific.Logger
 	version          string
 	mediaRoot        string
@@ -38,11 +43,11 @@ type Handler struct {
 	mainFeedPath     string
 }
 
-func NewHandler(podcastService AudiobooksPodcastService, updateService AudiobooksUpdateService,
+func NewHandler(podcastService AudiobooksPodcastService, cacheStore CacheStore,
 	logger loggerrific.Logger, opts ...HandlerOption) *Handler {
 	handler := &Handler{
 		PodcastService: podcastService,
-		UpdateService:  updateService,
+		CacheStore:     cacheStore,
 		Log:            logger,
 	}
 	for _, opt := range opts {
@@ -61,10 +66,15 @@ func (h *Handler) mapRoutes() {
 	h.HandleFunc("/ready", h.readiness)
 	h.HandleFunc("/version", h.printVersion)
 
-	middleware := NewMiddlewares(h.Log)
+	middleware := NewMiddlewares(h.Log, h.CacheStore)
 
 	podcastSubrouter := h.PathPrefix(h.podcastServePath).Subrouter()
-	podcastSubrouter.Use(middleware.LoggingMiddleware)
+	h.Log.Infoln("Cache store is", middleware.CacheStore)
+	h.Log.Infoln("Cache store exists is ", (middleware.CacheStore != nil))
+	if middleware.CacheStore != nil {
+		h.Log.Infoln("Caching enabled on", h.podcastServePath, "endpoints is enabled with at TTL of", middleware.CacheStore.GetTTL().String())
+	}
+	podcastSubrouter.Use(middleware.LoggingMiddleware, middleware.CachingMiddleware)
 	podcastSubrouter.HandleFunc(h.mainFeedPath, h.getFeed)
 	podcastSubrouter.HandleFunc(fmt.Sprintf("/genre/{genre}%s", h.mainFeedPath), h.getGenreFeed)
 

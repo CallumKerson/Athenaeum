@@ -11,6 +11,7 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	audiobooksService "github.com/CallumKerson/Athenaeum/internal/audiobooks/service"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
+	"github.com/CallumKerson/Athenaeum/internal/memcache"
 	overcastNotifier "github.com/CallumKerson/Athenaeum/internal/overcast/notifier"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
@@ -103,7 +104,13 @@ func runServer(cfg *Config) error {
 		return errScan
 	}
 	podcastSvc := podcastService.New(audiobookSvc, logger, cfg.GetPodcastServiceOpts()...)
-	httpHandler := transportHttp.NewHandler(podcastSvc, audiobookSvc, logger, cfg.GetHTTPHandlerOpts()...)
+
+	var httpHandler *transportHttp.Handler
+	if cfg.Cache.Enabled {
+		httpHandler = transportHttp.NewHandler(podcastSvc, memcache.NewStore(cfg.GetMemcacheOpts()...), logger, cfg.GetHTTPHandlerOpts()...)
+	} else {
+		httpHandler = transportHttp.NewHandler(podcastSvc, nil, logger, cfg.GetHTTPHandlerOpts()...)
+	}
 
 	return transportHttp.Serve(httpHandler, cfg.Port, logger)
 }

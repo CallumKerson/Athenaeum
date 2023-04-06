@@ -19,6 +19,7 @@ const (
 type AudiobooksClient interface {
 	GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error)
 	GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error)
+	UpdateAudiobooks(ctx context.Context) error
 }
 
 type Service struct {
@@ -75,6 +76,10 @@ func (s *Service) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.
 
 func (s *Service) IsReady(ctx context.Context) bool {
 	return true
+}
+
+func (s *Service) UpdateFeeds(ctx context.Context) error {
+	return s.UpdateAudiobooks(ctx)
 }
 
 func New(audiobooksClient AudiobooksClient, logger loggerrific.Logger, opts ...Option) *Service {

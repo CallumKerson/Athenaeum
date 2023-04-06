@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/baloo.v3"
@@ -24,7 +25,7 @@ const (
 )
 
 func TestHandler(t *testing.T) {
-	testHandler := NewHandler(&DummyPodcastService{}, &DummyUpdateService{}, tlogger.NewTLogger(t),
+	testHandler := NewHandler(&DummyPodcastService{}, &DummyCacheStore{}, tlogger.NewTLogger(t),
 		WithMediaConfig(filepath.Join("testdata", "media"), "/media/"), WithVersion("1.0.0-test"), WithStaticPath("/static"))
 
 	testServer := httptest.NewServer(testHandler)
@@ -69,7 +70,7 @@ func TestHandler(t *testing.T) {
 }
 
 func TestHandler_Static(t *testing.T) {
-	testHandler := NewHandler(&DummyPodcastService{}, &DummyUpdateService{}, tlogger.NewTLogger(t),
+	testHandler := NewHandler(&DummyPodcastService{}, &DummyCacheStore{}, tlogger.NewTLogger(t),
 		WithMediaConfig("testdata", "/media/"), WithVersion("1.0.0-test"), WithStaticPath("/static"))
 
 	testServer := httptest.NewServer(testHandler)
@@ -121,13 +122,23 @@ func (s *DummyPodcastService) IsReady(ctx context.Context) bool {
 	return true
 }
 
-type DummyUpdateService struct {
-}
-
-func (s *DummyUpdateService) UpdateAudiobooks(ctx context.Context) error {
+func (s *DummyPodcastService) UpdateFeeds(ctx context.Context) error {
 	return nil
 }
 
-func (s *DummyUpdateService) IsReady(ctx context.Context) bool {
-	return true
+type DummyCacheStore struct {
+}
+
+func (s *DummyCacheStore) Get(key uint64) ([]byte, bool) {
+	return []byte{}, false
+}
+
+func (s *DummyCacheStore) Set(key uint64, content []byte, expiration time.Time) {}
+
+func (s *DummyCacheStore) Release(key uint64) {}
+
+func (s *DummyCacheStore) ReleaseAll() {}
+
+func (s *DummyCacheStore) GetTTL() time.Duration {
+	return time.Minute
 }
