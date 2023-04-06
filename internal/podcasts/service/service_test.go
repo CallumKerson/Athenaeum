@@ -27,6 +27,10 @@ func (c *testAudiobookClient) GetAudiobooksByGenre(ctx context.Context, genre au
 	return testbooks.AudiobooksFilteredBy(testbooks.GenreFilter(genre)), nil
 }
 
+func (c *testAudiobookClient) UpdateAudiobooks(ctx context.Context) error {
+	return nil
+}
+
 func TestGetFeed(t *testing.T) {
 	tests := []struct {
 		name               string

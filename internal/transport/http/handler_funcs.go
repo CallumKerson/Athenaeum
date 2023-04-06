@@ -19,7 +19,7 @@ func healthCheck(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
-	if h.PodcastService.IsReady(request.Context()) && h.UpdateService.IsReady(request.Context()) {
+	if h.PodcastService.IsReady(request.Context()) {
 		SendJSON(writer, http.StatusOK, Payload{
 			"readiness": "ok",
 		})
@@ -65,7 +65,10 @@ func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request
 
 func (h *Handler) updateAudiobooks(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == http.MethodPost {
-		if err := h.UpdateService.UpdateAudiobooks(request.Context()); err != nil {
+		if h.CacheStore != nil {
+			h.CacheStore.ReleaseAll()
+		}
+		if err := h.PodcastService.UpdateFeeds(request.Context()); err != nil {
 			SendJSONError(writer, http.StatusInternalServerError, err)
 			return
 		}

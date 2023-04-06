@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -23,6 +24,7 @@ type Config struct {
 	Podcast    Podcast
 	ThirdParty ThirdParty
 	Log        Log
+	Cache      Cache
 }
 
 type Log struct {
@@ -62,6 +64,16 @@ func (c *Config) GetLogLevel() string {
 	return c.Log.Level
 }
 
+type Cache struct {
+	Enabled bool
+	TTL     string
+	Length  int
+}
+
+func (c Cache) GetTTL() (time.Duration, error) {
+	return time.ParseDuration(c.TTL)
+}
+
 func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Podcast.Copyright", "None")
 	viper.SetDefault("Podcast.Explicit", true)
@@ -74,6 +86,9 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Port", defaultPort)
 	viper.SetDefault("Host", fmt.Sprintf("http://localhost:%d", defaultPort))
 	viper.SetDefault("Log.Level", "INFO")
+	viper.SetDefault("Cache.Enabled", false)
+	viper.SetDefault("Cache.TTL", "1m")
+	viper.SetDefault("Cache.Length", 50)
 
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
