@@ -75,6 +75,15 @@ func AuthorFilter(name string) Filter {
 	}
 }
 
+func NarratorFilter(name string) Filter {
+	return func(a *audiobooks.Audiobook) bool {
+		if a != nil && contains(a.Narrators, name) {
+			return true
+		}
+		return false
+	}
+}
+
 func GenreFilter(genre audiobooks.Genre) Filter {
 	return func(a *audiobooks.Audiobook) bool {
 		if a != nil && contains(a.Genres, genre) {

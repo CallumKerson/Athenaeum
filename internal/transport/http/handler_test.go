@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http/httptest"
 	"os"
@@ -19,9 +20,11 @@ import (
 )
 
 const (
-	testFeed  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\"></rss>"
-	sciFiFeed = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\">" +
-		"<channel><title>Science Fiction</title></channel></rss>"
+	testFeed   = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\"></rss>"
+	feedFormat = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\">" +
+		"<channel><title>%s</title></channel></rss>"
+	testAuthor   = "Agatha Test-y"
+	testNarrator = "David Crochet"
 )
 
 func TestHandler(t *testing.T) {
@@ -46,8 +49,12 @@ func TestHandler(t *testing.T) {
 		{name: "health check", method: "GET", path: "/health", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}"},
 		{name: "readiness check", method: "GET", path: "/ready", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}"},
 		{name: "version", method: "GET", path: "/version", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}"},
-		{name: "feed", method: "GET", path: "/podcast/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: testFeed},
-		{name: "feed", method: "GET", path: "/podcast/genre/scifi/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeXML, expectedBody: sciFiFeed},
+		{name: "feed", method: "GET", path: "/podcast/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: testFeed},
+		{name: "genre feed", method: "GET", path: "/podcast/genre/scifi/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, audiobooks.SciFi.String())},
+		{name: "author feed", method: "GET", path: "/podcast/authors/Agatha%20Test-y/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testAuthor)},
+		{name: "no author feed", method: "GET", path: "/podcast/authors/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
+		{name: "narrator feed", method: "GET", path: "/podcast/narrators/David%20Crochet/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testNarrator)},
+		{name: "no author feed", method: "GET", path: "/podcast/narrators/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
 		{name: "media", method: "GET", path: "/media/media.txt", expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file"},
 		{name: "update", method: "POST", path: "/update", expectedStatus: 204, expectedContentType: "", expectedBody: ""},
 		{name: "update on get fails", method: "GET", path: "/update", expectedStatus: 405, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Method Not Allowed"},
@@ -109,13 +116,26 @@ func (s *DummyPodcastService) WriteAllAudiobooksFeed(ctx context.Context, w io.W
 }
 
 func (s *DummyPodcastService) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.Genre, w io.Writer) error {
-	if genre == audiobooks.SciFi {
-		_, err := w.Write([]byte(sciFiFeed))
-		return err
-	} else {
-		_, err := w.Write([]byte(testFeed))
-		return err
+	_, err := fmt.Fprintf(w, feedFormat, genre.String())
+	return err
+}
+
+func (s *DummyPodcastService) WriteAuthorAudiobookFeed(ctx context.Context, name string, w io.Writer) (bool, error) {
+	var err error = nil
+	if name == testAuthor {
+		_, err = fmt.Fprintf(w, feedFormat, name)
+		return true, err
 	}
+	return false, err
+}
+
+func (s *DummyPodcastService) WriteNarratorAudiobookFeed(ctx context.Context, name string, w io.Writer) (bool, error) {
+	var err error = nil
+	if name == testNarrator {
+		_, err = fmt.Fprintf(w, feedFormat, name)
+		return true, err
+	}
+	return false, err
 }
 
 func (s *DummyPodcastService) IsReady(ctx context.Context) bool {

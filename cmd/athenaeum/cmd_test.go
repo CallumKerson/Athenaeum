@@ -34,7 +34,7 @@ func TestRootCommand(t *testing.T) {
 			path:                "/podcast/feed.rss",
 			method:              "GET",
 			expectedStatus:      200,
-			expectedContentType: "application/xml; charset=utf-8",
+			expectedContentType: "text/xml; charset=utf-8",
 			expectedBody:        getExpectedFeed(t, "expected.rss", host),
 		},
 		{
@@ -42,8 +42,24 @@ func TestRootCommand(t *testing.T) {
 			path:                "/podcast/genre/lgbt+/feed.rss",
 			method:              "GET",
 			expectedStatus:      200,
-			expectedContentType: "application/xml; charset=utf-8",
+			expectedContentType: "text/xml; charset=utf-8",
 			expectedBody:        getExpectedFeed(t, "lgbt.rss", host),
+		},
+		{
+			name:                "author feed",
+			path:                "/podcast/authors/Ursula%20K.%20Le%20Guin/feed.rss",
+			method:              "GET",
+			expectedStatus:      200,
+			expectedContentType: "text/xml; charset=utf-8",
+			expectedBody:        getExpectedFeed(t, "le_guin.rss", host),
+		},
+		{
+			name:                "narrator feed",
+			path:                "/podcast/narrators/Emily%20Woo%20Zeller/feed.rss",
+			method:              "GET",
+			expectedStatus:      200,
+			expectedContentType: "text/xml; charset=utf-8",
+			expectedBody:        getExpectedFeed(t, "woo_zeller.rss", host),
 		},
 	}
 

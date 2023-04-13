@@ -88,6 +88,10 @@ func (s *Service) GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Gen
 	return s.audiobookStore.Get(ctx, GenreFilter(genre))
 }
 
+func (s *Service) GetAudiobooksByNarrator(ctx context.Context, name string) ([]audiobooks.Audiobook, error) {
+	return s.audiobookStore.Get(ctx, NarratorFilter(name))
+}
+
 func (s *Service) GetAudiobooksBy(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
 	return s.audiobookStore.Get(ctx, filter)
 }
