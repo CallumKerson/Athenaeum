@@ -46,6 +46,7 @@ tasks:
       - task: go:mod-tidy
       - task: go:fmt
       - task: go:isort
+      - task: go:lint
       - pre-commit run -a
 
   build:

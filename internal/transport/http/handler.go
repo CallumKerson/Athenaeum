@@ -16,8 +16,10 @@ import (
 )
 
 type AudiobooksPodcastService interface {
-	WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error
+	WriteAllAudiobooksFeed(context.Context, io.Writer) error
 	WriteGenreAudiobookFeed(context.Context, audiobooks.Genre, io.Writer) error
+	WriteAuthorAudiobookFeed(context.Context, string, io.Writer) (bool, error)
+	WriteNarratorAudiobookFeed(context.Context, string, io.Writer) (bool, error)
 	UpdateFeeds(context.Context) error
 	IsReady(ctx context.Context) bool
 }
@@ -69,14 +71,14 @@ func (h *Handler) mapRoutes() {
 	middleware := NewMiddlewares(h.Log, h.CacheStore)
 
 	podcastSubrouter := h.PathPrefix(h.podcastServePath).Subrouter()
-	h.Log.Infoln("Cache store is", middleware.CacheStore)
-	h.Log.Infoln("Cache store exists is ", (middleware.CacheStore != nil))
 	if middleware.CacheStore != nil {
 		h.Log.Infoln("Caching enabled on", h.podcastServePath, "endpoints is enabled with at TTL of", middleware.CacheStore.GetTTL().String())
 	}
 	podcastSubrouter.Use(middleware.LoggingMiddleware, middleware.CachingMiddleware)
 	podcastSubrouter.HandleFunc(h.mainFeedPath, h.getFeed)
 	podcastSubrouter.HandleFunc(fmt.Sprintf("/genre/{genre}%s", h.mainFeedPath), h.getGenreFeed)
+	podcastSubrouter.HandleFunc(fmt.Sprintf("/authors/{author}%s", h.mainFeedPath), h.getAuthorFeed)
+	podcastSubrouter.HandleFunc(fmt.Sprintf("/narrators/{narrator}%s", h.mainFeedPath), h.getNarratorFeed)
 
 	updateRouter := h.PathPrefix("/update").Subrouter()
 	updateRouter.Use(SevereRateLimitMiddleware, middleware.LoggingMiddleware)

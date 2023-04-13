@@ -27,6 +27,14 @@ func (c *testAudiobookClient) GetAudiobooksByGenre(ctx context.Context, genre au
 	return testbooks.AudiobooksFilteredBy(testbooks.GenreFilter(genre)), nil
 }
 
+func (c *testAudiobookClient) GetAudiobooksByAuthor(ctx context.Context, author string) ([]audiobooks.Audiobook, error) {
+	return testbooks.AudiobooksFilteredBy(testbooks.AuthorFilter(author)), nil
+}
+
+func (c *testAudiobookClient) GetAudiobooksByNarrator(ctx context.Context, narrator string) ([]audiobooks.Audiobook, error) {
+	return testbooks.AudiobooksFilteredBy(testbooks.NarratorFilter(narrator)), nil
+}
+
 func (c *testAudiobookClient) UpdateAudiobooks(ctx context.Context) error {
 	return nil
 }
@@ -34,16 +42,29 @@ func (c *testAudiobookClient) UpdateAudiobooks(ctx context.Context) error {
 func TestGetFeed(t *testing.T) {
 	tests := []struct {
 		name               string
-		writeFeedTest      func(*Service, io.Writer) error
+		writeFeedTest      func(*Service, io.Writer) (bool, error)
 		pathToExpectedFeed string
 		expectedFeed       string
+		expectedFeedExists bool
 	}{
-		{name: "Full feed", writeFeedTest: func(svc *Service, wrt io.Writer) error {
-			return svc.WriteAllAudiobooksFeed(context.Background(), wrt)
-		}, pathToExpectedFeed: "full_feed.rss"},
-		{name: "Sci-Fi feed", writeFeedTest: func(svc *Service, wrt io.Writer) error {
-			return svc.WriteGenreAudiobookFeed(context.Background(), audiobooks.SciFi, wrt)
-		}, pathToExpectedFeed: "scifi_feed.rss"},
+		{name: "Full feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return true, svc.WriteAllAudiobooksFeed(context.Background(), wrt)
+		}, pathToExpectedFeed: "full_feed.rss", expectedFeedExists: true},
+		{name: "Sci-Fi feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return true, svc.WriteGenreAudiobookFeed(context.Background(), audiobooks.SciFi, wrt)
+		}, pathToExpectedFeed: "scifi_feed.rss", expectedFeedExists: true},
+		{name: "Amal El-Mohtar Author feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return svc.WriteAuthorAudiobookFeed(context.Background(), "Amal El-Mohtar", wrt)
+		}, pathToExpectedFeed: "el_mohtar_feed.rss", expectedFeedExists: true},
+		{name: "Feed for author that does not exist in library", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return svc.WriteAuthorAudiobookFeed(context.Background(), "Octavia Butler", wrt)
+		}, expectedFeed: "", expectedFeedExists: false},
+		{name: "Kobna Holdbrook-Smith Narrator feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return svc.WriteNarratorAudiobookFeed(context.Background(), "Kobna Holdbrook-Smith", wrt)
+		}, pathToExpectedFeed: "holdbrook_smith_feed.rss", expectedFeedExists: true},
+		{name: "Feed for narrator that does not exist in library", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return svc.WriteNarratorAudiobookFeed(context.Background(), "Simon Vance", wrt)
+		}, expectedFeed: "", expectedFeedExists: false},
 	}
 
 	svc := New(&testAudiobookClient{},
@@ -66,10 +87,11 @@ func TestGetFeed(t *testing.T) {
 			var buf bytes.Buffer
 
 			// when
-			err := testCase.writeFeedTest(svc, &buf)
+			feedExists, err := testCase.writeFeedTest(svc, &buf)
 
 			// then
 			assert.NoError(t, err)
+			assert.Equal(t, testCase.expectedFeedExists, feedExists)
 			assert.Equal(t, expected, buf.String())
 		})
 	}

@@ -20,6 +20,8 @@ func TestFilers(t *testing.T) {
 		{name: "not match author", filter: AuthorFilter("Max Gladstone"), book: testbooks.Audiobooks[1], expectedMatch: false},
 		{name: "match genre", filter: GenreFilter(audiobooks.SciFi), book: testbooks.Audiobooks[0], expectedMatch: true},
 		{name: "not match genre", filter: GenreFilter(audiobooks.SciFi), book: testbooks.Audiobooks[1], expectedMatch: false},
+		{name: "match narrator", filter: NarratorFilter("Emily Woo Zeller"), book: testbooks.Audiobooks[0], expectedMatch: true},
+		{name: "not match narrator", filter: NarratorFilter("Emily Woo Zeller"), book: testbooks.Audiobooks[1], expectedMatch: false},
 	}
 
 	for _, testCase := range tests {

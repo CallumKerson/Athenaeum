@@ -1,7 +1,9 @@
 package http
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"text/template"
@@ -37,8 +39,6 @@ func (h *Handler) printVersion(writer http.ResponseWriter, request *http.Request
 }
 
 func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
-	writer.WriteHeader(http.StatusOK)
 	err := h.PodcastService.WriteAllAudiobooksFeed(request.Context(), writer)
 	if err != nil {
 		SendJSONError(writer, http.StatusInternalServerError, err)
@@ -47,8 +47,6 @@ func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Add(ContentTypeHeader, ContentTypeXML)
-	writer.WriteHeader(http.StatusOK)
 	vars := mux.Vars(request)
 	genreStr, _ := url.PathUnescape(vars["genre"])
 	genre, err := audiobooks.ParseGenre(genreStr)
@@ -59,6 +57,33 @@ func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request
 	err = h.PodcastService.WriteGenreAudiobookFeed(request.Context(), genre, writer)
 	if err != nil {
 		SendJSONError(writer, http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (h *Handler) getAuthorFeed(writer http.ResponseWriter, request *http.Request) {
+	h.getPersonFeed(writer, request, "author", h.PodcastService.WriteAuthorAudiobookFeed)
+}
+
+func (h *Handler) getNarratorFeed(writer http.ResponseWriter, request *http.Request) {
+	h.getPersonFeed(writer, request, "narrator", h.PodcastService.WriteNarratorAudiobookFeed)
+}
+
+func (h *Handler) getPersonFeed(writer http.ResponseWriter, request *http.Request, pathVar string,
+	writeFunc func(context.Context, string, io.Writer) (bool, error)) {
+	vars := mux.Vars(request)
+	nameStr, err := url.PathUnescape(vars[pathVar])
+	if err != nil {
+		SendJSONError(writer, http.StatusNotFound, err)
+		return
+	}
+	written, err := writeFunc(request.Context(), nameStr, writer)
+	if err != nil {
+		SendJSONError(writer, http.StatusInternalServerError, err)
+		return
+	}
+	if !written {
+		http.Error(writer, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 }
@@ -97,8 +122,6 @@ func (h *Handler) serveHTML(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	writer.Header().Set(ContentTypeHeader, ContentTypeHTML)
-	writer.WriteHeader(http.StatusOK)
 	data := map[string]interface{}{
 		"Title":           "Audiobooks",
 		"Description":     "Like movies in your mind!",
