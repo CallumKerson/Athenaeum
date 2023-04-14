@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/CallumKerson/loggerrific"
 
@@ -33,7 +34,7 @@ type CacheStore interface {
 }
 
 type Handler struct {
-	*mux.Router
+	*chi.Mux
 	PodcastService   AudiobooksPodcastService
 	CacheStore       CacheStore
 	Log              loggerrific.Logger
@@ -57,40 +58,39 @@ func NewHandler(podcastService AudiobooksPodcastService, cacheStore CacheStore,
 	}
 	handler.podcastServePath = "/podcast"
 	handler.mainFeedPath = "/feed.rss"
-	handler.Router = mux.NewRouter()
+	handler.Mux = chi.NewRouter()
 	handler.mapRoutes()
-	handler.Use(TimeoutMiddleware)
 	return handler
 }
 
 func (h *Handler) mapRoutes() {
+	middleware := NewMiddlewares(h.Log, h.CacheStore)
+	h.Use(chiMiddleware.RequestID, chiMiddleware.Recoverer, middleware.LoggingMiddleware, TimeoutMiddleware)
+
 	h.HandleFunc("/health", healthCheck)
 	h.HandleFunc("/ready", h.readiness)
 	h.HandleFunc("/version", h.printVersion)
 
-	middleware := NewMiddlewares(h.Log, h.CacheStore)
+	h.Route(h.podcastServePath, func(router chi.Router) {
+		if middleware.CacheStore != nil {
+			h.Log.Infoln("Caching enabled on", h.podcastServePath, "endpoints is enabled with at TTL of", middleware.CacheStore.GetTTL().String())
+		}
+		router.Use(middleware.CachingMiddleware)
+		router.HandleFunc(fmt.Sprintf("/genre/{genre}%s", h.mainFeedPath), h.getGenreFeed)
+		router.HandleFunc(fmt.Sprintf("/authors/{author}%s", h.mainFeedPath), h.getAuthorFeed)
+		router.HandleFunc(fmt.Sprintf("/narrators/{narrator}%s", h.mainFeedPath), h.getNarratorFeed)
+		router.HandleFunc(h.mainFeedPath, h.getFeed)
+	})
 
-	podcastSubrouter := h.PathPrefix(h.podcastServePath).Subrouter()
-	if middleware.CacheStore != nil {
-		h.Log.Infoln("Caching enabled on", h.podcastServePath, "endpoints is enabled with at TTL of", middleware.CacheStore.GetTTL().String())
-	}
-	podcastSubrouter.Use(middleware.LoggingMiddleware, middleware.CachingMiddleware)
-	podcastSubrouter.HandleFunc(h.mainFeedPath, h.getFeed)
-	podcastSubrouter.HandleFunc(fmt.Sprintf("/genre/{genre}%s", h.mainFeedPath), h.getGenreFeed)
-	podcastSubrouter.HandleFunc(fmt.Sprintf("/authors/{author}%s", h.mainFeedPath), h.getAuthorFeed)
-	podcastSubrouter.HandleFunc(fmt.Sprintf("/narrators/{narrator}%s", h.mainFeedPath), h.getNarratorFeed)
-
-	updateRouter := h.PathPrefix("/update").Subrouter()
-	updateRouter.Use(SevereRateLimitMiddleware, middleware.LoggingMiddleware)
-	updateRouter.HandleFunc("", h.updateAudiobooks)
+	h.Handle("/update", SevereRateLimitMiddleware(http.HandlerFunc(h.updateAudiobooks)))
 
 	mediaFS := http.StripPrefix(h.mediaServePath, http.FileServer(http.Dir(h.mediaRoot)))
 	h.Log.Infoln("Serving media files from local path", h.mediaRoot, "at", h.mediaServePath)
-	h.Router.PathPrefix(h.mediaServePath).Handler(middleware.LoggingMiddleware(mediaFS))
+	h.Handle(fmt.Sprintf("%s*", h.mediaServePath), mediaFS)
 
 	staticFS := http.StripPrefix(h.staticServePath, http.FileServer(http.FS(static.Assets)))
 	h.Log.Infoln("Serving static files at", h.staticServePath)
-	h.Router.PathPrefix(h.staticServePath).Handler(middleware.LoggingMiddleware(staticFS))
+	h.Handle(fmt.Sprintf("%s*", h.staticServePath), staticFS)
 
-	h.Handle("/", middleware.LoggingMiddleware(http.HandlerFunc(h.serveHTML)))
+	h.HandleFunc("/", h.serveHTML)
 }
