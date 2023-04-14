@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"text/template"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/templates"
@@ -47,8 +47,7 @@ func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request) {
-	vars := mux.Vars(request)
-	genreStr, _ := url.PathUnescape(vars["genre"])
+	genreStr, _ := url.PathUnescape(chi.URLParam(request, "genre"))
 	genre, err := audiobooks.ParseGenre(genreStr)
 	if err != nil {
 		SendJSONError(writer, http.StatusNotFound, err)
@@ -71,8 +70,7 @@ func (h *Handler) getNarratorFeed(writer http.ResponseWriter, request *http.Requ
 
 func (h *Handler) getPersonFeed(writer http.ResponseWriter, request *http.Request, pathVar string,
 	writeFunc func(context.Context, string, io.Writer) (bool, error)) {
-	vars := mux.Vars(request)
-	nameStr, err := url.PathUnescape(vars[pathVar])
+	nameStr, err := url.PathUnescape(chi.URLParam(request, pathVar))
 	if err != nil {
 		SendJSONError(writer, http.StatusNotFound, err)
 		return

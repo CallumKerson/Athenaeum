@@ -7,8 +7,8 @@ require (
 	github.com/CallumKerson/podcasts v0.0.5
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
 	github.com/carlmjohnson/requests v0.23.2
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
-	github.com/gorilla/mux v1.8.0
 	github.com/pelletier/go-toml/v2 v2.0.7
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0
