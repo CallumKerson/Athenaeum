@@ -23,6 +23,7 @@ type AudiobooksClient interface {
 	GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error)
 	GetAudiobooksByAuthor(ctx context.Context, author string) (books []audiobooks.Audiobook, err error)
 	GetAudiobooksByNarrator(ctx context.Context, narrator string) (books []audiobooks.Audiobook, err error)
+	GetAudiobooksByTag(ctx context.Context, tag string) (books []audiobooks.Audiobook, err error)
 	UpdateAudiobooks(ctx context.Context) error
 }
 
@@ -45,18 +46,7 @@ func (s *Service) WriteAllAudiobooksFeed(ctx context.Context, writer io.Writer) 
 	if err != nil {
 		return err
 	}
-	allAudiobooksFeedOpts := &FeedOpts{
-		Title:       allAudiobooksFeedTitle,
-		Description: allAudiobooksFeedDescription,
-		Link:        s.host,
-		ImageLink:   s.fedImageLink,
-		Explicit:    s.feedExplicit,
-		Language:    s.feedLanguage,
-		Author:      s.feedAuthor,
-		Email:       s.feedAuthorEmail,
-		Copyright:   s.feedCopyright,
-	}
-	return s.WriteFeedFromAudiobooks(ctx, books, allAudiobooksFeedOpts, writer)
+	return s.writeAudiobookFeed(ctx, allAudiobooksFeedTitle, allAudiobooksFeedDescription, books, writer)
 }
 
 func (s *Service) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.Genre, writer io.Writer) error {
@@ -86,7 +76,7 @@ func (s *Service) WriteAuthorAudiobookFeed(ctx context.Context, author string, w
 	if len(books) < 1 {
 		return false, nil
 	}
-	return true, s.writePersonAudiobookFeed(ctx, author, authorDescriptionFormat, books, writer)
+	return true, s.writeAudiobookFeed(ctx, author, fmt.Sprintf(authorDescriptionFormat, author), books, writer)
 }
 
 func (s *Service) WriteNarratorAudiobookFeed(ctx context.Context, narrator string, writer io.Writer) (bool, error) {
@@ -97,7 +87,18 @@ func (s *Service) WriteNarratorAudiobookFeed(ctx context.Context, narrator strin
 	if len(books) < 1 {
 		return false, nil
 	}
-	return true, s.writePersonAudiobookFeed(ctx, narrator, narratorDescriptionFormat, books, writer)
+	return true, s.writeAudiobookFeed(ctx, narrator, fmt.Sprintf(narratorDescriptionFormat, narrator), books, writer)
+}
+
+func (s *Service) WriteTagAudiobookFeed(ctx context.Context, tag string, writer io.Writer) (bool, error) {
+	books, err := s.GetAudiobooksByTag(ctx, tag)
+	if err != nil {
+		return false, err
+	}
+	if len(books) < 1 {
+		return false, nil
+	}
+	return true, s.writeAudiobookFeed(ctx, tag, fmt.Sprintf(descriptionFormat, tag), books, writer)
 }
 
 func (s *Service) IsReady(ctx context.Context) bool {
@@ -119,11 +120,11 @@ func New(audiobooksClient AudiobooksClient, logger loggerrific.Logger, opts ...O
 	return svc
 }
 
-func (s *Service) writePersonAudiobookFeed(ctx context.Context, personName, descFormat string,
-	personBooks []audiobooks.Audiobook, writer io.Writer) error {
-	personFeedOpts := &FeedOpts{
-		Title:       personName,
-		Description: fmt.Sprintf(descFormat, personName),
+func (s *Service) writeAudiobookFeed(ctx context.Context, title, description string,
+	books []audiobooks.Audiobook, writer io.Writer) error {
+	feedOtps := &FeedOpts{
+		Title:       title,
+		Description: description,
 		Link:        s.host,
 		ImageLink:   s.fedImageLink,
 		Explicit:    s.feedExplicit,
@@ -132,5 +133,5 @@ func (s *Service) writePersonAudiobookFeed(ctx context.Context, personName, desc
 		Email:       s.feedAuthorEmail,
 		Copyright:   s.feedCopyright,
 	}
-	return s.WriteFeedFromAudiobooks(ctx, personBooks, personFeedOpts, writer)
+	return s.WriteFeedFromAudiobooks(ctx, books, feedOtps, writer)
 }

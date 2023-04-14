@@ -25,6 +25,7 @@ const (
 		"<channel><title>%s</title></channel></rss>"
 	testAuthor   = "Agatha Test-y"
 	testNarrator = "David Crochet"
+	testTag      = "Cosy Classics"
 )
 
 func TestHandler(t *testing.T) {
@@ -54,7 +55,9 @@ func TestHandler(t *testing.T) {
 		{name: "author feed", method: "GET", path: "/podcast/authors/Agatha%20Test-y/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testAuthor)},
 		{name: "no author feed", method: "GET", path: "/podcast/authors/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
 		{name: "narrator feed", method: "GET", path: "/podcast/narrators/David%20Crochet/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testNarrator)},
-		{name: "no author feed", method: "GET", path: "/podcast/narrators/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
+		{name: "no narrator feed", method: "GET", path: "/podcast/narrators/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
+		{name: "tag feed", method: "GET", path: "/podcast/tags/Cosy%20Classics/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testTag)},
+		{name: "no tag feed", method: "GET", path: "/podcast/tags/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
 		{name: "media", method: "GET", path: "/media/media.txt", expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file"},
 		{name: "update", method: "POST", path: "/update", expectedStatus: 204, expectedContentType: "", expectedBody: ""},
 		{name: "update on get fails", method: "GET", path: "/update", expectedStatus: 405, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Method Not Allowed"},
@@ -133,6 +136,15 @@ func (s *DummyPodcastService) WriteNarratorAudiobookFeed(ctx context.Context, na
 	var err error = nil
 	if name == testNarrator {
 		_, err = fmt.Fprintf(w, feedFormat, name)
+		return true, err
+	}
+	return false, err
+}
+
+func (s *DummyPodcastService) WriteTagAudiobookFeed(ctx context.Context, tag string, w io.Writer) (bool, error) {
+	var err error = nil
+	if tag == testTag {
+		_, err = fmt.Fprintf(w, feedFormat, tag)
 		return true, err
 	}
 	return false, err

@@ -24,6 +24,7 @@ type Audiobook struct {
 	Genres      []Genre                  `json:"genres,omitempty" toml:",omitempty"`
 	Series      *Series                  `json:"series,omitempty" toml:",omitempty"`
 	Narrators   []string                 `json:"narrators" toml:",omitempty"`
+	Tags        []string                 `json:"tags,omitempty" toml:",omitempty"`
 	Duration    time.Duration            `json:"duration" toml:",omitempty"`
 	FileSize    uint64                   `json:"fileSize" toml:",omitempty"`
 	MIMEType    string                   `json:"mimeType" toml:",omitempty"`

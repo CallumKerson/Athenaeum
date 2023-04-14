@@ -61,6 +61,14 @@ func TestRootCommand(t *testing.T) {
 			expectedContentType: "text/xml; charset=utf-8",
 			expectedBody:        getExpectedFeed(t, "woo_zeller.rss", host),
 		},
+		{
+			name:                "tag feed",
+			path:                "/podcast/tags/Hugo%20Awards/feed.rss",
+			method:              "GET",
+			expectedStatus:      200,
+			expectedContentType: "text/xml; charset=utf-8",
+			expectedBody:        getExpectedFeed(t, "hugo_awards.rss", host),
+		},
 	}
 
 	for _, testCase := range tests {

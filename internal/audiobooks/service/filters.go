@@ -31,6 +31,15 @@ func NarratorFilter(name string) Filter {
 	}
 }
 
+func TagFilter(tag string) Filter {
+	return func(a *audiobooks.Audiobook) bool {
+		if a != nil && contains(a.Tags, tag) {
+			return true
+		}
+		return false
+	}
+}
+
 func contains[K comparable](slice []K, item K) bool {
 	for _, v := range slice {
 		if v == item {

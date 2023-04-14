@@ -21,6 +21,7 @@ type AudiobooksPodcastService interface {
 	WriteGenreAudiobookFeed(context.Context, audiobooks.Genre, io.Writer) error
 	WriteAuthorAudiobookFeed(context.Context, string, io.Writer) (bool, error)
 	WriteNarratorAudiobookFeed(context.Context, string, io.Writer) (bool, error)
+	WriteTagAudiobookFeed(context.Context, string, io.Writer) (bool, error)
 	UpdateFeeds(context.Context) error
 	IsReady(ctx context.Context) bool
 }
@@ -79,6 +80,7 @@ func (h *Handler) mapRoutes() {
 		router.HandleFunc(fmt.Sprintf("/genre/{genre}%s", h.mainFeedPath), h.getGenreFeed)
 		router.HandleFunc(fmt.Sprintf("/authors/{author}%s", h.mainFeedPath), h.getAuthorFeed)
 		router.HandleFunc(fmt.Sprintf("/narrators/{narrator}%s", h.mainFeedPath), h.getNarratorFeed)
+		router.HandleFunc(fmt.Sprintf("/tags/{tag}%s", h.mainFeedPath), h.getTagFeed)
 		router.HandleFunc(h.mainFeedPath, h.getFeed)
 	})
 

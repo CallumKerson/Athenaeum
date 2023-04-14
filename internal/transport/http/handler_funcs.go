@@ -61,14 +61,18 @@ func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request
 }
 
 func (h *Handler) getAuthorFeed(writer http.ResponseWriter, request *http.Request) {
-	h.getPersonFeed(writer, request, "author", h.PodcastService.WriteAuthorAudiobookFeed)
+	h.getFeedForStr(writer, request, "author", h.PodcastService.WriteAuthorAudiobookFeed)
 }
 
 func (h *Handler) getNarratorFeed(writer http.ResponseWriter, request *http.Request) {
-	h.getPersonFeed(writer, request, "narrator", h.PodcastService.WriteNarratorAudiobookFeed)
+	h.getFeedForStr(writer, request, "narrator", h.PodcastService.WriteNarratorAudiobookFeed)
 }
 
-func (h *Handler) getPersonFeed(writer http.ResponseWriter, request *http.Request, pathVar string,
+func (h *Handler) getTagFeed(writer http.ResponseWriter, request *http.Request) {
+	h.getFeedForStr(writer, request, "tag", h.PodcastService.WriteTagAudiobookFeed)
+}
+
+func (h *Handler) getFeedForStr(writer http.ResponseWriter, request *http.Request, pathVar string,
 	writeFunc func(context.Context, string, io.Writer) (bool, error)) {
 	nameStr, err := url.PathUnescape(chi.URLParam(request, pathVar))
 	if err != nil {

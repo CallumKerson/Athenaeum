@@ -35,6 +35,10 @@ func (c *testAudiobookClient) GetAudiobooksByNarrator(ctx context.Context, narra
 	return testbooks.AudiobooksFilteredBy(testbooks.NarratorFilter(narrator)), nil
 }
 
+func (c *testAudiobookClient) GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobooks.Audiobook, error) {
+	return testbooks.AudiobooksFilteredBy(testbooks.TagFilter(tag)), nil
+}
+
 func (c *testAudiobookClient) UpdateAudiobooks(ctx context.Context) error {
 	return nil
 }
@@ -64,6 +68,12 @@ func TestGetFeed(t *testing.T) {
 		}, pathToExpectedFeed: "holdbrook_smith_feed.rss", expectedFeedExists: true},
 		{name: "Feed for narrator that does not exist in library", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
 			return svc.WriteNarratorAudiobookFeed(context.Background(), "Simon Vance", wrt)
+		}, expectedFeed: "", expectedFeedExists: false},
+		{name: "Tag feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return svc.WriteTagAudiobookFeed(context.Background(), "Hugo Awards", wrt)
+		}, pathToExpectedFeed: "hugo_awards_feed.rss", expectedFeedExists: true},
+		{name: "Feed for tag that does not exist in library", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+			return svc.WriteNarratorAudiobookFeed(context.Background(), "Nebula Awards", wrt)
 		}, expectedFeed: "", expectedFeedExists: false},
 	}
 

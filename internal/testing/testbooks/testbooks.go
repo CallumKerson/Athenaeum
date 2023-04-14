@@ -22,6 +22,7 @@ var (
 			Duration:    time.Nanosecond * 4671000064,
 			ReleaseDate: &toml.LocalDate{Year: 2019, Month: 07, Day: 16},
 			Genres:      []audiobooks.Genre{audiobooks.SciFi, audiobooks.LGBT},
+			Tags:        []string{"Hugo Awards"},
 			Description: &description.Description{
 				Text: "Among the ashes of a dying world, an agent of the Commandant finds a letter. It reads: Burn before reading.\n" +
 					"Thus begins an unlikely correspondence between two rival agents hellbent " +
@@ -87,6 +88,15 @@ func NarratorFilter(name string) Filter {
 func GenreFilter(genre audiobooks.Genre) Filter {
 	return func(a *audiobooks.Audiobook) bool {
 		if a != nil && contains(a.Genres, genre) {
+			return true
+		}
+		return false
+	}
+}
+
+func TagFilter(tag string) Filter {
+	return func(a *audiobooks.Audiobook) bool {
+		if a != nil && contains(a.Tags, tag) {
 			return true
 		}
 		return false
