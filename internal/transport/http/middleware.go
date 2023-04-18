@@ -15,19 +15,17 @@ type Middlewares struct {
 	CacheStore
 }
 
-func NewMiddlewares(logger loggerrific.Logger, cacheStore CacheStore) *Middlewares {
-	return &Middlewares{Logger: logger, CacheStore: cacheStore}
-}
-
-func (m *Middlewares) LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		m.Logger.WithFields(map[string]interface{}{
-			"method":    request.Method,
-			"path":      request.URL.Path,
-			"userAgent": request.UserAgent(),
-		}).Infoln("Handled Request")
-		next.ServeHTTP(writer, request)
-	})
+func GetLoggingMiddleware(logger loggerrific.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			logger.WithFields(map[string]interface{}{
+				"method":    request.Method,
+				"path":      request.URL.Path,
+				"userAgent": request.UserAgent(),
+			}).Infoln("Handled Request")
+			next.ServeHTTP(writer, request)
+		})
+	}
 }
 
 func TimeoutMiddleware(next http.Handler) http.Handler {

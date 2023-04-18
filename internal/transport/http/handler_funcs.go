@@ -33,9 +33,11 @@ func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) printVersion(writer http.ResponseWriter, request *http.Request) {
-	SendJSON(writer, http.StatusOK, Payload{
-		"version": h.version,
-	})
+	if h.version != "" {
+		SendJSON(writer, http.StatusOK, Payload{
+			"version": h.version,
+		})
+	}
 }
 
 func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
@@ -127,8 +129,8 @@ func (h *Handler) serveHTML(writer http.ResponseWriter, request *http.Request) {
 	data := map[string]interface{}{
 		"Title":           "Audiobooks",
 		"Description":     "Like movies in your mind!",
-		"StaticServePath": h.staticServePath,
-		"FeedLink":        fmt.Sprintf("%s%s", h.podcastServePath, h.mainFeedPath),
+		"StaticServePath": StaticPath,
+		"FeedLink":        fmt.Sprintf("%s/%s", PodcastPath, PodcastFeedName),
 	}
 	if err := tpl.Execute(writer, data); err != nil {
 		return

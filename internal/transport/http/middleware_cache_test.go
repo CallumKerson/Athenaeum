@@ -11,8 +11,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/CallumKerson/loggerrific/tlogger"
-
 	cacheableResponse "github.com/CallumKerson/Athenaeum/pkg/caching/response"
 )
 
@@ -70,8 +68,7 @@ func TestMiddleware(t *testing.T) {
 		},
 	}
 
-	middlewares := NewMiddlewares(tlogger.NewTLogger(t), testCacheStore)
-	handler := middlewares.CachingMiddleware(httpTestHandler)
+	handler := GetCachingMiddleware(testCacheStore)(httpTestHandler)
 
 	tests := []struct {
 		name     string

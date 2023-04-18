@@ -30,12 +30,28 @@ func TestRootCommand(t *testing.T) {
 		expectedBody        string
 	}{
 		{
+			name:                "index",
+			path:                "/",
+			method:              "GET",
+			expectedStatus:      200,
+			expectedContentType: "text/html; charset=utf-8",
+			expectedBody:        getExpected(t, "index.html", nil),
+		},
+		{
+			name:                "version",
+			path:                "/version",
+			method:              "GET",
+			expectedStatus:      200,
+			expectedContentType: "application/json; charset=utf-8",
+			expectedBody:        fmt.Sprintf("{\n  \"version\": %q\n}", Version),
+		},
+		{
 			name:                "feed",
 			path:                "/podcast/feed.rss",
 			method:              "GET",
 			expectedStatus:      200,
 			expectedContentType: "text/xml; charset=utf-8",
-			expectedBody:        getExpectedFeed(t, "expected.rss", host),
+			expectedBody:        getExpected(t, "expected.rss", host),
 		},
 		{
 			name:                "sci-fi feed",
@@ -43,7 +59,7 @@ func TestRootCommand(t *testing.T) {
 			method:              "GET",
 			expectedStatus:      200,
 			expectedContentType: "text/xml; charset=utf-8",
-			expectedBody:        getExpectedFeed(t, "lgbt.rss", host),
+			expectedBody:        getExpected(t, "lgbt.rss", host),
 		},
 		{
 			name:                "author feed",
@@ -51,7 +67,7 @@ func TestRootCommand(t *testing.T) {
 			method:              "GET",
 			expectedStatus:      200,
 			expectedContentType: "text/xml; charset=utf-8",
-			expectedBody:        getExpectedFeed(t, "le_guin.rss", host),
+			expectedBody:        getExpected(t, "le_guin.rss", host),
 		},
 		{
 			name:                "narrator feed",
@@ -59,7 +75,7 @@ func TestRootCommand(t *testing.T) {
 			method:              "GET",
 			expectedStatus:      200,
 			expectedContentType: "text/xml; charset=utf-8",
-			expectedBody:        getExpectedFeed(t, "woo_zeller.rss", host),
+			expectedBody:        getExpected(t, "woo_zeller.rss", host),
 		},
 		{
 			name:                "tag feed",
@@ -67,7 +83,7 @@ func TestRootCommand(t *testing.T) {
 			method:              "GET",
 			expectedStatus:      200,
 			expectedContentType: "text/xml; charset=utf-8",
-			expectedBody:        getExpectedFeed(t, "hugo_awards.rss", host),
+			expectedBody:        getExpected(t, "hugo_awards.rss", host),
 		},
 	}
 
@@ -127,7 +143,7 @@ func getFreePort(t *testing.T) int {
 	return l.Addr().(*net.TCPAddr).Port
 }
 
-func getExpectedFeed(t *testing.T, filename string, host interface{}) string {
+func getExpected(t *testing.T, filename string, host interface{}) string {
 	var b bytes.Buffer
 	tpl, err := template.ParseFiles(filepath.Join("testdata", filename))
 	assert.NoError(t, err)

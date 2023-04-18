@@ -5,15 +5,24 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/CallumKerson/loggerrific"
+	noOptLogger "github.com/CallumKerson/loggerrific/noopt"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/static"
+)
+
+const (
+	StaticPath      = "/static"
+	PodcastPath     = "/podcast"
+	MediaPath       = "/media"
+	PodcastFeedName = "feed.rss"
 )
 
 type AudiobooksPodcastService interface {
@@ -36,63 +45,68 @@ type CacheStore interface {
 
 type Handler struct {
 	*chi.Mux
-	PodcastService   AudiobooksPodcastService
-	CacheStore       CacheStore
-	Log              loggerrific.Logger
-	version          string
-	mediaRoot        string
-	mediaServePath   string
-	staticServePath  string
-	podcastServePath string
-	mainFeedPath     string
+	PodcastService AudiobooksPodcastService
+	mediaRoot      string
+	CacheStore     CacheStore
+	Log            loggerrific.Logger
+	version        string
 }
 
-func NewHandler(podcastService AudiobooksPodcastService, cacheStore CacheStore,
-	logger loggerrific.Logger, opts ...HandlerOption) *Handler {
+func NewHandler(podcastService AudiobooksPodcastService, mediaRoot string, opts ...HandlerOption) *Handler {
 	handler := &Handler{
 		PodcastService: podcastService,
-		CacheStore:     cacheStore,
-		Log:            logger,
+		Log:            noOptLogger.New(),
+		mediaRoot:      mediaRoot,
 	}
 	for _, opt := range opts {
 		opt(handler)
 	}
-	handler.podcastServePath = "/podcast"
-	handler.mainFeedPath = "/feed.rss"
 	handler.Mux = chi.NewRouter()
 	handler.mapRoutes()
 	return handler
 }
 
 func (h *Handler) mapRoutes() {
-	middleware := NewMiddlewares(h.Log, h.CacheStore)
-	h.Use(chiMiddleware.RequestID, chiMiddleware.Recoverer, middleware.LoggingMiddleware, TimeoutMiddleware)
+	h.Use(chiMiddleware.RequestID, chiMiddleware.Recoverer, GetLoggingMiddleware(h.Log), TimeoutMiddleware)
 
 	h.HandleFunc("/health", healthCheck)
 	h.HandleFunc("/ready", h.readiness)
 	h.HandleFunc("/version", h.printVersion)
 
-	h.Route(h.podcastServePath, func(router chi.Router) {
-		if middleware.CacheStore != nil {
-			h.Log.Infoln("Caching enabled on", h.podcastServePath, "endpoints is enabled with at TTL of", middleware.CacheStore.GetTTL().String())
+	h.Route(PodcastPath, func(router chi.Router) {
+		if h.CacheStore != nil {
+			h.Log.Infoln("Caching enabled on", PodcastPath, "endpoints is enabled with at TTL of", h.CacheStore.GetTTL().String())
+			router.Use(GetCachingMiddleware(h.CacheStore))
 		}
-		router.Use(middleware.CachingMiddleware)
-		router.HandleFunc(fmt.Sprintf("/genre/{genre}%s", h.mainFeedPath), h.getGenreFeed)
-		router.HandleFunc(fmt.Sprintf("/authors/{author}%s", h.mainFeedPath), h.getAuthorFeed)
-		router.HandleFunc(fmt.Sprintf("/narrators/{narrator}%s", h.mainFeedPath), h.getNarratorFeed)
-		router.HandleFunc(fmt.Sprintf("/tags/{tag}%s", h.mainFeedPath), h.getTagFeed)
-		router.HandleFunc(h.mainFeedPath, h.getFeed)
+		router.HandleFunc(fmt.Sprintf("/genre/{genre}/%s", PodcastFeedName), h.getGenreFeed)
+		router.HandleFunc(fmt.Sprintf("/authors/{author}/%s", PodcastFeedName), h.getAuthorFeed)
+		router.HandleFunc(fmt.Sprintf("/narrators/{narrator}/%s", PodcastFeedName), h.getNarratorFeed)
+		router.HandleFunc(fmt.Sprintf("/tags/{tag}/%s", PodcastFeedName), h.getTagFeed)
+		router.HandleFunc(fmt.Sprintf("/%s", PodcastFeedName), h.getFeed)
 	})
 
 	h.Handle("/update", SevereRateLimitMiddleware(http.HandlerFunc(h.updateAudiobooks)))
 
-	mediaFS := http.StripPrefix(h.mediaServePath, http.FileServer(http.Dir(h.mediaRoot)))
-	h.Log.Infoln("Serving media files from local path", h.mediaRoot, "at", h.mediaServePath)
-	h.Handle(fmt.Sprintf("%s*", h.mediaServePath), mediaFS)
+	h.Log.Infoln("Serving media files from local path", h.mediaRoot, "at", MediaPath)
+	h.routeFileServer(MediaPath, http.Dir(h.mediaRoot))
 
-	staticFS := http.StripPrefix(h.staticServePath, http.FileServer(http.FS(static.Assets)))
-	h.Log.Infoln("Serving static files at", h.staticServePath)
-	h.Handle(fmt.Sprintf("%s*", h.staticServePath), staticFS)
+	h.Log.Infoln("Serving static files at", StaticPath)
+	h.routeFileServer(StaticPath, http.FS(static.Assets))
 
 	h.HandleFunc("/", h.serveHTML)
+}
+
+func (h *Handler) routeFileServer(path string, root http.FileSystem) {
+	if path != "/" && path[len(path)-1] != '/' {
+		h.Get(path, http.RedirectHandler(path+"/", http.StatusMovedPermanently).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	h.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		routeContext := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(routeContext.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
 }
