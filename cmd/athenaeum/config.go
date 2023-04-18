@@ -36,8 +36,7 @@ type DB struct {
 }
 
 type Media struct {
-	Root     string
-	HostPath string
+	Root string
 }
 
 type ThirdParty struct {

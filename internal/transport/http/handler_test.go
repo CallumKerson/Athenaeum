@@ -9,12 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/baloo.v3"
-
-	"github.com/CallumKerson/loggerrific/tlogger"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -29,8 +26,7 @@ const (
 )
 
 func TestHandler(t *testing.T) {
-	testHandler := NewHandler(&DummyPodcastService{}, &DummyCacheStore{}, tlogger.NewTLogger(t),
-		WithMediaConfig(filepath.Join("testdata", "media"), "/media/"), WithVersion("1.0.0-test"), WithStaticPath("/static"))
+	testHandler := NewHandler(&DummyPodcastService{}, filepath.Join("testdata", "media"), WithVersion("1.0.0-test"))
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
@@ -80,8 +76,7 @@ func TestHandler(t *testing.T) {
 }
 
 func TestHandler_Static(t *testing.T) {
-	testHandler := NewHandler(&DummyPodcastService{}, &DummyCacheStore{}, tlogger.NewTLogger(t),
-		WithMediaConfig("testdata", "/media/"), WithVersion("1.0.0-test"), WithStaticPath("/static"))
+	testHandler := NewHandler(&DummyPodcastService{}, "testdata")
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
@@ -156,21 +151,4 @@ func (s *DummyPodcastService) IsReady(ctx context.Context) bool {
 
 func (s *DummyPodcastService) UpdateFeeds(ctx context.Context) error {
 	return nil
-}
-
-type DummyCacheStore struct {
-}
-
-func (s *DummyCacheStore) Get(key uint64) ([]byte, bool) {
-	return []byte{}, false
-}
-
-func (s *DummyCacheStore) Set(key uint64, content []byte, expiration time.Time) {}
-
-func (s *DummyCacheStore) Release(key uint64) {}
-
-func (s *DummyCacheStore) ReleaseAll() {}
-
-func (s *DummyCacheStore) GetTTL() time.Duration {
-	return time.Minute
 }

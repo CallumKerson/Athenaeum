@@ -107,9 +107,20 @@ func runServer(cfg *Config) error {
 
 	var httpHandler *transportHttp.Handler
 	if cfg.Cache.Enabled {
-		httpHandler = transportHttp.NewHandler(podcastSvc, memcache.NewStore(cfg.GetMemcacheOpts()...), logger, cfg.GetHTTPHandlerOpts()...)
+		httpHandler = transportHttp.NewHandler(
+			podcastSvc,
+			cfg.Media.Root,
+			transportHttp.WithCacheStore(memcache.NewStore(cfg.GetMemcacheOpts()...)),
+			transportHttp.WithLogger(logger),
+			transportHttp.WithVersion(Version),
+		)
 	} else {
-		httpHandler = transportHttp.NewHandler(podcastSvc, nil, logger, cfg.GetHTTPHandlerOpts()...)
+		httpHandler = transportHttp.NewHandler(
+			podcastSvc,
+			cfg.Media.Root,
+			transportHttp.WithLogger(logger),
+			transportHttp.WithVersion(Version),
+		)
 	}
 
 	return transportHttp.Serve(httpHandler, cfg.Port, logger)
