@@ -6,15 +6,10 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	"github.com/CallumKerson/Athenaeum/internal/memcache"
-	"github.com/CallumKerson/Athenaeum/pkg/client"
 )
 
 func (c *Config) GetBoltDBOps() []bolt.Option {
 	return []bolt.Option{bolt.WithDBDefaults(), bolt.WithPathToDBDirectory(c.DB.Root)}
-}
-
-func (c *Config) GetClientOpts() []client.Option {
-	return []client.Option{client.WithHost(c.Host), client.WithVersion(Version)}
 }
 
 func (c *Config) GetMemcacheOpts() []memcache.Option {

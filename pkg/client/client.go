@@ -13,8 +13,8 @@ type Client struct {
 	version string
 }
 
-func New(opts ...Option) *Client {
-	client := &Client{}
+func New(host string, opts ...Option) *Client {
+	client := &Client{host: host}
 	for _, opt := range opts {
 		opt(client)
 	}
@@ -22,10 +22,14 @@ func New(opts ...Option) *Client {
 }
 
 func (c *Client) Update(ctx context.Context) error {
+	userAgent := "AthenaeumClient"
+	if c.version != "" {
+		userAgent = fmt.Sprintf("%s/%s", userAgent, c.version)
+	}
 	return requests.
 		URL(c.host).
 		Method(http.MethodPost).
-		Header("User-Agent", fmt.Sprintf("AthenaeumClient/%s", c.version)).
+		Header("User-Agent", userAgent).
 		Path("update").
 		Fetch(ctx)
 }

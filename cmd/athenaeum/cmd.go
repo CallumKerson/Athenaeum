@@ -76,7 +76,7 @@ func NewUpdateCommand() *cobra.Command {
 		Short:        "Triggers an update on the running athenaeum instance.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			athenaeumClient := client.New((&cfg).GetClientOpts()...)
+			athenaeumClient := client.New((&cfg).Host, client.WithVersion(Version))
 			err := athenaeumClient.Update(context.Background())
 			if err != nil {
 				return err
