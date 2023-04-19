@@ -3,7 +3,7 @@ module github.com/CallumKerson/Athenaeum
 go 1.20
 
 require (
-	github.com/CallumKerson/loggerrific v1.1.1
+	github.com/CallumKerson/loggerrific v1.1.2
 	github.com/CallumKerson/podcasts v0.0.5
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
 	github.com/carlmjohnson/requests v0.23.3

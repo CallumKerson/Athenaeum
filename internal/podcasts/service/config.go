@@ -1,20 +1,8 @@
 package service
 
-import "strings"
+import "github.com/CallumKerson/loggerrific"
 
 type Option func(s *Service)
-
-func WithHost(host string) Option {
-	return func(s *Service) {
-		s.host = strings.TrimSuffix(host, "/")
-	}
-}
-
-func WithMediaPath(mediaPath string) Option {
-	return func(s *Service) {
-		s.mediaPath = strings.Trim(mediaPath, "/")
-	}
-}
 
 func WithPodcastFeedInfo(explicit bool, language, author, email, copyright, imageLink string) Option {
 	return func(service *Service) {
@@ -23,13 +11,19 @@ func WithPodcastFeedInfo(explicit bool, language, author, email, copyright, imag
 		service.feedAuthor = author
 		service.feedAuthorEmail = email
 		service.feedCopyright = copyright
-		service.fedImageLink = imageLink
+		service.feedImageLink = imageLink
 	}
 }
 
 func WithHandlePreUnixEpoch(handle bool) Option {
 	return func(service *Service) {
 		service.handlePreUnixEpochDates = handle
+	}
+}
+
+func WithLogger(logger loggerrific.Logger) Option {
+	return func(s *Service) {
+		s.log = logger
 	}
 }
 

@@ -8,8 +8,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/CallumKerson/loggerrific/tlogger"
-
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	"github.com/CallumKerson/Athenaeum/internal/testing/testbooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
@@ -20,7 +18,7 @@ func TestAudiobookStore_CreatesDBFileOnInit(t *testing.T) {
 	dbRoot := filepath.Join(t.TempDir(), "db")
 
 	// when
-	_, err := bolt.NewAudiobookStore(tlogger.NewTLogger(t), true, bolt.WithPathToDBDirectory(dbRoot), bolt.WithDBDefaults())
+	_, err := bolt.NewAudiobookStore(dbRoot)
 
 	// then
 	assert.NoError(t, err)
@@ -31,22 +29,10 @@ func TestAudiobookStore_CreatesDBFileOnInit(t *testing.T) {
 	assert.Equal(t, int64(32768), fInfo.Size())
 }
 
-func TestAudiobookStore_CreatesNoFileWhenNotInit(t *testing.T) {
-	// given
-	dbRoot := t.TempDir()
-
-	// when
-	_, err := bolt.NewAudiobookStore(tlogger.NewTLogger(t), false, bolt.WithPathToDBDirectory(dbRoot), bolt.WithDBDefaults())
-
-	// then
-	assert.NoError(t, err)
-	assert.NoFileExists(t, filepath.Join(dbRoot, "athenaeum.db"))
-}
-
 func TestAudiobookStore_StoreAudiobooks(t *testing.T) {
 	// given
 	dbRoot := t.TempDir()
-	store, err := bolt.NewAudiobookStore(tlogger.NewTLogger(t), true, bolt.WithPathToDBDirectory(dbRoot), bolt.WithDBDefaults())
+	store, err := bolt.NewAudiobookStore(dbRoot)
 	assert.NoError(t, err)
 	dbFile := filepath.Join(dbRoot, "athenaeum.db")
 	assert.FileExists(t, dbFile)
@@ -69,7 +55,7 @@ func TestAudiobookStore_StoreAudiobooks(t *testing.T) {
 func TestAudiobookStore_GetAudiobooks(t *testing.T) {
 	// given
 	dbRoot := t.TempDir()
-	store, err := bolt.NewAudiobookStore(tlogger.NewTLogger(t), true, bolt.WithPathToDBDirectory(dbRoot), bolt.WithDBDefaults())
+	store, err := bolt.NewAudiobookStore(dbRoot)
 	assert.NoError(t, err)
 	dbFile := filepath.Join(dbRoot, "athenaeum.db")
 	assert.FileExists(t, dbFile)
@@ -100,7 +86,7 @@ func TestAudiobookStore_GetAudiobooks(t *testing.T) {
 func TestAudiobookStore_GetAllAudiobooks_WhenEmpty(t *testing.T) {
 	// given
 	dbRoot := t.TempDir()
-	store, err := bolt.NewAudiobookStore(tlogger.NewTLogger(t), true, bolt.WithPathToDBDirectory(dbRoot), bolt.WithDBDefaults())
+	store, err := bolt.NewAudiobookStore(dbRoot)
 	assert.NoError(t, err)
 
 	// when

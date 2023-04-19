@@ -14,6 +14,7 @@ import (
 	"github.com/pelletier/go-toml/v2"
 
 	"github.com/CallumKerson/loggerrific"
+	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/pkg/m4b"
@@ -29,8 +30,12 @@ type Service struct {
 	logger            loggerrific.Logger
 }
 
-func New(m4bMetadataReader M4BMetadataReader, logger loggerrific.Logger, opts ...Option) *Service {
-	svc := &Service{m4bMetadataReader: m4bMetadataReader, logger: logger}
+func New(m4bMetadataReader M4BMetadataReader, mediaRoot string, opts ...Option) *Service {
+	svc := &Service{
+		m4bMetadataReader: m4bMetadataReader,
+		mediaRoot:         mediaRoot,
+		logger:            noOpLogger.New(),
+	}
 	for _, opt := range opts {
 		opt(svc)
 	}

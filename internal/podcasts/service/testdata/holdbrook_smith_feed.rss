@@ -4,20 +4,13 @@
     <title>Kobna Holdbrook-Smith</title>
     <link>http://www.example-podcast.com/audiobooks</link>
     <copyright></copyright>
-    <language>EN</language>
+    <language></language>
     <description>Audiobooks Narrated by Kobna Holdbrook-Smith</description>
-    <itunes:author>A Person</itunes:author>
     <itunes:block>yes</itunes:block>
-    <itunes:explicit>yes</itunes:explicit>
-    <itunes:owner>
-      <itunes:name>A Person</itunes:name>
-      <itunes:email>person@domain.test</itunes:email>
-    </itunes:owner>
-    <itunes:image href="http://www.example-podcast.com/images/itunes.jpg"></itunes:image>
     <item>
       <title>A Wizard of Earthsea</title>
       <guid>http://www.example-podcast.com/audiobooks/media/Ursula%20K%20Le%20Guin/Earthsea/1%20A%20Wizard%20of%20Earthsea/A%20Wizard%20of%20Earthsea.m4b</guid>
-      <pubDate>Thu, 01 Jan 1970 08:00:00 +0000</pubDate>
+      <pubDate>Fri, 01 Nov 1968 08:00:00 +0000</pubDate>
       <description><![CDATA[A Wizard of Earthsea by Ursula K. Le Guin]]></description>
       <content:encoded><![CDATA[<h1>A Wizard of Earthsea</h1><h2>By Ursula K. Le Guin</h2><h4>Earthsea Book 1</h4><h4>Narrated by Kobna Holdbrook-Smith</h4><p>Ged, the greatest sorcerer in all Earthsea, was called Sparrowhawk in his reckless youth.</p><p>Hungry for power and knowledge, Sparrowhawk tampered with long-held secrets and loosed a terrible shadow upon the world. This is the tale of his testing, how he mastered the mighty words of power, tamed an ancient dragon, and crossed death's threshold to restore the balance.</p>]]></content:encoded>
       <itunes:duration>0:04</itunes:duration>

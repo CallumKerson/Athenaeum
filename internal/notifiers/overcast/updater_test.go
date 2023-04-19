@@ -1,4 +1,4 @@
-package notifier
+package overcast
 
 import (
 	"context"
@@ -9,8 +9,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/CallumKerson/loggerrific/tlogger"
 )
 
 func TestUpdater(t *testing.T) {
@@ -21,7 +19,7 @@ func TestUpdater(t *testing.T) {
 	}))
 	defer server.Close()
 
-	testNotifier := &Notifier{host: server.URL, urlPrefix: testURLPrefix, logger: tlogger.NewTLogger(t)}
+	testNotifier := New(testURLPrefix, WithHost(server.URL))
 
 	err := testNotifier.Notify(context.TODO())
 	assert.NoError(t, err)

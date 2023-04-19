@@ -7,8 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/CallumKerson/loggerrific/tlogger"
-
 	"github.com/CallumKerson/Athenaeum/internal/testing/dataloader"
 	"github.com/CallumKerson/Athenaeum/internal/testing/testbooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
@@ -16,7 +14,7 @@ import (
 )
 
 func TestService_GetAudiobooks(t *testing.T) {
-	svc := New(&DummyM4BService{}, tlogger.NewTLogger(t), WithPathToMediaRoot(dataloader.GetRootTestdata(t)))
+	svc := New(&DummyM4BService{}, dataloader.GetRootTestdata(t))
 
 	books, err := svc.GetAllAudiobooks(context.TODO())
 	assert.NoError(t, err)
@@ -24,7 +22,7 @@ func TestService_GetAudiobooks(t *testing.T) {
 }
 
 func TestService_UpdateAudiobooks(t *testing.T) {
-	svc := New(&DummyM4BService{}, tlogger.NewTLogger(t), WithPathToMediaRoot(dataloader.GetRootTestdata(t)))
+	svc := New(&DummyM4BService{}, dataloader.GetRootTestdata(t))
 
 	books, changed, err := svc.ScanForNewAndUpdatedAudiobooks(context.TODO(), []audiobooks.Audiobook{testbooks.Audiobooks[0]})
 	assert.NoError(t, err)

@@ -7,8 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/CallumKerson/loggerrific/tlogger"
-
 	"github.com/CallumKerson/Athenaeum/internal/testing/testbooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -31,7 +29,7 @@ func TestUpdate_Changes(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			updatedThirdParty = false
 
-			testSvc := New(testCase.scanner, &DummyAudiobookStore{}, tlogger.NewTLogger(t), &DummyNotifier{})
+			testSvc := New(testCase.scanner, &DummyAudiobookStore{}, WithThirdPartyNotifier(&DummyNotifier{}))
 			err := testSvc.UpdateAudiobooks(context.TODO())
 
 			assert.False(t, updatedThirdParty, "updated not yet called")

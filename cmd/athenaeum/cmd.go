@@ -4,15 +4,17 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/alfgmp4"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
+	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	audiobooksService "github.com/CallumKerson/Athenaeum/internal/audiobooks/service"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	"github.com/CallumKerson/Athenaeum/internal/memcache"
-	overcastNotifier "github.com/CallumKerson/Athenaeum/internal/overcast/notifier"
+	overcastNotifier "github.com/CallumKerson/Athenaeum/internal/notifiers/overcast"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 	"github.com/CallumKerson/Athenaeum/pkg/client"
@@ -76,7 +78,7 @@ func NewUpdateCommand() *cobra.Command {
 		Short:        "Triggers an update on the running athenaeum instance.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			athenaeumClient := client.New((&cfg).GetClientOpts()...)
+			athenaeumClient := client.New((&cfg).Host, client.WithVersion(Version))
 			err := athenaeumClient.Update(context.Background())
 			if err != nil {
 				return err
@@ -88,40 +90,64 @@ func NewUpdateCommand() *cobra.Command {
 }
 
 func runServer(cfg *Config) error {
-	logger := cfg.GetLogger()
+	logger := getLogger(cfg)
+
 	m4bMetadataReader := alfgmp4.NewMetadataReader()
-	mediaSvc := mediaService.New(m4bMetadataReader, logger, cfg.GetMediaServiceOpts()...)
-	boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
+	mediaSvc := mediaService.New(m4bMetadataReader, cfg.Media.Root, mediaService.WithLogger(logger))
+	boltAudiobookStore, err := bolt.NewAudiobookStore(cfg.DB.Root, bolt.WithLogger(logger))
 	if err != nil {
 		return err
 	}
-	var updaters []audiobooksService.ThirdPartyNotifier
+	audiobookOpts := []audiobooksService.Option{audiobooksService.WithLogger(logger)}
 	if cfg.ThirdParty.UpdateOvercast || cfg.ThirdParty.NotifyOvercast {
-		updaters = append(updaters, overcastNotifier.New(cfg.Host, logger))
+		audiobookOpts = append(audiobookOpts,
+			audiobooksService.WithThirdPartyNotifier(overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger))))
 	}
-	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, logger, updaters...)
+	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, audiobookOpts...)
 	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
 		return errScan
 	}
-	podcastSvc := podcastService.New(audiobookSvc, logger, cfg.GetPodcastServiceOpts()...)
+	podcastSvc := podcastService.New(audiobookSvc, cfg.Host, transportHttp.MediaPath, podcastService.WithLogger(logger),
+		podcastService.WithPodcastFeedInfo(
+			cfg.Podcast.Explicit,
+			cfg.Podcast.Language,
+			cfg.Podcast.Author,
+			cfg.Podcast.Email,
+			cfg.Podcast.Copyright,
+			fmt.Sprintf("%s%s/itunes_image.jpg", cfg.Host, transportHttp.StaticPath),
+		),
+		podcastService.WithHandlePreUnixEpoch(cfg.Podcast.PreUnixEpoch.Handle))
 
-	var httpHandler *transportHttp.Handler
+	httpHandlerOpts := []transportHttp.HandlerOption{transportHttp.WithLogger(logger), transportHttp.WithVersion(Version)}
 	if cfg.Cache.Enabled {
-		httpHandler = transportHttp.NewHandler(
-			podcastSvc,
-			cfg.Media.Root,
-			transportHttp.WithCacheStore(memcache.NewStore(cfg.GetMemcacheOpts()...)),
-			transportHttp.WithLogger(logger),
-			transportHttp.WithVersion(Version),
-		)
-	} else {
-		httpHandler = transportHttp.NewHandler(
-			podcastSvc,
-			cfg.Media.Root,
-			transportHttp.WithLogger(logger),
-			transportHttp.WithVersion(Version),
-		)
+		httpHandlerOpts = append(httpHandlerOpts, transportHttp.WithCacheStore(
+			memcache.NewStore(
+				memcache.WithTTL(cfg.Cache.GetTTL()),
+				memcache.WithCapacity(cfg.Cache.Length),
+			),
+		))
 	}
 
+	httpHandler := transportHttp.NewHandler(
+		podcastSvc,
+		cfg.Media.Root,
+		httpHandlerOpts...,
+	)
 	return transportHttp.Serve(httpHandler, cfg.Port, logger)
+}
+
+func getLogger(cfg *Config) *logrus.Logger {
+	log := logrus.NewLogger()
+	level := strings.ToLower(cfg.Log.Level)
+	switch level {
+	case "debug":
+		log.SetLevelDebug()
+	case "warn":
+		log.SetLevelWarn()
+	case "error":
+		log.SetLevelError()
+	default:
+		log.SetLevelInfo()
+	}
+	return log
 }
