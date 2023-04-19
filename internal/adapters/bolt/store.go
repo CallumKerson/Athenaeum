@@ -11,6 +11,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 
 	"github.com/CallumKerson/loggerrific"
+	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -23,15 +24,18 @@ type AudiobookStore struct {
 	dbDefaultBucketName []byte
 }
 
-func NewAudiobookStore(log loggerrific.Logger, initialise bool, opts ...Option) (*AudiobookStore, error) {
-	store := &AudiobookStore{log: log}
+func NewAudiobookStore(pathToDatabaseDir string, opts ...Option) (*AudiobookStore, error) {
+	store := &AudiobookStore{
+		databaseRoot:        pathToDatabaseDir,
+		log:                 noOpLogger.New(),
+		dbFileName:          defaultDBFileName,
+		dbFilePermission:    defaultDBFilePermission,
+		dbDefaultBucketName: []byte(defaultDBBucketName),
+	}
 	for _, opt := range opts {
 		opt(store)
 	}
-	var err error
-	if initialise {
-		err = store.Initialise()
-	}
+	err := store.Initialise()
 	return store, err
 }
 

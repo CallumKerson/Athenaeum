@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/alfgmp4"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
+	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	audiobooksService "github.com/CallumKerson/Athenaeum/internal/audiobooks/service"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	"github.com/CallumKerson/Athenaeum/internal/memcache"
@@ -88,15 +90,15 @@ func NewUpdateCommand() *cobra.Command {
 }
 
 func runServer(cfg *Config) error {
-	logger := cfg.GetLogger()
+	logger := getLogger(cfg)
 
 	m4bMetadataReader := alfgmp4.NewMetadataReader()
 	mediaSvc := mediaService.New(m4bMetadataReader, cfg.Media.Root, mediaService.WithLogger(logger))
-	boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
+	boltAudiobookStore, err := bolt.NewAudiobookStore(cfg.DB.Root, bolt.WithLogger(logger))
 	if err != nil {
 		return err
 	}
-	var audiobookOpts = []audiobooksService.Option{audiobooksService.WithLogger(logger)}
+	audiobookOpts := []audiobooksService.Option{audiobooksService.WithLogger(logger)}
 	if cfg.ThirdParty.UpdateOvercast || cfg.ThirdParty.NotifyOvercast {
 		audiobookOpts = append(audiobookOpts,
 			audiobooksService.WithThirdPartyNotifier(overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger))))
@@ -116,23 +118,36 @@ func runServer(cfg *Config) error {
 		),
 		podcastService.WithHandlePreUnixEpoch(cfg.Podcast.PreUnixEpoch.Handle))
 
-	var httpHandler *transportHttp.Handler
+	httpHandlerOpts := []transportHttp.HandlerOption{transportHttp.WithLogger(logger), transportHttp.WithVersion(Version)}
 	if cfg.Cache.Enabled {
-		httpHandler = transportHttp.NewHandler(
-			podcastSvc,
-			cfg.Media.Root,
-			transportHttp.WithCacheStore(memcache.NewStore(cfg.GetMemcacheOpts()...)),
-			transportHttp.WithLogger(logger),
-			transportHttp.WithVersion(Version),
-		)
-	} else {
-		httpHandler = transportHttp.NewHandler(
-			podcastSvc,
-			cfg.Media.Root,
-			transportHttp.WithLogger(logger),
-			transportHttp.WithVersion(Version),
-		)
+		httpHandlerOpts = append(httpHandlerOpts, transportHttp.WithCacheStore(
+			memcache.NewStore(
+				memcache.WithTTL(cfg.Cache.GetTTL()),
+				memcache.WithCapacity(cfg.Cache.Length),
+			),
+		))
 	}
 
+	httpHandler := transportHttp.NewHandler(
+		podcastSvc,
+		cfg.Media.Root,
+		httpHandlerOpts...,
+	)
 	return transportHttp.Serve(httpHandler, cfg.Port, logger)
+}
+
+func getLogger(cfg *Config) *logrus.Logger {
+	log := logrus.NewLogger()
+	level := strings.ToLower(cfg.Log.Level)
+	switch level {
+	case "debug":
+		log.SetLevelDebug()
+	case "warn":
+		log.SetLevelWarn()
+	case "error":
+		log.SetLevelError()
+	default:
+		log.SetLevelInfo()
+	}
+	return log
 }

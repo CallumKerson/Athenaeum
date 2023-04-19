@@ -69,8 +69,9 @@ type Cache struct {
 	Length  int
 }
 
-func (c Cache) GetTTL() (time.Duration, error) {
-	return time.ParseDuration(c.TTL)
+func (c Cache) GetTTL() time.Duration {
+	ttl, _ := time.ParseDuration(c.TTL)
+	return ttl
 }
 
 func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {

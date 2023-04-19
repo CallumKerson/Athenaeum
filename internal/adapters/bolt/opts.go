@@ -1,6 +1,10 @@
 package bolt
 
-import "io/fs"
+import (
+	"io/fs"
+
+	"github.com/CallumKerson/loggerrific"
+)
 
 type Option func(s *AudiobookStore)
 
@@ -13,19 +17,6 @@ var (
 	defaultDBBucketName = "athenaeum"
 )
 
-func WithPathToDBDirectory(path string) Option {
-	return func(s *AudiobookStore) {
-		s.databaseRoot = path
-	}
-}
-
-func WithDBDefaults() Option {
-	return func(s *AudiobookStore) {
-		WithDBFile(defaultDBFileName, defaultDBFilePermission)(s)
-		WithDBBucketName(defaultDBBucketName)(s)
-	}
-}
-
 func WithDBFile(filename string, filePermission int) Option {
 	return func(s *AudiobookStore) {
 		s.dbFileName = filename
@@ -36,5 +27,11 @@ func WithDBFile(filename string, filePermission int) Option {
 func WithDBBucketName(name string) Option {
 	return func(s *AudiobookStore) {
 		s.dbDefaultBucketName = []byte(name)
+	}
+}
+
+func WithLogger(logger loggerrific.Logger) Option {
+	return func(s *AudiobookStore) {
+		s.log = logger
 	}
 }
