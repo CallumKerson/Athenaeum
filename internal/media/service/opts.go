@@ -1,9 +1,11 @@
 package service
 
+import "github.com/CallumKerson/loggerrific"
+
 type Option func(s *Service)
 
-func WithPathToMediaRoot(path string) Option {
+func WithLogger(logger loggerrific.Logger) Option {
 	return func(s *Service) {
-		s.mediaRoot = path
+		s.logger = logger
 	}
 }

@@ -89,8 +89,9 @@ func NewUpdateCommand() *cobra.Command {
 
 func runServer(cfg *Config) error {
 	logger := cfg.GetLogger()
+
 	m4bMetadataReader := alfgmp4.NewMetadataReader()
-	mediaSvc := mediaService.New(m4bMetadataReader, logger, cfg.GetMediaServiceOpts()...)
+	mediaSvc := mediaService.New(m4bMetadataReader, cfg.Media.Root, mediaService.WithLogger(logger))
 	boltAudiobookStore, err := bolt.NewAudiobookStore(logger, true, cfg.GetBoltDBOps()...)
 	if err != nil {
 		return err

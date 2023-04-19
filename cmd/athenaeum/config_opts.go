@@ -5,14 +5,9 @@ import (
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
-	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	"github.com/CallumKerson/Athenaeum/internal/memcache"
 	"github.com/CallumKerson/Athenaeum/pkg/client"
 )
-
-func (c *Config) GetMediaServiceOpts() []mediaService.Option {
-	return []mediaService.Option{mediaService.WithPathToMediaRoot(c.Media.Root)}
-}
 
 func (c *Config) GetBoltDBOps() []bolt.Option {
 	return []bolt.Option{bolt.WithDBDefaults(), bolt.WithPathToDBDirectory(c.DB.Root)}
