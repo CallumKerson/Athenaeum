@@ -2,16 +2,16 @@ package overcast
 
 import "github.com/CallumKerson/loggerrific"
 
-type Option func(s *Notifier)
+type Option func(n *Notifier)
 
 func WithLogger(logger loggerrific.Logger) Option {
-	return func(s *Notifier) {
-		s.logger = logger
+	return func(n *Notifier) {
+		n.logger = logger
 	}
 }
 
 func WithHost(host string) Option {
-	return func(s *Notifier) {
-		s.host = host
+	return func(n *Notifier) {
+		n.host = host
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/CallumKerson/loggerrific"
+	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -27,20 +28,22 @@ type ThirdPartyNotifier interface {
 }
 
 type Service struct {
-	mediaScanner             MediaScanner
-	audiobookStore           AudiobookStore
-	thirdPartyUpdateServices []ThirdPartyNotifier
-	logger                   loggerrific.Logger
+	mediaScanner        MediaScanner
+	audiobookStore      AudiobookStore
+	thirdPartyNotifiers []ThirdPartyNotifier
+	logger              loggerrific.Logger
 }
 
-func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, logger loggerrific.Logger,
-	thirdPartyUpdateServices ...ThirdPartyNotifier) *Service {
-	return &Service{
-		mediaScanner:             mediaScanner,
-		audiobookStore:           audiobookStore,
-		logger:                   logger,
-		thirdPartyUpdateServices: thirdPartyUpdateServices,
+func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, opts ...Option) *Service {
+	svc := &Service{
+		mediaScanner:   mediaScanner,
+		audiobookStore: audiobookStore,
+		logger:         noOpLogger.New(),
 	}
+	for _, opt := range opts {
+		opt(svc)
+	}
+	return svc
 }
 
 func (s *Service) UpdateAudiobooks(ctx context.Context) error {
@@ -58,12 +61,12 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		for svcIndex := range s.thirdPartyUpdateServices {
+		for svcIndex := range s.thirdPartyNotifiers {
 			go func(ctx context.Context, notifier ThirdPartyNotifier) {
 				if updateErr := notifier.Notify(ctx); updateErr != nil {
 					s.logger.WithError(updateErr).Warnln("Notifying", notifier, "failed")
 				}
-			}(context.TODO(), s.thirdPartyUpdateServices[svcIndex])
+			}(context.TODO(), s.thirdPartyNotifiers[svcIndex])
 		}
 		s.logger.Infoln("Update complete")
 	} else {

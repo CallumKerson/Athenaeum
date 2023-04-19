@@ -96,11 +96,12 @@ func runServer(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	var updaters []audiobooksService.ThirdPartyNotifier
+	var audiobookOpts = []audiobooksService.Option{audiobooksService.WithLogger(logger)}
 	if cfg.ThirdParty.UpdateOvercast || cfg.ThirdParty.NotifyOvercast {
-		updaters = append(updaters, overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger)))
+		audiobookOpts = append(audiobookOpts,
+			audiobooksService.WithThirdPartyNotifier(overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger))))
 	}
-	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, logger, updaters...)
+	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, audiobookOpts...)
 	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
 		return errScan
 	}
