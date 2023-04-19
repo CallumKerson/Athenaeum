@@ -103,7 +103,16 @@ func runServer(cfg *Config) error {
 	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
 		return errScan
 	}
-	podcastSvc := podcastService.New(audiobookSvc, logger, cfg.GetPodcastServiceOpts()...)
+	podcastSvc := podcastService.New(audiobookSvc, cfg.Host, transportHttp.MediaPath, podcastService.WithLogger(logger),
+		podcastService.WithPodcastFeedInfo(
+			cfg.Podcast.Explicit,
+			cfg.Podcast.Language,
+			cfg.Podcast.Author,
+			cfg.Podcast.Email,
+			cfg.Podcast.Copyright,
+			fmt.Sprintf("%s%s/itunes_image.jpg", cfg.Host, transportHttp.StaticPath),
+		),
+		podcastService.WithHandlePreUnixEpoch(cfg.Podcast.PreUnixEpoch.Handle))
 
 	var httpHandler *transportHttp.Handler
 	if cfg.Cache.Enabled {

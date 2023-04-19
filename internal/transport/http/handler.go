@@ -12,7 +12,7 @@ import (
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/CallumKerson/loggerrific"
-	noOptLogger "github.com/CallumKerson/loggerrific/noopt"
+	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/static"
@@ -55,7 +55,7 @@ type Handler struct {
 func NewHandler(podcastService AudiobooksPodcastService, mediaRoot string, opts ...HandlerOption) *Handler {
 	handler := &Handler{
 		PodcastService: podcastService,
-		Log:            noOptLogger.New(),
+		Log:            noOpLogger.New(),
 		mediaRoot:      mediaRoot,
 	}
 	for _, opt := range opts {

@@ -36,7 +36,7 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 	}
 
 	for bookIndex := range books {
-		hostedFile, err := url.Parse(fmt.Sprintf("%s/%s%s", s.host, s.mediaPath, books[bookIndex].Path))
+		hostedFile, err := url.Parse(fmt.Sprintf("%s/%s%s", s.getHost(), s.getMediaPath(), books[bookIndex].Path))
 		if err != nil {
 			return err
 		}

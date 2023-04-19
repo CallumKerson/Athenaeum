@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"fmt"
-	"io"
+	"strings"
 
 	"github.com/CallumKerson/loggerrific"
+	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -28,9 +28,9 @@ type AudiobooksClient interface {
 }
 
 type Service struct {
-	Log                     loggerrific.Logger
+	log                     loggerrific.Logger
 	host                    string
-	fedImageLink            string
+	feedImageLink           string
 	mediaPath               string
 	feedExplicit            bool
 	feedLanguage            string
@@ -41,66 +41,6 @@ type Service struct {
 	AudiobooksClient
 }
 
-func (s *Service) WriteAllAudiobooksFeed(ctx context.Context, writer io.Writer) error {
-	books, err := s.GetAllAudiobooks(ctx)
-	if err != nil {
-		return err
-	}
-	return s.writeAudiobookFeed(ctx, allAudiobooksFeedTitle, allAudiobooksFeedDescription, books, writer)
-}
-
-func (s *Service) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.Genre, writer io.Writer) error {
-	books, err := s.GetAudiobooksByGenre(ctx, genre)
-	if err != nil {
-		return err
-	}
-	genreFeedOpts := &FeedOpts{
-		Title:       genre.String(),
-		Description: fmt.Sprintf(descriptionFormat, genre),
-		Link:        s.host,
-		ImageLink:   s.fedImageLink,
-		Explicit:    s.feedExplicit,
-		Language:    s.feedLanguage,
-		Author:      s.feedAuthor,
-		Email:       s.feedAuthorEmail,
-		Copyright:   s.feedCopyright,
-	}
-	return s.WriteFeedFromAudiobooks(ctx, books, genreFeedOpts, writer)
-}
-
-func (s *Service) WriteAuthorAudiobookFeed(ctx context.Context, author string, writer io.Writer) (bool, error) {
-	books, err := s.GetAudiobooksByAuthor(ctx, author)
-	if err != nil {
-		return false, err
-	}
-	if len(books) < 1 {
-		return false, nil
-	}
-	return true, s.writeAudiobookFeed(ctx, author, fmt.Sprintf(authorDescriptionFormat, author), books, writer)
-}
-
-func (s *Service) WriteNarratorAudiobookFeed(ctx context.Context, narrator string, writer io.Writer) (bool, error) {
-	books, err := s.GetAudiobooksByNarrator(ctx, narrator)
-	if err != nil {
-		return false, err
-	}
-	if len(books) < 1 {
-		return false, nil
-	}
-	return true, s.writeAudiobookFeed(ctx, narrator, fmt.Sprintf(narratorDescriptionFormat, narrator), books, writer)
-}
-
-func (s *Service) WriteTagAudiobookFeed(ctx context.Context, tag string, writer io.Writer) (bool, error) {
-	books, err := s.GetAudiobooksByTag(ctx, tag)
-	if err != nil {
-		return false, err
-	}
-	if len(books) < 1 {
-		return false, nil
-	}
-	return true, s.writeAudiobookFeed(ctx, tag, fmt.Sprintf(descriptionFormat, tag), books, writer)
-}
-
 func (s *Service) IsReady(ctx context.Context) bool {
 	return true
 }
@@ -109,10 +49,12 @@ func (s *Service) UpdateFeeds(ctx context.Context) error {
 	return s.UpdateAudiobooks(ctx)
 }
 
-func New(audiobooksClient AudiobooksClient, logger loggerrific.Logger, opts ...Option) *Service {
+func New(audiobooksClient AudiobooksClient, host, mediaPath string, opts ...Option) *Service {
 	svc := &Service{
-		Log:              logger,
+		log:              noOpLogger.New(),
 		AudiobooksClient: audiobooksClient,
+		host:             host,
+		mediaPath:        mediaPath,
 	}
 	for _, opt := range opts {
 		opt(svc)
@@ -120,18 +62,10 @@ func New(audiobooksClient AudiobooksClient, logger loggerrific.Logger, opts ...O
 	return svc
 }
 
-func (s *Service) writeAudiobookFeed(ctx context.Context, title, description string,
-	books []audiobooks.Audiobook, writer io.Writer) error {
-	feedOtps := &FeedOpts{
-		Title:       title,
-		Description: description,
-		Link:        s.host,
-		ImageLink:   s.fedImageLink,
-		Explicit:    s.feedExplicit,
-		Language:    s.feedLanguage,
-		Author:      s.feedAuthor,
-		Email:       s.feedAuthorEmail,
-		Copyright:   s.feedCopyright,
-	}
-	return s.WriteFeedFromAudiobooks(ctx, books, feedOtps, writer)
+func (s *Service) getMediaPath() string {
+	return strings.Trim(s.mediaPath, "/")
+}
+
+func (s *Service) getHost() string {
+	return strings.Trim(s.host, "/")
 }

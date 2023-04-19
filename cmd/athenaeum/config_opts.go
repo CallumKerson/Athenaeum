@@ -1,15 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
 	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
 	"github.com/CallumKerson/Athenaeum/internal/memcache"
-	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
-	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 	"github.com/CallumKerson/Athenaeum/pkg/client"
 )
 
@@ -19,14 +16,6 @@ func (c *Config) GetMediaServiceOpts() []mediaService.Option {
 
 func (c *Config) GetBoltDBOps() []bolt.Option {
 	return []bolt.Option{bolt.WithDBDefaults(), bolt.WithPathToDBDirectory(c.DB.Root)}
-}
-
-func (c *Config) GetPodcastServiceOpts() []podcastService.Option {
-	return []podcastService.Option{podcastService.WithHost(c.Host),
-		podcastService.WithMediaPath(transportHttp.MediaPath),
-		podcastService.WithPodcastFeedInfo(c.Podcast.Explicit, c.Podcast.Language, c.Podcast.Author, c.Podcast.Email, c.Podcast.Copyright,
-			fmt.Sprintf("%s%s/itunes_image.jpg", c.Host, transportHttp.StaticPath)),
-		podcastService.WithHandlePreUnixEpoch(c.Podcast.PreUnixEpoch.Handle)}
 }
 
 func (c *Config) GetClientOpts() []client.Option {

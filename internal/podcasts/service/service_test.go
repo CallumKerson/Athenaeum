@@ -11,8 +11,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/CallumKerson/loggerrific/tlogger"
-
 	"github.com/CallumKerson/Athenaeum/internal/testing/testbooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -51,9 +49,9 @@ func TestGetFeed(t *testing.T) {
 		expectedFeed       string
 		expectedFeedExists bool
 	}{
-		{name: "Full feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
+		{name: "Feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
 			return true, svc.WriteAllAudiobooksFeed(context.Background(), wrt)
-		}, pathToExpectedFeed: "full_feed.rss", expectedFeedExists: true},
+		}, pathToExpectedFeed: "feed.rss", expectedFeedExists: true},
 		{name: "Sci-Fi feed", writeFeedTest: func(svc *Service, wrt io.Writer) (bool, error) {
 			return true, svc.WriteGenreAudiobookFeed(context.Background(), audiobooks.SciFi, wrt)
 		}, pathToExpectedFeed: "scifi_feed.rss", expectedFeedExists: true},
@@ -78,11 +76,8 @@ func TestGetFeed(t *testing.T) {
 	}
 
 	svc := New(&testAudiobookClient{},
-		tlogger.NewTLogger(t),
-		WithHost("http://www.example-podcast.com/audiobooks/"),
-		WithMediaPath("/media/"),
-		WithPodcastFeedInfo(true, "EN", "A Person", "person@domain.test", "None", "http://www.example-podcast.com/images/itunes.jpg"),
-		WithHandlePreUnixEpoch(true),
+		"http://www.example-podcast.com/audiobooks/",
+		"/media/",
 	)
 
 	for _, testCase := range tests {
@@ -105,4 +100,26 @@ func TestGetFeed(t *testing.T) {
 			assert.Equal(t, expected, buf.String())
 		})
 	}
+}
+
+func TestGetFeed_WithOptions(t *testing.T) {
+	// given
+	svc := New(&testAudiobookClient{},
+		"http://www.example-podcast.com/audiobooks",
+		"/media/",
+		WithPodcastFeedInfo(true, "EN", "A Person", "person@domain.test", "None", "http://www.example-podcast.com/images/itunes.jpg"),
+		WithHandlePreUnixEpoch(true),
+	)
+
+	expectedBytes, err := os.ReadFile(filepath.Join("testdata", "full_feed.rss"))
+	assert.NoError(t, err)
+	expected := strings.TrimSpace(string(expectedBytes))
+	var buf bytes.Buffer
+
+	// when
+	err = svc.WriteAllAudiobooksFeed(context.Background(), &buf)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, expected, buf.String())
 }
