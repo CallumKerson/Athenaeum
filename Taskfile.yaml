@@ -34,19 +34,34 @@ tasks:
 
   #local tasks
   go:mod-tidy:
-    - go mod tidy
+    cmds:
+      - go mod tidy
+    sources:
+      - go.mod
+      - go.sum
 
   go:fmt:
     - gofmt -l -s -w .
+  sources:
+    - "**/*.go"
 
   go:lint:
+    cmds:
     - golangci-lint run
+    sources:
+      - "**/*.go"
 
   go:isort:
+    cmds:
     - goimports-reviser -rm-unused -company-prefixes github.com/CallumKerson -project-name github.com/CallumKerson/Athenaeum -use-cache  -format ./...
+    sources:
+      - "**/*.go"
 
   test:
-    - go test ./...
+    cmds:
+      - go test ./...
+    sources:
+      - "**/*.go"
 
   compile:
     desc: "Compiles for the current OS and architecture"
@@ -57,6 +72,8 @@ tasks:
         sh: git rev-parse HEAD
       VERSION:
         sh: echo "$(git describe --tags)-dev+$(git rev-parse --short HEAD)"
+    sources:
+      - "**/*.go"
 
   linux-compile:
     desc: "Compiles for Linux"
