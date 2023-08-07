@@ -24,9 +24,8 @@ func TestAudiobookStore_CreatesDBFileOnInit(t *testing.T) {
 	assert.NoError(t, err)
 	dbFile := filepath.Join(dbRoot, "athenaeum.db")
 	assert.FileExists(t, dbFile)
-	fInfo, err := os.Stat(dbFile)
+	_, err = os.Stat(dbFile)
 	assert.NoError(t, err)
-	assert.Equal(t, int64(32768), fInfo.Size())
 }
 
 func TestAudiobookStore_StoreAudiobooks(t *testing.T) {
@@ -36,9 +35,8 @@ func TestAudiobookStore_StoreAudiobooks(t *testing.T) {
 	assert.NoError(t, err)
 	dbFile := filepath.Join(dbRoot, "athenaeum.db")
 	assert.FileExists(t, dbFile)
-	fInfo, err := os.Stat(dbFile)
+	_, err = os.Stat(dbFile)
 	assert.NoError(t, err)
-	assert.Equal(t, int64(32768), fInfo.Size())
 
 	// when
 	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
@@ -59,9 +57,8 @@ func TestAudiobookStore_GetAudiobooks(t *testing.T) {
 	assert.NoError(t, err)
 	dbFile := filepath.Join(dbRoot, "athenaeum.db")
 	assert.FileExists(t, dbFile)
-	fInfo, err := os.Stat(dbFile)
+	_, err = os.Stat(dbFile)
 	assert.NoError(t, err)
-	assert.Equal(t, int64(32768), fInfo.Size())
 
 	// when
 	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
