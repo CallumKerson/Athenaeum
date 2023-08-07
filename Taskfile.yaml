@@ -6,8 +6,31 @@ tasks:
   #unix setup
   setup:
     - brew update
-    - brew install go goimports-reviser golangci-lint pre-commit yq hadolint
-    - pre-commit install
+    - brew install go golangci-lint yq hadolint
+    - task: setup:imports-reviser
+    - task: setup:precommit:install
+
+  setup:imports-reviser:
+    cmds:
+      - brew tap incu6us/homebrew-tap
+      - brew update
+      - brew install goimports-reviser
+    status:
+      - command -v goimports-reviser
+
+  setup:precommit:cli:
+    cmds:
+      - brew update
+      - brew install pre-commit
+      - pre-commit install
+    status:
+      - command -v pre-commit
+
+  setup:precommit:install:
+    deps:
+      - setup:precommit:cli
+    cmds:
+      - pre-commit install
 
   #local tasks
   go:mod-tidy:
