@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -108,13 +109,22 @@ func startRunCommand(t *testing.T) string {
 	port := getFreePort(t)
 	host := fmt.Sprintf("http://localhost:%d", port)
 	tempDir := t.TempDir()
+	configFilePath := filepath.Join(t.TempDir(), "config.yaml")
 	envVarCleanup := envVarSetter(t, map[string]string{
-		"ATHENAEUM_HOST":       host,
-		"ATHENAEUM_PORT":       fmt.Sprintf("%d", port),
-		"ATHENAEUM_DB_ROOT":    tempDir,
-		"ATHENAEUM_MEDIA_ROOT": dataloader.GetRootTestdata(t),
+		"ATHENAEUM_CONFIG_PATH": configFilePath,
 	})
 	t.Cleanup(envVarCleanup)
+
+	configYAML := `---
+Host: "%s"
+Port: %d
+DB:
+    Root: "%s"
+Media:
+    Root: "%s"
+`
+	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(configYAML, host, port, tempDir, dataloader.GetRootTestdata(t))), 0644)
+	assert.NoError(t, err)
 
 	go func() {
 		cmd := NewRootCommand()

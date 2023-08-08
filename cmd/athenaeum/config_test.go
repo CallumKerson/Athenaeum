@@ -2,12 +2,15 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
 func TestConfig_FromEnvironment(t *testing.T) {
@@ -38,18 +41,27 @@ func TestConfig_FromFile(t *testing.T) {
 Host: "http://localhost:8088"
 Podcast:
     Language: FR
+ExcludsionsFromMainFeed:
+    Genres:
+      - nonfiction
 `
 	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
 	assert.NoError(t, err)
 	var config Config
+	var cmdOut = &bytes.Buffer{}
 
 	// when
-	err = InitConfig(&config, configFilePath, &bytes.Buffer{})
+	err = InitConfig(&config, configFilePath, cmdOut)
 
 	// then
 	assert.NoError(t, err)
+	assert.Equal(t, fmt.Sprintf("Using config file: %s\n", configFilePath), cmdOut.String())
 	assert.Equal(t, "http://localhost:8088", config.Host)
 	assert.Equal(t, "FR", config.Podcast.Language)
+
+	genres, err := config.ExcludsionsFromMainFeed.GetGenres()
+	assert.NoError(t, err)
+	assert.Equal(t, []audiobooks.Genre{audiobooks.NonFiction}, genres)
 }
 
 func TestConfig_FromFile_DefiniedInEnvironment(t *testing.T) {

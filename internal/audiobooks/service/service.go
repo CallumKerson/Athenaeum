@@ -32,6 +32,7 @@ type Service struct {
 	audiobookStore      AudiobookStore
 	thirdPartyNotifiers []ThirdPartyNotifier
 	logger              loggerrific.Logger
+	filtersForAll       []Filter
 }
 
 func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, opts ...Option) *Service {
@@ -76,7 +77,11 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 }
 
 func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
-	return s.audiobookStore.GetAll(ctx)
+	if len(s.filtersForAll) > 0 {
+		return s.audiobookStore.Get(ctx, AndFilter(s.filtersForAll...))
+	} else {
+		return s.audiobookStore.GetAll(ctx)
+	}
 }
 
 func (s *Service) IsReady(ctx context.Context) bool {

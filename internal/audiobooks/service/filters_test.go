@@ -33,6 +33,9 @@ func TestFilers(t *testing.T) {
 		{name: "match tag ignoring whitespace", filter: TagFilter("HugoAwards"), book: testbooks.Audiobooks[0], expectedMatch: true},
 		{name: "match tag ignoring case and whitespace", filter: TagFilter("hugoawards"), book: testbooks.Audiobooks[0], expectedMatch: true},
 		{name: "not match tag", filter: TagFilter("Nebula Awards"), book: testbooks.Audiobooks[1], expectedMatch: false},
+		{name: "use not filter with author", filter: NotFilter(AuthorFilter("Max Gladstone")), book: testbooks.Audiobooks[1], expectedMatch: true},
+		{name: "use not filter with author fails", filter: NotFilter(AuthorFilter("Max Gladstone")), book: testbooks.Audiobooks[0], expectedMatch: false},
+		{name: "combine multiple filters", filter: AndFilter(AuthorFilter("Max Gladstone"), GenreFilter(audiobooks.SciFi)), book: testbooks.Audiobooks[0], expectedMatch: true},
 	}
 
 	for _, testCase := range tests {
