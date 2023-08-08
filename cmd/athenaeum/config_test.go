@@ -64,7 +64,7 @@ ExclusionsFromMainFeed:
 	assert.Equal(t, []audiobooks.Genre{audiobooks.NonFiction}, genres)
 }
 
-func TestConfig_FromFile_DefiniedInEnvironment(t *testing.T) {
+func TestConfig_FromFile_DefinedInEnvironment(t *testing.T) {
 	// given
 	configFilePath := filepath.Join(t.TempDir(), "config.yaml")
 	envVarCleanup := envVarSetter(t, map[string]string{
@@ -170,7 +170,7 @@ func envVarSetter(t *testing.T, envs map[string]string) (closer func()) {
 				err := os.Setenv(name, origValue)
 				assert.NoError(t, err)
 			} else {
-				t.Log("Unsetting env", name)
+				t.Log("Resetting env", name)
 				err := os.Unsetenv(name)
 				assert.NoError(t, err)
 			}
