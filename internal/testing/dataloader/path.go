@@ -21,8 +21,8 @@ func GetRootPath(t *testing.T) string {
 	return dir
 }
 
-func GetRootTestdata(t *testing.T, subpaths ...string) string {
+func GetRootTestdata(t *testing.T, subPaths ...string) string {
 	baseTestData := []string{GetRootPath(t), "testdata"}
-	baseTestData = append(baseTestData, subpaths...)
+	baseTestData = append(baseTestData, subPaths...)
 	return filepath.Join(baseTestData...)
 }
