@@ -103,8 +103,8 @@ func runServer(cfg *Config) error {
 		audiobookOpts = append(audiobookOpts,
 			audiobooksService.WithThirdPartyNotifier(overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger))))
 	}
-	if len(cfg.ExcludsionsFromMainFeed.Genres) > 0 {
-		genres, err := cfg.ExcludsionsFromMainFeed.GetGenres()
+	if len(cfg.ExclusionsFromMainFeed.Genres) > 0 {
+		genres, err := cfg.ExclusionsFromMainFeed.GetGenres()
 		if err != nil {
 			return err
 		}
