@@ -50,7 +50,7 @@ func TestFilteringAllAudiobooks(t *testing.T) {
 		{name: "no filter options", filterOptions: []Option{}, expectedAudiobooks: testbooks.Audiobooks},
 		{
 			name:               "filter genres from all audibooks",
-			filterOptions:      []Option{WithGenresToExludeFromAllAudiobooks(audiobooks.SciFi)},
+			filterOptions:      []Option{WithGenresToExcludeFromAllAudiobooks(audiobooks.SciFi)},
 			expectedAudiobooks: []audiobooks.Audiobook{testbooks.Audiobooks[1]},
 		},
 	}

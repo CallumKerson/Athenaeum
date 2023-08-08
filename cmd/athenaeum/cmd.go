@@ -108,7 +108,7 @@ func runServer(cfg *Config) error {
 		if err != nil {
 			return err
 		}
-		audiobookOpts = append(audiobookOpts, audiobooksService.WithGenresToExludeFromAllAudiobooks(genres...))
+		audiobookOpts = append(audiobookOpts, audiobooksService.WithGenresToExcludeFromAllAudiobooks(genres...))
 	}
 	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, audiobookOpts...)
 	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
