@@ -1,14 +1,37 @@
 {
     "cSpell.words": [
+        "alfgmp",
         "baloo",
         "buildx",
+        "carlmjohnson",
+        "Childrens",
+        "cmds",
+        "emilywoozeller",
         "gofmt",
         "goimports",
         "golangci",
         "goreleaser",
         "hadolint",
+        "historicalfiction",
+        "httpretry",
+        "hugoawards",
+        "incu",
+        "Infoln",
         "isort",
-        "ldflags"
+        "Kerson",
+        "ldflags",
+        "loggerrific",
+        "logrus",
+        "maxgladstone",
+        "precommit",
+        "sciencefiction",
+        "scifi",
+        "stretchr",
+        "testbooks",
+        "Warnln",
+        "ybbus",
+        "youngadult",
+        "Zeller"
     ],
     "cSpell.language": "en,en-GB"
 }
