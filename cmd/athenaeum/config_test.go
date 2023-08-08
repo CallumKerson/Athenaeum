@@ -41,7 +41,7 @@ func TestConfig_FromFile(t *testing.T) {
 Host: "http://localhost:8088"
 Podcast:
     Language: FR
-ExcludsionsFromMainFeed:
+ExclusionsFromMainFeed:
     Genres:
       - nonfiction
 `
@@ -59,7 +59,7 @@ ExcludsionsFromMainFeed:
 	assert.Equal(t, "http://localhost:8088", config.Host)
 	assert.Equal(t, "FR", config.Podcast.Language)
 
-	genres, err := config.ExcludsionsFromMainFeed.GetGenres()
+	genres, err := config.ExclusionsFromMainFeed.GetGenres()
 	assert.NoError(t, err)
 	assert.Equal(t, []audiobooks.Genre{audiobooks.NonFiction}, genres)
 }

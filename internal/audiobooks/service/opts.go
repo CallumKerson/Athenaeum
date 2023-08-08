@@ -20,7 +20,7 @@ func WithThirdPartyNotifier(notifier ThirdPartyNotifier) Option {
 	}
 }
 
-func WithGenresToExludeFromAllAudiobooks(genres ...audiobooks.Genre) Option {
+func WithGenresToExcludeFromAllAudiobooks(genres ...audiobooks.Genre) Option {
 	return func(service *Service) {
 		if len(genres) > 0 {
 			var genreFilters []Filter

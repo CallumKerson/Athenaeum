@@ -19,15 +19,15 @@ const (
 )
 
 type Config struct {
-	Host                    string
-	Port                    int
-	DB                      DB
-	Media                   Media
-	Podcast                 Podcast
-	ThirdParty              ThirdParty
-	Log                     Log
-	Cache                   Cache
-	ExcludsionsFromMainFeed ExcludsionsFromMainFeed
+	Host                   string
+	Port                   int
+	DB                     DB
+	Media                  Media
+	Podcast                Podcast
+	ThirdParty             ThirdParty
+	Log                    Log
+	Cache                  Cache
+	ExclusionsFromMainFeed ExclusionsFromMainFeed
 }
 
 type Log struct {
@@ -77,11 +77,11 @@ func (c Cache) GetTTL() time.Duration {
 	return ttl
 }
 
-type ExcludsionsFromMainFeed struct {
+type ExclusionsFromMainFeed struct {
 	Genres []string
 }
 
-func (e ExcludsionsFromMainFeed) GetGenres() ([]audiobooks.Genre, error) {
+func (e ExclusionsFromMainFeed) GetGenres() ([]audiobooks.Genre, error) {
 	genres := []audiobooks.Genre{}
 	for _, genreName := range e.Genres {
 		genre, err := audiobooks.ParseGenre(genreName)
