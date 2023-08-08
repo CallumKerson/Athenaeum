@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
 const (
@@ -17,14 +19,15 @@ const (
 )
 
 type Config struct {
-	Host       string
-	Port       int
-	DB         DB
-	Media      Media
-	Podcast    Podcast
-	ThirdParty ThirdParty
-	Log        Log
-	Cache      Cache
+	Host                    string
+	Port                    int
+	DB                      DB
+	Media                   Media
+	Podcast                 Podcast
+	ThirdParty              ThirdParty
+	Log                     Log
+	Cache                   Cache
+	ExcludsionsFromMainFeed ExcludsionsFromMainFeed
 }
 
 type Log struct {
@@ -74,6 +77,22 @@ func (c Cache) GetTTL() time.Duration {
 	return ttl
 }
 
+type ExcludsionsFromMainFeed struct {
+	Genres []string
+}
+
+func (e ExcludsionsFromMainFeed) GetGenres() ([]audiobooks.Genre, error) {
+	genres := []audiobooks.Genre{}
+	for _, genreName := range e.Genres {
+		genre, err := audiobooks.ParseGenre(genreName)
+		if err != nil {
+			return genres, err
+		}
+		genres = append(genres, genre)
+	}
+	return genres, nil
+}
+
 func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 	viper.SetDefault("Podcast.Copyright", "None")
 	viper.SetDefault("Podcast.Explicit", true)
@@ -121,14 +140,20 @@ func InitConfig(cfg *Config, pathToConfigFile string, out io.Writer) error {
 		viper.AddConfigPath(filepath.Join(home, defaultConfigDir))
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("config")
-		if err := viper.ReadInConfig(); err == nil {
+		err = viper.ReadInConfig()
+		if err == nil {
 			configReadFromFile = true
+		} else {
+			fmt.Fprintln(out, "Error while reading config:", err.Error())
 		}
 	} else {
 		viper.SetConfigFile(pathToConfigFile)
-		if err := viper.ReadInConfig(); err == nil {
+		err := viper.ReadInConfig()
+		if err == nil {
 			fmt.Fprintln(out, "Using config file:", viper.ConfigFileUsed())
 			configReadFromFile = true
+		} else {
+			fmt.Fprintln(out, "Error while reading config:", err.Error())
 		}
 	}
 	if !configReadFromFile {

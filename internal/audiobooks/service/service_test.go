@@ -41,6 +41,33 @@ func TestUpdate_Changes(t *testing.T) {
 	}
 }
 
+func TestFilteringAllAudiobooks(t *testing.T) {
+	tests := []struct {
+		name               string
+		filterOptions      []Option
+		expectedAudiobooks []audiobooks.Audiobook
+	}{
+		{name: "no filter options", filterOptions: []Option{}, expectedAudiobooks: testbooks.Audiobooks},
+		{
+			name:               "filter genres from all audibooks",
+			filterOptions:      []Option{WithGenresToExludeFromAllAudiobooks(audiobooks.SciFi)},
+			expectedAudiobooks: []audiobooks.Audiobook{testbooks.Audiobooks[1]},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			updatedThirdParty = false
+
+			testSvc := New(&NoChangesMediaScanner{}, &DummyAudiobookStore{}, testCase.filterOptions...)
+			retrievedAudiobooks, err := testSvc.GetAllAudiobooks(context.TODO())
+
+			assert.NoError(t, err)
+			assert.Equal(t, testCase.expectedAudiobooks, retrievedAudiobooks)
+		})
+	}
+}
+
 type DummyNotifier struct {
 }
 

@@ -25,6 +25,7 @@ const (
 	Thriller
 	Horror
 	LGBT
+	Erotica
 )
 
 var (
@@ -44,6 +45,7 @@ var (
 		12: "Thriller",
 		13: "Horror",
 		14: "LGBT+",
+		15: "Erotica",
 	}
 	genreValue = map[string]uint8{
 		"literary":           1,
@@ -71,6 +73,7 @@ var (
 		"horror":             13,
 		"lgbt":               14,
 		"lgbt+":              14,
+		"erotica":            15,
 	}
 )
 

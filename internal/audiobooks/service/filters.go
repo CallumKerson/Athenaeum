@@ -45,6 +45,24 @@ func TagFilter(tag string) Filter {
 	}
 }
 
+func NotFilter(filter Filter) Filter {
+	return func(a *audiobooks.Audiobook) bool {
+		return !filter(a)
+	}
+}
+
+func AndFilter(filters ...Filter) Filter {
+	return func(a *audiobooks.Audiobook) bool {
+		fulfilledFilters := 0
+		for filterIndex := range filters {
+			if filters[filterIndex](a) {
+				fulfilledFilters++
+			}
+		}
+		return fulfilledFilters == len(filters)
+	}
+}
+
 func contains[K comparable](slice []K, item K) bool {
 	for _, v := range slice {
 		if v == item {
