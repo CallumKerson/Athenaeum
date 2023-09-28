@@ -8,7 +8,7 @@ require (
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
 	github.com/carlmjohnson/requests v0.23.4
 	github.com/go-chi/chi/v5 v5.0.10
-	github.com/gomarkdown/markdown v0.0.0-20230716120725-531d2d74bc12
+	github.com/gomarkdown/markdown v0.0.0-20230922112808-5421fefb8386
 	github.com/pelletier/go-toml/v2 v2.0.9
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.3
