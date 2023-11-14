@@ -49,7 +49,7 @@ func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, opts ...Optio
 
 func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 	s.logger.Infoln("Updating audiobooks")
-	existingAudiobooks, err := s.GetAllAudiobooks(ctx)
+	existingAudiobooks, err := s.audiobookStore.GetAll(ctx)
 	if err != nil {
 		return err
 	}
