@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    "schedule:daily",
+    ":automergeStableNonMajor",
+    "custommanagers:dockerfileVersions",
+    "custommanagers:githubActionsVersions",
+    ":prHourlyLimit4"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "internalChecksFilter": "strict",
+  "minimumReleaseAge": "1 week",
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "description": "Use ci semantic type for some deps",
+      "matchFileNames": [".github/workflows/**"],
+      "semanticCommitType": "ci"
+    }
+  ]
+}
