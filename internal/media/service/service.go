@@ -173,7 +173,7 @@ func (s *Service) parseM4BInfo(m4bPath string, audiobook *audiobooks.Audiobook) 
 		return err
 	}
 	audiobook.Path = strings.TrimPrefix(m4bPath, s.mediaRoot)
-	audiobook.FileSize = uint64(fInfo.Size())
+	audiobook.FileSize = uint64(fInfo.Size()) //nolint:gosec
 	if info.Moov != nil && info.Moov.Mvhd != nil {
 		audiobook.Duration = time.Duration(
 			(float32(info.Moov.Mvhd.Duration) / float32(info.Moov.Mvhd.Timescale)) * float32(time.Second))

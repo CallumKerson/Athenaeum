@@ -20,7 +20,7 @@ var (
 func WithDBFile(filename string, filePermission int) Option {
 	return func(s *AudiobookStore) {
 		s.dbFileName = filename
-		s.dbFilePermission = fs.FileMode(filePermission)
+		s.dbFilePermission = fs.FileMode(filePermission) //nolint:gosec
 	}
 }
 
