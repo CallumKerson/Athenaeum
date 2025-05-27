@@ -12,7 +12,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/gomarkdown/markdown v0.0.0-20230922112808-5421fefb8386
 	github.com/pelletier/go-toml/v2 v2.2.4
-	github.com/shopspring/decimal v1.3.1
+	github.com/shopspring/decimal v1.4.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
