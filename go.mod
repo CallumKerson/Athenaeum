@@ -1,6 +1,6 @@
 module github.com/CallumKerson/Athenaeum
 
-go 1.22
+go 1.23
 
 toolchain go1.24.3
 
@@ -18,7 +18,7 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	github.com/ybbus/httpretry v1.0.2
-	go.etcd.io/bbolt v1.3.7
+	go.etcd.io/bbolt v1.4.0
 	golang.org/x/time v0.8.0
 	gopkg.in/h2non/baloo.v3 v3.1.0
 )
