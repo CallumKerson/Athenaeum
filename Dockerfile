@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/static-debian11:debug-nonroot AS production
+FROM gcr.io/distroless/static-debian11:debug-nonroot@sha256:55716e80a7d4320ce9bc2dc8636fc193b418638041b817cf3306696bd0f975d1 AS production
 
 COPY athenaeum /usr/bin/athenaeum
 COPY --from=busybox:1.37.0-uclibc@sha256:cc57e0ff4b6d3138931ff5c7180d18078813300e2508a25fb767a4d36df30d4d /bin/wget /usr/bin/wget
