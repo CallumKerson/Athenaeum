@@ -19,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/ybbus/httpretry v1.0.2
 	go.etcd.io/bbolt v1.4.0
-	golang.org/x/time v0.11.0
+	golang.org/x/time v0.12.0
 	gopkg.in/h2non/baloo.v3 v3.1.0
 )
 
