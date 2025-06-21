@@ -1,26 +1,12 @@
-package service
+package audiobook
 
 import (
 	"context"
 
 	"github.com/CallumKerson/loggerrific"
-	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
-
-type MediaScanner interface {
-	GetAllAudiobooks(context.Context) ([]audiobooks.Audiobook, error)
-	ScanForNewAndUpdatedAudiobooks(context.Context, []audiobooks.Audiobook) ([]audiobooks.Audiobook, bool, error)
-}
-
-type AudiobookStore interface {
-	// StoreAll should remove any audiobooks not in the current slice and store those in the slice
-	StoreAll(context.Context, []audiobooks.Audiobook) error
-	GetAll(context.Context) ([]audiobooks.Audiobook, error)
-	Get(context.Context, func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error)
-	IsReady(context.Context) bool
-}
 
 type ThirdPartyNotifier interface {
 	Notify(context.Context) error
@@ -28,37 +14,45 @@ type ThirdPartyNotifier interface {
 }
 
 type Service struct {
-	mediaScanner        MediaScanner
-	audiobookStore      AudiobookStore
+	store               *Store
+	mediaRoot           string
 	thirdPartyNotifiers []ThirdPartyNotifier
 	logger              loggerrific.Logger
 	filtersForAll       []Filter
 }
 
-func New(mediaScanner MediaScanner, audiobookStore AudiobookStore, opts ...Option) *Service {
-	svc := &Service{
-		mediaScanner:   mediaScanner,
-		audiobookStore: audiobookStore,
-		logger:         noOpLogger.New(),
+func NewService(store *Store, mediaRoot string, logger loggerrific.Logger) *Service {
+	return &Service{
+		store:     store,
+		mediaRoot: mediaRoot,
+		logger:    logger,
 	}
-	for _, opt := range opts {
-		opt(svc)
-	}
-	return svc
+}
+
+func (s *Service) WithNotifiers(notifiers []ThirdPartyNotifier) *Service {
+	s.thirdPartyNotifiers = notifiers
+	return s
+}
+
+func (s *Service) WithFilters(filters []Filter) *Service {
+	s.filtersForAll = filters
+	return s
 }
 
 func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 	s.logger.Infoln("Updating audiobooks")
-	existingAudiobooks, err := s.audiobookStore.GetAll(ctx)
+	existingAudiobooks, err := s.store.GetAll(ctx)
 	if err != nil {
 		return err
 	}
-	audiobooksFromScan, changed, err := s.mediaScanner.ScanForNewAndUpdatedAudiobooks(ctx, existingAudiobooks)
+
+	audiobooksFromScan, changed, err := ScanForUpdates(ctx, s.mediaRoot, existingAudiobooks, s.logger)
 	if err != nil {
 		return err
 	}
+
 	if changed {
-		err = s.audiobookStore.StoreAll(ctx, audiobooksFromScan)
+		err = s.store.StoreAll(ctx, audiobooksFromScan)
 		if err != nil {
 			return err
 		}
@@ -78,32 +72,32 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 
 func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	if len(s.filtersForAll) > 0 {
-		return s.audiobookStore.Get(ctx, AndFilter(s.filtersForAll...))
+		return s.store.Get(ctx, AndFilter(s.filtersForAll...))
 	} else {
-		return s.audiobookStore.GetAll(ctx)
+		return s.store.GetAll(ctx)
 	}
 }
 
 func (s *Service) IsReady(ctx context.Context) bool {
-	return s.audiobookStore.IsReady(ctx)
+	return s.store.IsReady(ctx)
 }
 
 func (s *Service) GetAudiobooksByAuthor(ctx context.Context, name string) ([]audiobooks.Audiobook, error) {
-	return s.audiobookStore.Get(ctx, AuthorFilter(name))
+	return s.store.Get(ctx, AuthorFilter(name))
 }
 
 func (s *Service) GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error) {
-	return s.audiobookStore.Get(ctx, GenreFilter(genre))
+	return s.store.Get(ctx, GenreFilter(genre))
 }
 
 func (s *Service) GetAudiobooksByNarrator(ctx context.Context, name string) ([]audiobooks.Audiobook, error) {
-	return s.audiobookStore.Get(ctx, NarratorFilter(name))
+	return s.store.Get(ctx, NarratorFilter(name))
 }
 
 func (s *Service) GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobooks.Audiobook, error) {
-	return s.audiobookStore.Get(ctx, TagFilter(tag))
+	return s.store.Get(ctx, TagFilter(tag))
 }
 
 func (s *Service) GetAudiobooksBy(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
-	return s.audiobookStore.Get(ctx, filter)
+	return s.store.Get(ctx, filter)
 }
