@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Building and Testing
 
 - **Build**: `task build` - Builds the project, runs all linting, formatting, and compiles binary
-- **Compile only**: `task compile` - Compiles binary for current OS/architecture  
+- **Compile only**: `task compile` - Compiles binary for current OS/architecture
 - **Linux compile**: `task linux-compile` - Cross-compiles for Linux deployment
 - **Test**: `task test` or `go test ./...` - Run all tests
 - **Format and Lint**: `task tidy` - Runs formatting, import sorting, linting, and pre-commit hooks
@@ -62,7 +62,7 @@ Athenaeum is an audiobook server that provides podcast feeds, built with a layer
 ## Import Organization
 
 - Standard library imports first
-- Third-party imports second  
+- Third-party imports second
 - Local imports last with company prefix `github.com/CallumKerson`
 - Project imports use full path: `github.com/CallumKerson/Athenaeum/internal/...`
 
@@ -79,4 +79,3 @@ Athenaeum is an audiobook server that provides podcast feeds, built with a layer
 - Refactoring prioritises simple handler.
 - Direct functions will be used where possible.
 - Classes will only be used when the alternative is much more complicated.
-
