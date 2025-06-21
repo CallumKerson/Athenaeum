@@ -8,11 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/CallumKerson/Athenaeum/internal/adapters/alfgmp4"
-	"github.com/CallumKerson/Athenaeum/internal/adapters/bolt"
 	"github.com/CallumKerson/Athenaeum/internal/adapters/logrus"
-	audiobooksService "github.com/CallumKerson/Athenaeum/internal/audiobooks/service"
-	mediaService "github.com/CallumKerson/Athenaeum/internal/media/service"
+	"github.com/CallumKerson/Athenaeum/internal/audiobook"
 	"github.com/CallumKerson/Athenaeum/internal/memcache"
 	overcastNotifier "github.com/CallumKerson/Athenaeum/internal/notifiers/overcast"
 	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
@@ -92,25 +89,33 @@ func NewUpdateCommand() *cobra.Command {
 func runServer(cfg *Config) error {
 	logger := getLogger(cfg)
 
-	m4bMetadataReader := alfgmp4.NewMetadataReader()
-	mediaSvc := mediaService.New(m4bMetadataReader, cfg.Media.Root, mediaService.WithLogger(logger))
-	boltAudiobookStore, err := bolt.NewAudiobookStore(cfg.DB.Root, bolt.WithLogger(logger))
+	store, err := audiobook.NewStore(cfg.DB.Root, logger)
 	if err != nil {
 		return err
 	}
-	audiobookOpts := []audiobooksService.Option{audiobooksService.WithLogger(logger)}
+
+	audiobookSvc := audiobook.NewService(store, cfg.Media.Root, logger)
+
+	var notifiers []audiobook.ThirdPartyNotifier
 	if cfg.ThirdParty.UpdateOvercast || cfg.ThirdParty.NotifyOvercast {
-		audiobookOpts = append(audiobookOpts,
-			audiobooksService.WithThirdPartyNotifier(overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger))))
+		notifiers = append(notifiers, overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger)))
 	}
+	if len(notifiers) > 0 {
+		audiobookSvc = audiobookSvc.WithNotifiers(notifiers)
+	}
+
 	if len(cfg.ExclusionsFromMainFeed.Genres) > 0 {
 		genres, err := cfg.ExclusionsFromMainFeed.GetGenres()
 		if err != nil {
 			return err
 		}
-		audiobookOpts = append(audiobookOpts, audiobooksService.WithGenresToExcludeFromAllAudiobooks(genres...))
+		var filters []audiobook.Filter
+		for _, genre := range genres {
+			filters = append(filters, audiobook.NotFilter(audiobook.GenreFilter(genre)))
+		}
+		audiobookSvc = audiobookSvc.WithFilters(filters)
 	}
-	audiobookSvc := audiobooksService.New(mediaSvc, boltAudiobookStore, audiobookOpts...)
+
 	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
 		return errScan
 	}

@@ -1,4 +1,4 @@
-package bolt
+package audiobook
 
 import (
 	"context"
@@ -11,12 +11,17 @@ import (
 	bolt "go.etcd.io/bbolt"
 
 	"github.com/CallumKerson/loggerrific"
-	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
-type AudiobookStore struct {
+const (
+	defaultDBFileName       = "audiobooks.db"
+	defaultDBFilePermission = 0o600
+	defaultDBBucketName     = "audiobooks"
+)
+
+type Store struct {
 	log                 loggerrific.Logger
 	databaseRoot        string
 	dbFileName          string
@@ -24,26 +29,23 @@ type AudiobookStore struct {
 	dbDefaultBucketName []byte
 }
 
-func NewAudiobookStore(pathToDatabaseDir string, opts ...Option) (*AudiobookStore, error) {
-	store := &AudiobookStore{
+func NewStore(pathToDatabaseDir string, logger loggerrific.Logger) (*Store, error) {
+	store := &Store{
 		databaseRoot:        pathToDatabaseDir,
-		log:                 noOpLogger.New(),
+		log:                 logger,
 		dbFileName:          defaultDBFileName,
 		dbFilePermission:    defaultDBFilePermission,
 		dbDefaultBucketName: []byte(defaultDBBucketName),
 	}
-	for _, opt := range opts {
-		opt(store)
-	}
-	err := store.Initialise()
+	err := store.initialise()
 	return store, err
 }
 
-func (s *AudiobookStore) getDBPath() string {
+func (s *Store) getDBPath() string {
 	return filepath.Join(s.databaseRoot, s.dbFileName)
 }
 
-func (s *AudiobookStore) Initialise() error {
+func (s *Store) initialise() error {
 	err := os.MkdirAll(s.databaseRoot, 0755)
 	if err != nil {
 		return err
@@ -63,7 +65,7 @@ func (s *AudiobookStore) Initialise() error {
 	})
 }
 
-func (s *AudiobookStore) StoreAll(ctx context.Context, allAudiobooks []audiobooks.Audiobook) error {
+func (s *Store) StoreAll(ctx context.Context, allAudiobooks []audiobooks.Audiobook) error {
 	boltDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
 	if err != nil {
 		return err
@@ -89,7 +91,7 @@ func (s *AudiobookStore) StoreAll(ctx context.Context, allAudiobooks []audiobook
 	})
 }
 
-func (s *AudiobookStore) GetAll(context.Context) ([]audiobooks.Audiobook, error) {
+func (s *Store) GetAll(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	boldDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
 	if err != nil {
 		return nil, err
@@ -110,7 +112,7 @@ func (s *AudiobookStore) GetAll(context.Context) ([]audiobooks.Audiobook, error)
 	})
 }
 
-func (s *AudiobookStore) Get(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
+func (s *Store) Get(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
 	boldDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
 	if err != nil {
 		return nil, err
@@ -133,6 +135,6 @@ func (s *AudiobookStore) Get(ctx context.Context, filter func(*audiobooks.Audiob
 	})
 }
 
-func (s *AudiobookStore) IsReady(context.Context) bool {
+func (s *Store) IsReady(ctx context.Context) bool {
 	return true
 }
