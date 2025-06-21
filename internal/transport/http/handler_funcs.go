@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/CallumKerson/Athenaeum/internal/audiobook"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/templates"
 )
@@ -21,7 +22,7 @@ func healthCheck(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) readiness(writer http.ResponseWriter, request *http.Request) {
-	if h.PodcastService.IsReady(request.Context()) {
+	if h.audiobookService.IsReady(request.Context()) {
 		SendJSON(writer, http.StatusOK, Payload{
 			"readiness": "ok",
 		})
@@ -41,7 +42,12 @@ func (h *Handler) printVersion(writer http.ResponseWriter, request *http.Request
 }
 
 func (h *Handler) getFeed(writer http.ResponseWriter, request *http.Request) {
-	err := h.PodcastService.WriteAllAudiobooksFeed(request.Context(), writer)
+	books, err := h.audiobookService.GetAllAudiobooks(request.Context())
+	if err != nil {
+		SendJSONError(writer, http.StatusInternalServerError, err)
+		return
+	}
+	err = audiobook.WriteAllAudiobooksFeed(books, h.feedConfig, writer)
 	if err != nil {
 		SendJSONError(writer, http.StatusInternalServerError, err)
 		return
@@ -55,7 +61,12 @@ func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request
 		SendJSONError(writer, http.StatusNotFound, err)
 		return
 	}
-	err = h.PodcastService.WriteGenreAudiobookFeed(request.Context(), genre, writer)
+	books, err := h.audiobookService.GetAudiobooksByGenre(request.Context(), genre)
+	if err != nil {
+		SendJSONError(writer, http.StatusInternalServerError, err)
+		return
+	}
+	err = audiobook.WriteGenreAudiobookFeed(books, genre, h.feedConfig, writer)
 	if err != nil {
 		SendJSONError(writer, http.StatusInternalServerError, err)
 		return
@@ -63,15 +74,15 @@ func (h *Handler) getGenreFeed(writer http.ResponseWriter, request *http.Request
 }
 
 func (h *Handler) getAuthorFeed(writer http.ResponseWriter, request *http.Request) {
-	h.getFeedForStr(writer, request, "author", h.PodcastService.WriteAuthorAudiobookFeed)
+	h.getFeedForStr(writer, request, "author", h.writeAuthorFeed)
 }
 
 func (h *Handler) getNarratorFeed(writer http.ResponseWriter, request *http.Request) {
-	h.getFeedForStr(writer, request, "narrator", h.PodcastService.WriteNarratorAudiobookFeed)
+	h.getFeedForStr(writer, request, "narrator", h.writeNarratorFeed)
 }
 
 func (h *Handler) getTagFeed(writer http.ResponseWriter, request *http.Request) {
-	h.getFeedForStr(writer, request, "tag", h.PodcastService.WriteTagAudiobookFeed)
+	h.getFeedForStr(writer, request, "tag", h.writeTagFeed)
 }
 
 func (h *Handler) getFeedForStr(writer http.ResponseWriter, request *http.Request, pathVar string,
@@ -97,7 +108,7 @@ func (h *Handler) updateAudiobooks(writer http.ResponseWriter, request *http.Req
 		if h.CacheStore != nil {
 			h.CacheStore.ReleaseAll()
 		}
-		if err := h.PodcastService.UpdateFeeds(request.Context()); err != nil {
+		if err := h.audiobookService.UpdateAudiobooks(request.Context()); err != nil {
 			SendJSONError(writer, http.StatusInternalServerError, err)
 			return
 		}
@@ -107,6 +118,30 @@ func (h *Handler) updateAudiobooks(writer http.ResponseWriter, request *http.Req
 		writer.Header().Add("Allow", http.MethodPost)
 		http.Error(writer, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
+}
+
+func (h *Handler) writeAuthorFeed(ctx context.Context, author string, writer io.Writer) (bool, error) {
+	books, err := h.audiobookService.GetAudiobooksByAuthor(ctx, author)
+	if err != nil {
+		return false, err
+	}
+	return audiobook.WriteAuthorAudiobookFeed(books, author, h.feedConfig, writer)
+}
+
+func (h *Handler) writeNarratorFeed(ctx context.Context, narrator string, writer io.Writer) (bool, error) {
+	books, err := h.audiobookService.GetAudiobooksByNarrator(ctx, narrator)
+	if err != nil {
+		return false, err
+	}
+	return audiobook.WriteNarratorAudiobookFeed(books, narrator, h.feedConfig, writer)
+}
+
+func (h *Handler) writeTagFeed(ctx context.Context, tag string, writer io.Writer) (bool, error) {
+	books, err := h.audiobookService.GetAudiobooksByTag(ctx, tag)
+	if err != nil {
+		return false, err
+	}
+	return audiobook.WriteTagAudiobookFeed(books, tag, h.feedConfig, writer)
 }
 
 func (h *Handler) serveHTML(writer http.ResponseWriter, request *http.Request) {
