@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -118,6 +119,22 @@ Host: "http://localhost:8083"
 
 func TestConfig_DefaultsOnly(t *testing.T) {
 	// given
+	// Clear any existing athenaeum environment variables that might interfere with defaults
+	envVarsToUnset := map[string]string{}
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, "ATHENAEUM_") {
+			key := strings.SplitN(env, "=", 2)[0]
+			envVarsToUnset[key] = ""
+		}
+	}
+	envVarCleanup := envVarSetter(t, envVarsToUnset)
+	t.Cleanup(envVarCleanup)
+
+	// Also ensure no config file is found by using a temporary directory as home
+	tempDir := t.TempDir()
+	homeCleanup := envVarSetter(t, map[string]string{"HOME": tempDir})
+	t.Cleanup(homeCleanup)
+
 	viper.Reset()
 	var config Config
 
@@ -158,8 +175,14 @@ func envVarSetter(t *testing.T, envs map[string]string) (closer func()) {
 		if originalValue, ok := os.LookupEnv(name); ok {
 			originalEnvVars[name] = originalValue
 		}
-		err := os.Setenv(name, value)
-		assert.NoError(t, err)
+		if value == "" {
+			// Empty value means unset the environment variable
+			err := os.Unsetenv(name)
+			assert.NoError(t, err)
+		} else {
+			err := os.Setenv(name, value)
+			assert.NoError(t, err)
+		}
 	}
 
 	return func() {
