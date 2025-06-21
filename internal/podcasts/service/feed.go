@@ -92,7 +92,7 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 }
 
 func (s *Service) WriteFeed(ctx context.Context, feedOpts *FeedOpts, writer io.Writer) error {
-	books, err := s.GetAllAudiobooks(ctx)
+	books, err := s.audiobookService.GetAllAudiobooks(ctx)
 	if err != nil {
 		return err
 	}

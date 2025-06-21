@@ -18,7 +18,7 @@ const (
 	narratorDescriptionFormat    = "Audiobooks Narrated by %s"
 )
 
-type AudiobooksClient interface {
+type AudiobookService interface {
 	GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error)
 	GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error)
 	GetAudiobooksByAuthor(ctx context.Context, author string) (books []audiobooks.Audiobook, err error)
@@ -38,7 +38,7 @@ type Service struct {
 	feedAuthorEmail         string
 	feedCopyright           string
 	handlePreUnixEpochDates bool
-	AudiobooksClient
+	audiobookService        AudiobookService
 }
 
 func (s *Service) IsReady(ctx context.Context) bool {
@@ -46,13 +46,13 @@ func (s *Service) IsReady(ctx context.Context) bool {
 }
 
 func (s *Service) UpdateFeeds(ctx context.Context) error {
-	return s.UpdateAudiobooks(ctx)
+	return s.audiobookService.UpdateAudiobooks(ctx)
 }
 
-func New(audiobooksClient AudiobooksClient, host, mediaPath string, opts ...Option) *Service {
+func New(audiobookService AudiobookService, host, mediaPath string, opts ...Option) *Service {
 	svc := &Service{
 		log:              noOpLogger.New(),
-		AudiobooksClient: audiobooksClient,
+		audiobookService: audiobookService,
 		host:             host,
 		mediaPath:        mediaPath,
 	}

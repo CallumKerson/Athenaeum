@@ -15,29 +15,29 @@ import (
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
-type testAudiobookClient struct{}
+type testAudiobookService struct{}
 
-func (c *testAudiobookClient) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
+func (c *testAudiobookService) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	return testbooks.Audiobooks, nil
 }
 
-func (c *testAudiobookClient) GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error) {
+func (c *testAudiobookService) GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error) {
 	return testbooks.AudiobooksFilteredBy(testbooks.GenreFilter(genre)), nil
 }
 
-func (c *testAudiobookClient) GetAudiobooksByAuthor(ctx context.Context, author string) ([]audiobooks.Audiobook, error) {
+func (c *testAudiobookService) GetAudiobooksByAuthor(ctx context.Context, author string) ([]audiobooks.Audiobook, error) {
 	return testbooks.AudiobooksFilteredBy(testbooks.AuthorFilter(author)), nil
 }
 
-func (c *testAudiobookClient) GetAudiobooksByNarrator(ctx context.Context, narrator string) ([]audiobooks.Audiobook, error) {
+func (c *testAudiobookService) GetAudiobooksByNarrator(ctx context.Context, narrator string) ([]audiobooks.Audiobook, error) {
 	return testbooks.AudiobooksFilteredBy(testbooks.NarratorFilter(narrator)), nil
 }
 
-func (c *testAudiobookClient) GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobooks.Audiobook, error) {
+func (c *testAudiobookService) GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobooks.Audiobook, error) {
 	return testbooks.AudiobooksFilteredBy(testbooks.TagFilter(tag)), nil
 }
 
-func (c *testAudiobookClient) UpdateAudiobooks(ctx context.Context) error {
+func (c *testAudiobookService) UpdateAudiobooks(ctx context.Context) error {
 	return nil
 }
 
@@ -75,7 +75,7 @@ func TestGetFeed(t *testing.T) {
 		}, expectedFeed: "", expectedFeedExists: false},
 	}
 
-	svc := New(&testAudiobookClient{},
+	svc := New(&testAudiobookService{},
 		"http://www.example-podcast.com/audiobooks/",
 		"/media/",
 	)
@@ -104,7 +104,7 @@ func TestGetFeed(t *testing.T) {
 
 func TestGetFeed_WithOptions(t *testing.T) {
 	// given
-	svc := New(&testAudiobookClient{},
+	svc := New(&testAudiobookService{},
 		"http://www.example-podcast.com/audiobooks",
 		"/media/",
 		WithPodcastFeedInfo(true, "EN", "A Person", "person@domain.test", "None", "http://www.example-podcast.com/images/itunes.jpg"),

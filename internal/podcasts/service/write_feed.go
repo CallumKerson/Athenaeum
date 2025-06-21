@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Service) WriteAllAudiobooksFeed(ctx context.Context, writer io.Writer) error {
-	books, err := s.GetAllAudiobooks(ctx)
+	books, err := s.audiobookService.GetAllAudiobooks(ctx)
 	if err != nil {
 		return err
 	}
@@ -17,7 +17,7 @@ func (s *Service) WriteAllAudiobooksFeed(ctx context.Context, writer io.Writer) 
 }
 
 func (s *Service) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.Genre, writer io.Writer) error {
-	books, err := s.GetAudiobooksByGenre(ctx, genre)
+	books, err := s.audiobookService.GetAudiobooksByGenre(ctx, genre)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func (s *Service) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.
 }
 
 func (s *Service) WriteAuthorAudiobookFeed(ctx context.Context, author string, writer io.Writer) (bool, error) {
-	books, err := s.GetAudiobooksByAuthor(ctx, author)
+	books, err := s.audiobookService.GetAudiobooksByAuthor(ctx, author)
 	if err != nil {
 		return false, err
 	}
@@ -47,7 +47,7 @@ func (s *Service) WriteAuthorAudiobookFeed(ctx context.Context, author string, w
 }
 
 func (s *Service) WriteNarratorAudiobookFeed(ctx context.Context, narrator string, writer io.Writer) (bool, error) {
-	books, err := s.GetAudiobooksByNarrator(ctx, narrator)
+	books, err := s.audiobookService.GetAudiobooksByNarrator(ctx, narrator)
 	if err != nil {
 		return false, err
 	}
@@ -58,7 +58,7 @@ func (s *Service) WriteNarratorAudiobookFeed(ctx context.Context, narrator strin
 }
 
 func (s *Service) WriteTagAudiobookFeed(ctx context.Context, tag string, writer io.Writer) (bool, error) {
-	books, err := s.GetAudiobooksByTag(ctx, tag)
+	books, err := s.audiobookService.GetAudiobooksByTag(ctx, tag)
 	if err != nil {
 		return false, err
 	}
