@@ -41,7 +41,7 @@ func (s *Service) WithFilters(filters []Filter) *Service {
 
 func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 	s.logger.Infoln("Updating audiobooks")
-	existingAudiobooks, err := s.store.GetAll(ctx)
+	existingAudiobooks, err := s.store.GetAll()
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 	}
 
 	if changed {
-		err = s.store.StoreAll(ctx, audiobooksFromScan)
+		err = s.store.StoreAll(audiobooksFromScan)
 		if err != nil {
 			return err
 		}
@@ -72,32 +72,32 @@ func (s *Service) UpdateAudiobooks(ctx context.Context) error {
 
 func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	if len(s.filtersForAll) > 0 {
-		return s.store.Get(ctx, AndFilter(s.filtersForAll...))
+		return s.store.Get(AndFilter(s.filtersForAll...))
 	} else {
-		return s.store.GetAll(ctx)
+		return s.store.GetAll()
 	}
 }
 
 func (s *Service) IsReady(ctx context.Context) bool {
-	return s.store.IsReady(ctx)
+	return s.store.IsReady()
 }
 
 func (s *Service) GetAudiobooksByAuthor(ctx context.Context, name string) ([]audiobooks.Audiobook, error) {
-	return s.store.Get(ctx, AuthorFilter(name))
+	return s.store.Get(AuthorFilter(name))
 }
 
 func (s *Service) GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error) {
-	return s.store.Get(ctx, GenreFilter(genre))
+	return s.store.Get(GenreFilter(genre))
 }
 
 func (s *Service) GetAudiobooksByNarrator(ctx context.Context, name string) ([]audiobooks.Audiobook, error) {
-	return s.store.Get(ctx, NarratorFilter(name))
+	return s.store.Get(NarratorFilter(name))
 }
 
 func (s *Service) GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobooks.Audiobook, error) {
-	return s.store.Get(ctx, TagFilter(tag))
+	return s.store.Get(TagFilter(tag))
 }
 
 func (s *Service) GetAudiobooksBy(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
-	return s.store.Get(ctx, filter)
+	return s.store.Get(filter)
 }

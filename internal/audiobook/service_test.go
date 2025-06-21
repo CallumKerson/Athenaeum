@@ -25,7 +25,7 @@ func setupServiceTest(t *testing.T) *Service {
 	store, err := NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	return NewService(store, testMediaRoot, logger)
@@ -92,7 +92,7 @@ func TestService_GetAllAudiobooks_WithoutFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	// Store test books
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	service := NewService(store, testMediaRoot, logger)
@@ -109,7 +109,7 @@ func TestService_GetAllAudiobooks_WithFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	// Store test books
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	// Create service with filter that excludes SciFi
@@ -165,7 +165,7 @@ func TestService_GetAudiobooksBy_CustomFilter(t *testing.T) {
 	store, err := NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	service := NewService(store, testMediaRoot, logger)
@@ -242,7 +242,7 @@ func TestService_UpdateAudiobooks_WithChangesAndNotifiers(t *testing.T) {
 	require.NoError(t, err)
 
 	// Store some initial books
-	err = store.StoreAll(context.TODO(), []audiobooks.Audiobook{testbooks.Audiobooks[0]})
+	err = store.StoreAll([]audiobooks.Audiobook{testbooks.Audiobooks[0]})
 	require.NoError(t, err)
 
 	updatedThirdParty = false
@@ -265,7 +265,7 @@ func TestService_UpdateAudiobooks_NoChanges(t *testing.T) {
 	require.NoError(t, err)
 
 	// Store all test books first
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	updatedThirdParty = false
@@ -288,7 +288,7 @@ func TestService_UpdateAudiobooks_NotifierError(t *testing.T) {
 	require.NoError(t, err)
 
 	// Store some initial books
-	err = store.StoreAll(context.TODO(), []audiobooks.Audiobook{testbooks.Audiobooks[0]})
+	err = store.StoreAll([]audiobooks.Audiobook{testbooks.Audiobooks[0]})
 	require.NoError(t, err)
 
 	// Create a notifier that will return an error

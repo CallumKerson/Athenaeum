@@ -1,7 +1,6 @@
 package audiobook
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -27,6 +26,7 @@ type Store struct {
 	dbFileName          string
 	dbFilePermission    fs.FileMode
 	dbDefaultBucketName []byte
+	dbPath              string
 }
 
 func NewStore(pathToDatabaseDir string, logger loggerrific.Logger) (*Store, error) {
@@ -36,44 +36,41 @@ func NewStore(pathToDatabaseDir string, logger loggerrific.Logger) (*Store, erro
 		dbFileName:          defaultDBFileName,
 		dbFilePermission:    defaultDBFilePermission,
 		dbDefaultBucketName: []byte(defaultDBBucketName),
+		dbPath:              filepath.Join(pathToDatabaseDir, defaultDBFileName),
 	}
-	err := store.initialise()
+	err := initializeDB(store.dbPath, store.dbFilePermission, store.dbDefaultBucketName, logger)
 	return store, err
 }
 
-func (s *Store) getDBPath() string {
-	return filepath.Join(s.databaseRoot, s.dbFileName)
-}
-
-func (s *Store) initialise() error {
-	err := os.MkdirAll(s.databaseRoot, 0755)
+func initializeDB(dbPath string, dbFilePermission fs.FileMode, bucketName []byte, logger loggerrific.Logger) error {
+	err := os.MkdirAll(filepath.Dir(dbPath), 0755)
 	if err != nil {
 		return err
 	}
-	boltDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
+	boltDB, err := bolt.Open(dbPath, dbFilePermission, nil)
 	if err != nil {
-		return fmt.Errorf("could not open bolt DB at %s, %w", s.getDBPath(), err)
+		return fmt.Errorf("could not open bolt DB at %s, %w", dbPath, err)
 	}
 	defer boltDB.Close()
-	s.log.Infoln("Setting up database at", s.getDBPath())
+	logger.Infoln("Setting up database at", dbPath)
 	return boltDB.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists(s.dbDefaultBucketName)
+		_, err := tx.CreateBucketIfNotExists(bucketName)
 		if err != nil {
-			return fmt.Errorf("could not create bucket %s: %w", string(s.dbDefaultBucketName), err)
+			return fmt.Errorf("could not create bucket %s: %w", string(bucketName), err)
 		}
 		return nil
 	})
 }
 
-func (s *Store) StoreAll(ctx context.Context, allAudiobooks []audiobooks.Audiobook) error {
-	boltDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
+func StoreAll(dbPath string, dbFilePermission fs.FileMode, bucketName []byte, allAudiobooks []audiobooks.Audiobook) error {
+	boltDB, err := bolt.Open(dbPath, dbFilePermission, nil)
 	if err != nil {
 		return err
 	}
 	defer boltDB.Close()
 	return boltDB.Update(func(tx *bolt.Tx) error {
-		_ = tx.DeleteBucket(s.dbDefaultBucketName)
-		bucket, err := tx.CreateBucketIfNotExists(s.dbDefaultBucketName)
+		_ = tx.DeleteBucket(bucketName)
+		bucket, err := tx.CreateBucketIfNotExists(bucketName)
 		if err != nil {
 			return err
 		}
@@ -91,15 +88,15 @@ func (s *Store) StoreAll(ctx context.Context, allAudiobooks []audiobooks.Audiobo
 	})
 }
 
-func (s *Store) GetAll(ctx context.Context) ([]audiobooks.Audiobook, error) {
-	boldDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
+func GetAll(dbPath string, dbFilePermission fs.FileMode, bucketName []byte) ([]audiobooks.Audiobook, error) {
+	boltDB, err := bolt.Open(dbPath, dbFilePermission, nil)
 	if err != nil {
 		return nil, err
 	}
-	defer boldDB.Close()
+	defer boltDB.Close()
 	var allAudiobooks []audiobooks.Audiobook
-	return allAudiobooks, boldDB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(s.dbDefaultBucketName)
+	return allAudiobooks, boltDB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketName)
 		return b.ForEach(func(k, v []byte) error {
 			audiobook := audiobooks.Audiobook{}
 			err = json.Unmarshal(v, &audiobook)
@@ -112,15 +109,20 @@ func (s *Store) GetAll(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	})
 }
 
-func (s *Store) Get(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
-	boldDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
+func Get(
+	dbPath string,
+	dbFilePermission fs.FileMode,
+	bucketName []byte,
+	filter func(*audiobooks.Audiobook) bool,
+) ([]audiobooks.Audiobook, error) {
+	boltDB, err := bolt.Open(dbPath, dbFilePermission, nil)
 	if err != nil {
 		return nil, err
 	}
-	defer boldDB.Close()
+	defer boltDB.Close()
 	var allAudiobooks []audiobooks.Audiobook
-	return allAudiobooks, boldDB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(s.dbDefaultBucketName)
+	return allAudiobooks, boltDB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketName)
 		return b.ForEach(func(k, v []byte) error {
 			audiobook := audiobooks.Audiobook{}
 			err = json.Unmarshal(v, &audiobook)
@@ -135,6 +137,23 @@ func (s *Store) Get(ctx context.Context, filter func(*audiobooks.Audiobook) bool
 	})
 }
 
-func (s *Store) IsReady(ctx context.Context) bool {
+func IsReady() bool {
 	return true
+}
+
+// Store methods that call the package-level functions
+func (s *Store) StoreAll(allAudiobooks []audiobooks.Audiobook) error {
+	return StoreAll(s.dbPath, s.dbFilePermission, s.dbDefaultBucketName, allAudiobooks)
+}
+
+func (s *Store) GetAll() ([]audiobooks.Audiobook, error) {
+	return GetAll(s.dbPath, s.dbFilePermission, s.dbDefaultBucketName)
+}
+
+func (s *Store) Get(filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
+	return Get(s.dbPath, s.dbFilePermission, s.dbDefaultBucketName, filter)
+}
+
+func (s *Store) IsReady() bool {
+	return IsReady()
 }
