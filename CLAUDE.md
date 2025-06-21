@@ -79,3 +79,6 @@ Athenaeum is an audiobook server that provides podcast feeds, built with a layer
 - Refactoring prioritises simple handler.
 - Direct functions will be used where possible.
 - Classes will only be used when the alternative is much more complicated.
+- All of the refactoring PRs will target the v2 branch.
+  Once [#85](https://github.com/CallumKerson/Athenaeum/issues/85) is completed,
+  then v2 will be merged into main.
