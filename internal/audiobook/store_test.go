@@ -1,7 +1,6 @@
 package audiobook_test
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -37,10 +36,10 @@ func TestStore_StoreAll(t *testing.T) {
 	dbFile := filepath.Join(dbRoot, "audiobooks.db")
 	assert.FileExists(t, dbFile)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	assert.NoError(t, err)
 
-	retrievedBooks, err := store.GetAll(context.TODO())
+	retrievedBooks, err := store.GetAll()
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, testbooks.Audiobooks, retrievedBooks)
 }
@@ -51,10 +50,10 @@ func TestStore_GetAll(t *testing.T) {
 	store, err := audiobook.NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
-	retrievedBooks, err := store.GetAll(context.TODO())
+	retrievedBooks, err := store.GetAll()
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, testbooks.Audiobooks, retrievedBooks)
 }
@@ -65,10 +64,10 @@ func TestStore_Get(t *testing.T) {
 	store, err := audiobook.NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
-	retrievedBooks, err := store.Get(context.TODO(), func(a *audiobooks.Audiobook) bool {
+	retrievedBooks, err := store.Get(func(a *audiobooks.Audiobook) bool {
 		for _, v := range a.Authors {
 			if v == "Amal El-Mohtar" {
 				return true
@@ -87,7 +86,7 @@ func TestStore_GetAll_WhenEmpty(t *testing.T) {
 	store, err := audiobook.NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	retrievedBooks, err := store.GetAll(context.TODO())
+	retrievedBooks, err := store.GetAll()
 	assert.NoError(t, err)
 	assert.Empty(t, retrievedBooks)
 }
@@ -98,7 +97,7 @@ func TestStore_IsReady(t *testing.T) {
 	store, err := audiobook.NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	ready := store.IsReady(context.TODO())
+	ready := store.IsReady()
 	assert.True(t, ready)
 }
 
@@ -108,11 +107,11 @@ func TestStore_GetWithFilter(t *testing.T) {
 	store, err := audiobook.NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	// Test filtering by genre
-	sciFiBooks, err := store.Get(context.TODO(), func(a *audiobooks.Audiobook) bool {
+	sciFiBooks, err := store.Get(func(a *audiobooks.Audiobook) bool {
 		for _, genre := range a.Genres {
 			if genre == audiobooks.SciFi {
 				return true
@@ -132,16 +131,16 @@ func TestStore_StoreAll_OverwritesExisting(t *testing.T) {
 	require.NoError(t, err)
 
 	// Store initial books
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	// Store only one book (should overwrite all)
 	singleBook := []audiobooks.Audiobook{testbooks.Audiobooks[0]}
-	err = store.StoreAll(context.TODO(), singleBook)
+	err = store.StoreAll(singleBook)
 	require.NoError(t, err)
 
 	// Should only have one book now
-	retrievedBooks, err := store.GetAll(context.TODO())
+	retrievedBooks, err := store.GetAll()
 	assert.NoError(t, err)
 	assert.Len(t, retrievedBooks, 1)
 	assert.Equal(t, testbooks.Audiobooks[0], retrievedBooks[0])
@@ -167,11 +166,11 @@ func TestStore_StoreAll_EmptyList(t *testing.T) {
 	require.NoError(t, err)
 
 	// Store empty list
-	err = store.StoreAll(context.TODO(), []audiobooks.Audiobook{})
+	err = store.StoreAll([]audiobooks.Audiobook{})
 	assert.NoError(t, err)
 
 	// Should have no books
-	retrievedBooks, err := store.GetAll(context.TODO())
+	retrievedBooks, err := store.GetAll()
 	assert.NoError(t, err)
 	assert.Empty(t, retrievedBooks)
 }
@@ -182,11 +181,11 @@ func TestStore_Get_NoMatches(t *testing.T) {
 	store, err := audiobook.NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	// Filter that matches nothing
-	retrievedBooks, err := store.Get(context.TODO(), func(a *audiobooks.Audiobook) bool {
+	retrievedBooks, err := store.Get(func(a *audiobooks.Audiobook) bool {
 		return false // Never matches
 	})
 	assert.NoError(t, err)
@@ -199,11 +198,11 @@ func TestStore_Get_AllMatch(t *testing.T) {
 	store, err := audiobook.NewStore(dbRoot, logger)
 	require.NoError(t, err)
 
-	err = store.StoreAll(context.TODO(), testbooks.Audiobooks)
+	err = store.StoreAll(testbooks.Audiobooks)
 	require.NoError(t, err)
 
 	// Filter that matches everything
-	retrievedBooks, err := store.Get(context.TODO(), func(a *audiobooks.Audiobook) bool {
+	retrievedBooks, err := store.Get(func(a *audiobooks.Audiobook) bool {
 		return true // Always matches
 	})
 	assert.NoError(t, err)
