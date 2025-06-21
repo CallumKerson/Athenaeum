@@ -2,7 +2,7 @@ name: PR Build
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: ["main", "v2"]
 
 jobs:
   lint-title:
