@@ -12,7 +12,6 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/audiobook"
 	"github.com/CallumKerson/Athenaeum/internal/memcache"
 	overcastNotifier "github.com/CallumKerson/Athenaeum/internal/notifiers/overcast"
-	podcastService "github.com/CallumKerson/Athenaeum/internal/podcasts/service"
 	transportHttp "github.com/CallumKerson/Athenaeum/internal/transport/http"
 	"github.com/CallumKerson/Athenaeum/pkg/client"
 )
@@ -119,16 +118,20 @@ func runServer(cfg *Config) error {
 	if errScan := audiobookSvc.UpdateAudiobooks(context.Background()); errScan != nil {
 		return errScan
 	}
-	podcastSvc := podcastService.New(audiobookSvc, cfg.Host, transportHttp.MediaPath, podcastService.WithLogger(logger),
-		podcastService.WithPodcastFeedInfo(
-			cfg.Podcast.Explicit,
-			cfg.Podcast.Language,
-			cfg.Podcast.Author,
-			cfg.Podcast.Email,
-			cfg.Podcast.Copyright,
-			fmt.Sprintf("%s%s/itunes_image.jpg", cfg.Host, transportHttp.StaticPath),
-		),
-		podcastService.WithHandlePreUnixEpoch(cfg.Podcast.PreUnixEpoch.Handle))
+
+	// Create feed configuration
+	feedConfig := &audiobook.FeedConfig{
+		Link:                    cfg.Host,
+		ImageLink:               fmt.Sprintf("%s%s/itunes_image.jpg", cfg.Host, transportHttp.StaticPath),
+		Explicit:                cfg.Podcast.Explicit,
+		Language:                cfg.Podcast.Language,
+		Author:                  cfg.Podcast.Author,
+		Email:                   cfg.Podcast.Email,
+		Copyright:               cfg.Podcast.Copyright,
+		Host:                    cfg.Host,
+		MediaPath:               transportHttp.MediaPath,
+		HandlePreUnixEpochDates: cfg.Podcast.PreUnixEpoch.Handle,
+	}
 
 	httpHandlerOpts := []transportHttp.HandlerOption{transportHttp.WithLogger(logger), transportHttp.WithVersion(Version)}
 	if cfg.Cache.Enabled {
@@ -141,7 +144,8 @@ func runServer(cfg *Config) error {
 	}
 
 	httpHandler := transportHttp.NewHandler(
-		podcastSvc,
+		audiobookSvc,
+		feedConfig,
 		cfg.Media.Root,
 		httpHandlerOpts...,
 	)

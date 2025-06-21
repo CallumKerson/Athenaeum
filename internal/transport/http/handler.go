@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -14,6 +13,7 @@ import (
 	"github.com/CallumKerson/loggerrific"
 	noOpLogger "github.com/CallumKerson/loggerrific/noop"
 
+	"github.com/CallumKerson/Athenaeum/internal/audiobook"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/static"
 )
@@ -25,13 +25,13 @@ const (
 	PodcastFeedName = "feed.rss"
 )
 
-type AudiobooksPodcastService interface {
-	WriteAllAudiobooksFeed(context.Context, io.Writer) error
-	WriteGenreAudiobookFeed(context.Context, audiobooks.Genre, io.Writer) error
-	WriteAuthorAudiobookFeed(context.Context, string, io.Writer) (bool, error)
-	WriteNarratorAudiobookFeed(context.Context, string, io.Writer) (bool, error)
-	WriteTagAudiobookFeed(context.Context, string, io.Writer) (bool, error)
-	UpdateFeeds(context.Context) error
+type AudiobookService interface {
+	GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error)
+	GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error)
+	GetAudiobooksByAuthor(ctx context.Context, author string) ([]audiobooks.Audiobook, error)
+	GetAudiobooksByNarrator(ctx context.Context, narrator string) ([]audiobooks.Audiobook, error)
+	GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobooks.Audiobook, error)
+	UpdateAudiobooks(ctx context.Context) error
 	IsReady(ctx context.Context) bool
 }
 
@@ -45,18 +45,20 @@ type CacheStore interface {
 
 type Handler struct {
 	*chi.Mux
-	PodcastService AudiobooksPodcastService
-	mediaRoot      string
-	CacheStore     CacheStore
-	Log            loggerrific.Logger
-	version        string
+	audiobookService AudiobookService
+	feedConfig       *audiobook.FeedConfig
+	mediaRoot        string
+	CacheStore       CacheStore
+	Log              loggerrific.Logger
+	version          string
 }
 
-func NewHandler(podcastService AudiobooksPodcastService, mediaRoot string, opts ...HandlerOption) *Handler {
+func NewHandler(audiobookService AudiobookService, feedConfig *audiobook.FeedConfig, mediaRoot string, opts ...HandlerOption) *Handler {
 	handler := &Handler{
-		PodcastService: podcastService,
-		Log:            noOpLogger.New(),
-		mediaRoot:      mediaRoot,
+		audiobookService: audiobookService,
+		feedConfig:       feedConfig,
+		Log:              noOpLogger.New(),
+		mediaRoot:        mediaRoot,
 	}
 	for _, opt := range opts {
 		opt(handler)

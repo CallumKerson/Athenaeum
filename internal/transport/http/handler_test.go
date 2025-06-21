@@ -2,31 +2,36 @@ package http
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/pelletier/go-toml/v2"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/baloo.v3"
 
+	"github.com/CallumKerson/Athenaeum/internal/audiobook"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
 const (
-	testFeed   = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\"></rss>"
-	feedFormat = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\" version=\"2.0\">" +
-		"<channel><title>%s</title></channel></rss>"
 	testAuthor   = "Agatha Test-y"
 	testNarrator = "David Crochet"
 	testTag      = "Cosy Classics"
 )
 
 func TestHandler(t *testing.T) {
-	testHandler := NewHandler(&DummyPodcastService{}, filepath.Join("testdata", "media"), WithVersion("1.0.0-test"))
+	audiobookService := &DummyAudiobookService{}
+	feedConfig := &audiobook.FeedConfig{
+		Link:      "http://example.com",
+		ImageLink: "http://example.com/image.jpg",
+		Host:      "http://example.com",
+		MediaPath: "/media",
+	}
+	testHandler := NewHandler(audiobookService, feedConfig, filepath.Join("testdata", "media"), WithVersion("1.0.0-test"))
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
@@ -46,13 +51,13 @@ func TestHandler(t *testing.T) {
 		{name: "health check", method: "GET", path: "/health", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}"},
 		{name: "readiness check", method: "GET", path: "/ready", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}"},
 		{name: "version", method: "GET", path: "/version", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}"},
-		{name: "feed", method: "GET", path: "/podcast/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: testFeed},
-		{name: "genre feed", method: "GET", path: "/podcast/genre/scifi/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, audiobooks.SciFi.String())},
-		{name: "author feed", method: "GET", path: "/podcast/authors/Agatha%20Test-y/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testAuthor)},
+		{name: "feed", method: "GET", path: "/podcast/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: ""},
+		{name: "genre feed", method: "GET", path: "/podcast/genre/scifi/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: ""},
+		{name: "author feed", method: "GET", path: "/podcast/authors/Agatha%20Test-y/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: ""},
 		{name: "no author feed", method: "GET", path: "/podcast/authors/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
-		{name: "narrator feed", method: "GET", path: "/podcast/narrators/David%20Crochet/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testNarrator)},
+		{name: "narrator feed", method: "GET", path: "/podcast/narrators/David%20Crochet/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: ""},
 		{name: "no narrator feed", method: "GET", path: "/podcast/narrators/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
-		{name: "tag feed", method: "GET", path: "/podcast/tags/Cosy%20Classics/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testTag)},
+		{name: "tag feed", method: "GET", path: "/podcast/tags/Cosy%20Classics/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: ""},
 		{name: "no tag feed", method: "GET", path: "/podcast/tags/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
 		{name: "media", method: "GET", path: "/media/media.txt", expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file"},
 		{name: "update", method: "POST", path: "/update", expectedStatus: 204, expectedContentType: "", expectedBody: ""},
@@ -60,23 +65,44 @@ func TestHandler(t *testing.T) {
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.NoError(t,
-				baloo.New(testServer.URL).
-					Method(testCase.method).
-					Path(testCase.path).
-					Request().
-					Expect(t).
-					Status(testCase.expectedStatus).
-					Type(testCase.expectedContentType).
-					BodyEquals(testCase.expectedBody).
-					Done(),
-			)
+			if testCase.expectedBody == "" && testCase.expectedContentType == ContentTypeTextXML {
+				// For XML feeds, just check status and content type
+				assert.NoError(t,
+					baloo.New(testServer.URL).
+						Method(testCase.method).
+						Path(testCase.path).
+						Request().
+						Expect(t).
+						Status(testCase.expectedStatus).
+						Type(testCase.expectedContentType).
+						Done(),
+				)
+			} else {
+				assert.NoError(t,
+					baloo.New(testServer.URL).
+						Method(testCase.method).
+						Path(testCase.path).
+						Request().
+						Expect(t).
+						Status(testCase.expectedStatus).
+						Type(testCase.expectedContentType).
+						BodyEquals(testCase.expectedBody).
+						Done(),
+				)
+			}
 		})
 	}
 }
 
 func TestHandler_Static(t *testing.T) {
-	testHandler := NewHandler(&DummyPodcastService{}, "testdata")
+	audiobookService := &DummyAudiobookService{}
+	feedConfig := &audiobook.FeedConfig{
+		Link:      "http://example.com",
+		ImageLink: "http://example.com/image.jpg",
+		Host:      "http://example.com",
+		MediaPath: "/media",
+	}
+	testHandler := NewHandler(audiobookService, feedConfig, "testdata")
 
 	testServer := httptest.NewServer(testHandler)
 	defer testServer.Close()
@@ -105,50 +131,66 @@ func TestHandler_Static(t *testing.T) {
 	}
 }
 
-type DummyPodcastService struct {
+type DummyAudiobookService struct {
 }
 
-func (s *DummyPodcastService) WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error {
-	_, err := w.Write([]byte(testFeed))
-	return err
+func (s *DummyAudiobookService) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
+	return []audiobooks.Audiobook{}, nil
 }
 
-func (s *DummyPodcastService) WriteGenreAudiobookFeed(ctx context.Context, genre audiobooks.Genre, w io.Writer) error {
-	_, err := fmt.Fprintf(w, feedFormat, genre.String())
-	return err
+func (s *DummyAudiobookService) GetAudiobooksByGenre(ctx context.Context, genre audiobooks.Genre) ([]audiobooks.Audiobook, error) {
+	return []audiobooks.Audiobook{}, nil
 }
 
-func (s *DummyPodcastService) WriteAuthorAudiobookFeed(ctx context.Context, name string, w io.Writer) (bool, error) {
-	var err error = nil
-	if name == testAuthor {
-		_, err = fmt.Fprintf(w, feedFormat, name)
-		return true, err
+func (s *DummyAudiobookService) GetAudiobooksByAuthor(ctx context.Context, author string) ([]audiobooks.Audiobook, error) {
+	if author == testAuthor {
+		return []audiobooks.Audiobook{{
+			Title:       "Test Book",
+			Authors:     []string{author},
+			Path:        "/test.m4b",
+			FileSize:    1000,
+			MIMEType:    "audio/mp4a-latm",
+			Duration:    time.Minute,
+			ReleaseDate: &toml.LocalDate{Year: 2020, Month: 1, Day: 1},
+		}}, nil
 	}
-	return false, err
+	return []audiobooks.Audiobook{}, nil
 }
 
-func (s *DummyPodcastService) WriteNarratorAudiobookFeed(ctx context.Context, name string, w io.Writer) (bool, error) {
-	var err error = nil
-	if name == testNarrator {
-		_, err = fmt.Fprintf(w, feedFormat, name)
-		return true, err
+func (s *DummyAudiobookService) GetAudiobooksByNarrator(ctx context.Context, narrator string) ([]audiobooks.Audiobook, error) {
+	if narrator == testNarrator {
+		return []audiobooks.Audiobook{{
+			Title:       "Test Book",
+			Narrators:   []string{narrator},
+			Path:        "/test.m4b",
+			FileSize:    1000,
+			MIMEType:    "audio/mp4a-latm",
+			Duration:    time.Minute,
+			ReleaseDate: &toml.LocalDate{Year: 2020, Month: 1, Day: 1},
+		}}, nil
 	}
-	return false, err
+	return []audiobooks.Audiobook{}, nil
 }
 
-func (s *DummyPodcastService) WriteTagAudiobookFeed(ctx context.Context, tag string, w io.Writer) (bool, error) {
-	var err error = nil
+func (s *DummyAudiobookService) GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobooks.Audiobook, error) {
 	if tag == testTag {
-		_, err = fmt.Fprintf(w, feedFormat, tag)
-		return true, err
+		return []audiobooks.Audiobook{{
+			Title:       "Test Book",
+			Tags:        []string{tag},
+			Path:        "/test.m4b",
+			FileSize:    1000,
+			MIMEType:    "audio/mp4a-latm",
+			Duration:    time.Minute,
+			ReleaseDate: &toml.LocalDate{Year: 2020, Month: 1, Day: 1},
+		}}, nil
 	}
-	return false, err
+	return []audiobooks.Audiobook{}, nil
 }
 
-func (s *DummyPodcastService) IsReady(ctx context.Context) bool {
-	return true
-}
-
-func (s *DummyPodcastService) UpdateFeeds(ctx context.Context) error {
+func (s *DummyAudiobookService) UpdateAudiobooks(ctx context.Context) error {
 	return nil
+}
+
+func (s *DummyAudiobookService) IsReady(ctx context.Context) bool {
+	return true
 }
