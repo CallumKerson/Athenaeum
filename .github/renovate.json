@@ -2,12 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:best-practices",
-    "schedule:daily",
+    "schedule:monthly",
     ":automergeStableNonMajor",
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions",
     ":prHourlyLimit4"
   ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  },
   "lockFileMaintenance": {
     "enabled": true
   },
