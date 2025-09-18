@@ -8,7 +8,7 @@ require (
 	github.com/CallumKerson/loggerrific v1.1.2
 	github.com/CallumKerson/podcasts v0.0.5
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
-	github.com/carlmjohnson/requests v0.24.3
+	github.com/carlmjohnson/requests v0.25.1
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
 	github.com/pelletier/go-toml/v2 v2.2.4
