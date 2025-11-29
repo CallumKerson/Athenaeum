@@ -2,6 +2,8 @@ github.com/CallumKerson/loggerrific v1.1.2 h1:vALKbAfd2XN4ZQkDr1uitQTz68oKLczvj1
 github.com/CallumKerson/loggerrific v1.1.2/go.mod h1:jJg0jUNE6bIEqSOuPuNG+YBZVCsTOb80/7x18bz7Sqk=
 github.com/CallumKerson/podcasts v0.0.5 h1:Pjt2IIUQIwPbRvaS2OmxWKi2wVF1LrHiOUy55dMzO08=
 github.com/CallumKerson/podcasts v0.0.5/go.mod h1:SGDAg6H7VevfPLGtEQ2y5HvA+5h2rJKiCkh+ygGeRhc=
+github.com/CallumKerson/podcasts v1.0.0 h1:nnmuguaJb3IAL6DdJAhol83lmfswzMrVgv2VS4BJFlk=
+github.com/CallumKerson/podcasts v1.0.0/go.mod h1:SGDAg6H7VevfPLGtEQ2y5HvA+5h2rJKiCkh+ygGeRhc=
 github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb h1:v8z8Yym2Z/NCYgXO/aFqmYDYa/d3uRyVMq1DjgMfzn4=
 github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb/go.mod h1:RfuO8OqkqAcWXXkaS3MuymrBQJbKJWi04H/bs6vNvh0=
 github.com/carlmjohnson/requests v0.25.1 h1:17zNRLecxtAjhtdEIV+F+wrYfe+AGZUjWJtpndcOUYA=
