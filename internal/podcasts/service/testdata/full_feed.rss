@@ -23,6 +23,7 @@
       <itunes:duration>0:04</itunes:duration>
       <itunes:subtitle>Amal El-Mohtar &amp; Max Gladstone</itunes:subtitle>
       <enclosure url="http://www.example-podcast.com/audiobooks/media/Amal%20El-Mohtar%20and%20Max%20Gladstone/This%20Is%20How%20You%20Lose%20the%20Time%20War/This%20Is%20How%20You%20Lose%20the%20Time%20War.m4b" length="145608" type="audio/mp4a-latm"></enclosure>
+      <itunes:image href="http://www.example-podcast.com/audiobooks/media/Amal%20El-Mohtar%20and%20Max%20Gladstone/This%20Is%20How%20You%20Lose%20the%20Time%20War/This%20Is%20How%20You%20Lose%20the%20Time%20War.png"></itunes:image>
     </item>
     <item>
       <title>A Wizard of Earthsea</title>
@@ -33,6 +34,7 @@
       <itunes:duration>0:04</itunes:duration>
       <itunes:subtitle>Ursula K. Le Guin</itunes:subtitle>
       <enclosure url="http://www.example-podcast.com/audiobooks/media/Ursula%20K%20Le%20Guin/Earthsea/1%20A%20Wizard%20of%20Earthsea/A%20Wizard%20of%20Earthsea.m4b" length="145565" type="audio/mp4a-latm"></enclosure>
+      <itunes:image href="http://www.example-podcast.com/audiobooks/media/Ursula%20K%20Le%20Guin/Earthsea/1%20A%20Wizard%20of%20Earthsea/A%20Wizard%20of%20Earthsea.png"></itunes:image>
     </item>
   </channel>
 </rss>

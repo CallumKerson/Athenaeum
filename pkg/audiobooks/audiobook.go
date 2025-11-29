@@ -28,6 +28,7 @@ type Audiobook struct {
 	Duration    time.Duration            `json:"duration"              toml:",omitempty"`
 	FileSize    uint64                   `json:"fileSize"              toml:",omitempty"`
 	MIMEType    string                   `json:"mimeType"              toml:",omitempty"`
+	ImagePath   string                   `json:"imagePath,omitempty"   toml:",omitempty"`
 }
 
 // Person - representation of a person, for example an author or audiobook narrator.

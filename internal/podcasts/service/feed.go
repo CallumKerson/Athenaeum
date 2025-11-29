@@ -51,7 +51,7 @@ func (s *Service) WriteFeedFromAudiobooks(
 		}
 		pubDate = pubDate.Add(8 * time.Hour)
 
-		pod.AddItem(&podcasts.Item{
+		item := &podcasts.Item{
 			Title: books[bookIndex].Title,
 			Description: &podcasts.CDATAText{
 				Value: fmt.Sprintf("%s by %s", books[bookIndex].Title, books[bookIndex].GetAuthor()),
@@ -66,7 +66,18 @@ func (s *Service) WriteFeedFromAudiobooks(
 			},
 			Subtitle:       books[bookIndex].GetAuthor(),
 			ContentEncoded: &podcasts.CDATAText{Value: getHTMLSummary(&books[bookIndex])},
-		})
+		}
+
+		if books[bookIndex].ImagePath != "" {
+			imageURL, err := url.Parse(
+				fmt.Sprintf("%s/%s%s", s.getHost(), s.getMediaPath(), books[bookIndex].ImagePath),
+			)
+			if err == nil {
+				item.Image = &podcasts.ItunesImage{Href: imageURL.String()}
+			}
+		}
+
+		pod.AddItem(item)
 	}
 
 	feed, err := pod.Feed(podcasts.Block)

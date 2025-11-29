@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/pelletier/go-toml/v2"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/CallumKerson/Athenaeum/internal/testing/testbooks"
@@ -124,6 +125,146 @@ func TestGetFeed(t *testing.T) {
 			assert.Equal(t, expected, buf.String())
 		})
 	}
+}
+
+func TestGetFeed_WithEpisodeImages(t *testing.T) {
+	// Create a custom audiobook client that returns books with images
+	client := &testAudiobookClientWithImages{}
+
+	svc := New(
+		client,
+		"http://www.example-podcast.com/audiobooks",
+		"/media/",
+	)
+
+	var buf bytes.Buffer
+	err := svc.WriteAllAudiobooksFeed(context.Background(), &buf)
+
+	assert.NoError(t, err)
+	result := buf.String()
+
+	// Verify the feed contains episode-level itunes:image tag
+	assert.Contains(
+		t,
+		result,
+		`<itunes:image href="http://www.example-podcast.com/audiobooks/media/Author/Book/Book.jpg"></itunes:image>`,
+	)
+}
+
+func TestGetFeed_WithoutEpisodeImages(t *testing.T) {
+	// Verify that feeds for audiobooks without images don't have item-level itunes:image
+	client := &testAudiobookClientNoImages{}
+
+	svc := New(
+		client,
+		"http://www.example-podcast.com/audiobooks",
+		"/media/",
+	)
+
+	var buf bytes.Buffer
+	err := svc.WriteAllAudiobooksFeed(context.Background(), &buf)
+
+	assert.NoError(t, err)
+	result := buf.String()
+
+	// Should have items but no itunes:image tags (since this client returns books without ImagePath)
+	assert.Contains(t, result, "<item>")
+	assert.NotContains(t, result, "<itunes:image")
+}
+
+type testAudiobookClientNoImages struct{}
+
+func (c *testAudiobookClientNoImages) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
+	return []audiobooks.Audiobook{
+		{
+			Title:       "Book Without Image",
+			Authors:     []string{"Test Author"},
+			Path:        "/Author/Book/Book.m4b",
+			FileSize:    1000,
+			MIMEType:    "audio/mp4a-latm",
+			ReleaseDate: &toml.LocalDate{Year: 2024, Month: 1, Day: 1},
+		},
+	}, nil
+}
+
+func (c *testAudiobookClientNoImages) GetAudiobooksByGenre(
+	ctx context.Context,
+	genre audiobooks.Genre,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientNoImages) GetAudiobooksByAuthor(
+	ctx context.Context,
+	author string,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientNoImages) GetAudiobooksByNarrator(
+	ctx context.Context,
+	narrator string,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientNoImages) GetAudiobooksByTag(
+	ctx context.Context,
+	tag string,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientNoImages) UpdateAudiobooks(ctx context.Context) error {
+	return nil
+}
+
+type testAudiobookClientWithImages struct{}
+
+func (c *testAudiobookClientWithImages) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
+	return []audiobooks.Audiobook{
+		{
+			Title:       "Test Book",
+			Authors:     []string{"Test Author"},
+			Path:        "/Author/Book/Book.m4b",
+			ImagePath:   "/Author/Book/Book.jpg",
+			FileSize:    1000,
+			MIMEType:    "audio/mp4a-latm",
+			ReleaseDate: &toml.LocalDate{Year: 2024, Month: 1, Day: 1},
+		},
+	}, nil
+}
+
+func (c *testAudiobookClientWithImages) GetAudiobooksByGenre(
+	ctx context.Context,
+	genre audiobooks.Genre,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientWithImages) GetAudiobooksByAuthor(
+	ctx context.Context,
+	author string,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientWithImages) GetAudiobooksByNarrator(
+	ctx context.Context,
+	narrator string,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientWithImages) GetAudiobooksByTag(
+	ctx context.Context,
+	tag string,
+) ([]audiobooks.Audiobook, error) {
+	return nil, nil
+}
+
+func (c *testAudiobookClientWithImages) UpdateAudiobooks(ctx context.Context) error {
+	return nil
 }
 
 func TestGetFeed_WithOptions(t *testing.T) {
