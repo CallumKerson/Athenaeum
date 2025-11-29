@@ -35,6 +35,7 @@ jobs:
       - name: Rebase release PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           gh pr list --label "autorelease: pending" --state open --json number --jq '.[].number' | while read -r pr_number; do
             echo "Processing PR #${pr_number}"
