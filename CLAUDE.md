@@ -18,7 +18,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-Athenaeum is an audiobook server that provides podcast feeds, built with a layered architecture following clean architecture principles.
+Athenaeum is an audiobook server that provides podcast feeds, built with a
+layered architecture following clean architecture principles.
 
 ### Core Architecture
 

@@ -3,4 +3,6 @@
 #MISE sources=["go.mod", "go.sum", "**/*.go"]
 #MISE outputs={auto = true}
 
+set -ex
+
 golangci-lint run --fix --allow-parallel-runners --config ./.config/.golangci.yaml
