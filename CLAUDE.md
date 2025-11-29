@@ -4,17 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+This project uses [mise](https://mise.jdx.dev/) for task running and tool
+version management. Run `mise tasks` to see all available tasks.
+
 ### Building and Testing
 
-- **Build**: `task build` - Builds the project, runs all linting, formatting, and compiles binary
-- **Compile only**: `task compile` - Compiles binary for current OS/architecture
-- **Linux compile**: `task linux-compile` - Cross-compiles for Linux deployment
-- **Test**: `task test` or `go test ./...` - Run all tests
-- **Format and Lint**: `task tidy` - Runs formatting, import sorting, linting, and pre-commit hooks
+- **Compile only**: `mise run golang:compile` - Compiles binary for current OS/architecture
+- **Linux compile**: `mise run golang:linux-compile` - Cross-compiles for Linux deployment
+- **Test**: `mise run test` or `go test ./...` - Run all tests
+- **Format**: `mise run format` - Runs all formatters (Go and text files)
+- **Lint**: `mise run lint` - Runs all linters (Go and text files)
+- **Pre-commit**: `mise run pre-commit` - Runs format, lint, and test (recommended before committing)
+- **CI**: `mise run ci` - Runs lint and test (used in CI pipeline)
 
 ### Docker
 
-- **Docker build and run**: `task docker` - Builds Linux binary and runs with docker-compose
+- **Docker build and run**: `mise run docker:run` - Runs pre-commit checks, builds Linux binary, and starts with docker-compose
+
+### Task Structure
+
+Tasks are organized in the `tasks/` directory by category:
+
+- `golang/` - Go-specific tasks (compile, test, lint, format, mod-tidy)
+- `text/` - Text file tasks (markdown/YAML formatting and linting)
+- `docker/` - Container tasks
 
 ## Architecture Overview
 
