@@ -32,6 +32,7 @@ jobs:
         with:
           release-type: go
           skip-github-release: true
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
       - name: Update release PRs
         env:
           GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
