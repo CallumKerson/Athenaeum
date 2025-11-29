@@ -1,7 +1,5 @@
 github.com/CallumKerson/loggerrific v1.1.2 h1:vALKbAfd2XN4ZQkDr1uitQTz68oKLczvj1KFRG8iG+w=
 github.com/CallumKerson/loggerrific v1.1.2/go.mod h1:jJg0jUNE6bIEqSOuPuNG+YBZVCsTOb80/7x18bz7Sqk=
-github.com/CallumKerson/podcasts v0.0.5 h1:Pjt2IIUQIwPbRvaS2OmxWKi2wVF1LrHiOUy55dMzO08=
-github.com/CallumKerson/podcasts v0.0.5/go.mod h1:SGDAg6H7VevfPLGtEQ2y5HvA+5h2rJKiCkh+ygGeRhc=
 github.com/CallumKerson/podcasts v1.0.0 h1:nnmuguaJb3IAL6DdJAhol83lmfswzMrVgv2VS4BJFlk=
 github.com/CallumKerson/podcasts v1.0.0/go.mod h1:SGDAg6H7VevfPLGtEQ2y5HvA+5h2rJKiCkh+ygGeRhc=
 github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb h1:v8z8Yym2Z/NCYgXO/aFqmYDYa/d3uRyVMq1DjgMfzn4=
@@ -20,8 +18,6 @@ github.com/go-chi/chi/v5 v5.2.3 h1:WQIt9uxdsAbgIYgid+BpYc+liqQZGMHRaUwp0JUcvdE=
 github.com/go-chi/chi/v5 v5.2.3/go.mod h1:L2yAIGWB3H+phAw1NxKwWM+7eUH/lU8pOMm5hHcoops=
 github.com/go-viper/mapstructure/v2 v2.4.0 h1:EBsztssimR/CONLSZZ04E8qAkxNYq4Qp9LvH92wZUgs=
 github.com/go-viper/mapstructure/v2 v2.4.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
-github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b h1:EY/KpStFl60qA17CptGXhwfZ+k1sFNJIUNR8DdbcuUk=
-github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b/go.mod h1:JDGcbDT52eL4fju3sZ4TeHGsQwhG9nbDV21aMyhwPoA=
 github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a h1:l7A0loSszR5zHd/qK53ZIHMO8b3bBSmENnQ6eKnUT0A=
 github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a/go.mod h1:JDGcbDT52eL4fju3sZ4TeHGsQwhG9nbDV21aMyhwPoA=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
