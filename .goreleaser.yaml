@@ -67,14 +67,14 @@ docker_manifests:
 changelog:
   use: github-native
 brews:
-  - tap:
+  - repository:
       owner: CallumKerson
       name: homebrew-tap
       branch: main
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     homepage: "https://github.com/CallumKerson/Athenaeum"
     license: "MIT"
-    folder: Formula
+    directory: Formula
     test: |
       system "#{bin}/athenaeum --version"
     service: |
