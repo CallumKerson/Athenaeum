@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0](https://github.com/CallumKerson/Athenaeum/compare/v1.14.30...v1.15.0) (2025-11-29)
+
+
+### Features
+
+* add support for episode images in podcast feeds ([#145](https://github.com/CallumKerson/Athenaeum/issues/145)) ([e3b2d16](https://github.com/CallumKerson/Athenaeum/commit/e3b2d16f15117ea38b5b70137fe02ac7e974afdb))
+
 ## [1.14.30](https://github.com/CallumKerson/Athenaeum/compare/v1.14.29...v1.14.30) (2025-11-29)
 
 
