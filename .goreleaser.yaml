@@ -3,6 +3,8 @@ project_name: athenaeum
 before:
   hooks:
     - go mod tidy
+release:
+  mode: keep-existing
 builds:
   - main: ./cmd/athenaeum
     goos:
