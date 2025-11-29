@@ -6,7 +6,7 @@ toolchain go1.25.4
 
 require (
 	github.com/CallumKerson/loggerrific v1.1.2
-	github.com/CallumKerson/podcasts v0.0.5
+	github.com/CallumKerson/podcasts v1.0.0
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
 	github.com/carlmjohnson/requests v0.25.1
 	github.com/go-chi/chi/v5 v5.2.3
