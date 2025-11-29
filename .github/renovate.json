@@ -11,6 +11,7 @@
   "lockFileMaintenance": {
     "enabled": true
   },
+  "postUpdateOptions": ["gomodTidy"],
   "internalChecksFilter": "strict",
   "minimumReleaseAge": "1 week",
   "osvVulnerabilityAlerts": true,
