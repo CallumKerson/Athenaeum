@@ -104,6 +104,9 @@ func (s *Service) GetAudiobooksByTag(ctx context.Context, tag string) ([]audiobo
 	return s.audiobookStore.Get(ctx, TagFilter(tag))
 }
 
-func (s *Service) GetAudiobooksBy(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
+func (s *Service) GetAudiobooksBy(
+	ctx context.Context,
+	filter func(*audiobooks.Audiobook) bool,
+) ([]audiobooks.Audiobook, error) {
 	return s.audiobookStore.Get(ctx, filter)
 }

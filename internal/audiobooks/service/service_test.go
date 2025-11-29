@@ -11,9 +11,7 @@ import (
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
-var (
-	updatedThirdParty = false
-)
+var updatedThirdParty = false
 
 func TestUpdate_Changes(t *testing.T) {
 	tests := []struct {
@@ -68,8 +66,7 @@ func TestFilteringAllAudiobooks(t *testing.T) {
 	}
 }
 
-type DummyNotifier struct {
-}
+type DummyNotifier struct{}
 
 func (u *DummyNotifier) Notify(context.Context) error {
 	time.Sleep(100 * time.Millisecond)
@@ -81,30 +78,33 @@ func (u *DummyNotifier) String() string {
 	return "dummy"
 }
 
-type NewBooksMediaScanner struct {
-}
+type NewBooksMediaScanner struct{}
 
 func (s *NewBooksMediaScanner) GetAllAudiobooks(context.Context) ([]audiobooks.Audiobook, error) {
 	return testbooks.Audiobooks, nil
 }
 
-func (s *NewBooksMediaScanner) ScanForNewAndUpdatedAudiobooks(context.Context, []audiobooks.Audiobook) ([]audiobooks.Audiobook, bool, error) {
+func (s *NewBooksMediaScanner) ScanForNewAndUpdatedAudiobooks(
+	context.Context,
+	[]audiobooks.Audiobook,
+) ([]audiobooks.Audiobook, bool, error) {
 	return testbooks.Audiobooks, true, nil
 }
 
-type NoChangesMediaScanner struct {
-}
+type NoChangesMediaScanner struct{}
 
 func (s *NoChangesMediaScanner) GetAllAudiobooks(context.Context) ([]audiobooks.Audiobook, error) {
 	return testbooks.Audiobooks, nil
 }
 
-func (s *NoChangesMediaScanner) ScanForNewAndUpdatedAudiobooks(context.Context, []audiobooks.Audiobook) ([]audiobooks.Audiobook, bool, error) {
+func (s *NoChangesMediaScanner) ScanForNewAndUpdatedAudiobooks(
+	context.Context,
+	[]audiobooks.Audiobook,
+) ([]audiobooks.Audiobook, bool, error) {
 	return testbooks.Audiobooks, false, nil
 }
 
-type DummyAudiobookStore struct {
-}
+type DummyAudiobookStore struct{}
 
 func (s *DummyAudiobookStore) StoreAll(context.Context, []audiobooks.Audiobook) error {
 	return nil
@@ -114,7 +114,10 @@ func (s *DummyAudiobookStore) GetAll(context.Context) ([]audiobooks.Audiobook, e
 	return testbooks.Audiobooks, nil
 }
 
-func (s *DummyAudiobookStore) Get(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
+func (s *DummyAudiobookStore) Get(
+	ctx context.Context,
+	filter func(*audiobooks.Audiobook) bool,
+) ([]audiobooks.Audiobook, error) {
 	var filtered []audiobooks.Audiobook
 	all, _ := s.GetAll(ctx)
 	for index := range all {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -68,12 +69,7 @@ func TestAudiobookStore_GetAudiobooks(t *testing.T) {
 
 	// when
 	retrievedBooks, err := store.Get(context.TODO(), func(a *audiobooks.Audiobook) bool {
-		for _, v := range a.Authors {
-			if v == "Amal El-Mohtar" {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(a.Authors, "Amal El-Mohtar")
 	})
 	assert.NoError(t, err)
 	assert.Len(t, retrievedBooks, 1)

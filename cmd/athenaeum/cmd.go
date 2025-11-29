@@ -100,8 +100,12 @@ func runServer(cfg *Config) error {
 	}
 	audiobookOpts := []audiobooksService.Option{audiobooksService.WithLogger(logger)}
 	if cfg.ThirdParty.UpdateOvercast || cfg.ThirdParty.NotifyOvercast {
-		audiobookOpts = append(audiobookOpts,
-			audiobooksService.WithThirdPartyNotifier(overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger))))
+		audiobookOpts = append(
+			audiobookOpts,
+			audiobooksService.WithThirdPartyNotifier(
+				overcastNotifier.New(cfg.Host, overcastNotifier.WithLogger(logger)),
+			),
+		)
 	}
 	if len(cfg.ExclusionsFromMainFeed.Genres) > 0 {
 		genres, err := cfg.ExclusionsFromMainFeed.GetGenres()
@@ -125,7 +129,10 @@ func runServer(cfg *Config) error {
 		),
 		podcastService.WithHandlePreUnixEpoch(cfg.Podcast.PreUnixEpoch.Handle))
 
-	httpHandlerOpts := []transportHttp.HandlerOption{transportHttp.WithLogger(logger), transportHttp.WithVersion(Version)}
+	httpHandlerOpts := []transportHttp.HandlerOption{
+		transportHttp.WithLogger(logger),
+		transportHttp.WithVersion(Version),
+	}
 	if cfg.Cache.Enabled {
 		httpHandlerOpts = append(httpHandlerOpts, transportHttp.WithCacheStore(
 			memcache.NewStore(

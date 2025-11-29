@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/carlmjohnson/requests"
-	"github.com/ybbus/httpretry"
-
 	"github.com/CallumKerson/loggerrific"
 	noOpLogger "github.com/CallumKerson/loggerrific/noop"
+	"github.com/carlmjohnson/requests"
+	"github.com/ybbus/httpretry"
 )
 
 const (

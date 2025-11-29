@@ -46,10 +46,10 @@ ExclusionsFromMainFeed:
     Genres:
       - nonfiction
 `
-	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
+	err := os.WriteFile(configFilePath, []byte(configYAML), 0o644)
 	assert.NoError(t, err)
 	var config Config
-	var cmdOut = &bytes.Buffer{}
+	cmdOut := &bytes.Buffer{}
 
 	// when
 	err = InitConfig(&config, configFilePath, cmdOut)
@@ -79,7 +79,7 @@ Host: "http://localhost:8082"
 Podcast:
     Explicit: False
 `
-	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
+	err := os.WriteFile(configFilePath, []byte(configYAML), 0o644)
 	assert.NoError(t, err)
 	var config Config
 
@@ -105,7 +105,7 @@ func TestConfig_EnvironmentOverridesFile(t *testing.T) {
 	configYAML := `---
 Host: "http://localhost:8083"
 `
-	err := os.WriteFile(configFilePath, []byte(configYAML), 0644)
+	err := os.WriteFile(configFilePath, []byte(configYAML), 0o644)
 	assert.NoError(t, err)
 	var config Config
 

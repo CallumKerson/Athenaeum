@@ -20,6 +20,7 @@ linters:
     - lll
     - makezero
     - misspell
+    - modernize
     - nakedret
     - noctx
     - nolintlint
@@ -87,15 +88,17 @@ linters:
       - examples$
 formatters:
   enable:
-    - gofmt
-    - goimports
+    - gci
+    - gofumpt
+    - golines
   settings:
-    goimports:
-      local-prefixes:
-        - github.com/CallumKerson/Athenaeum
-  exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+    gofumpt: #
+      module-path: github.com/CallumKerson/Athenaeum
+      extra-rules: true
+    golines:
+      max-len: 120

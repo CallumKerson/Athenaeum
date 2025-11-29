@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE sources=["**/*.md", "**/*.yaml", "**/*.json"]
+#MISE outputs={auto = true}
+
+prettier '**/*.{md,yaml,json}' --write --ignore-path=.gitignore

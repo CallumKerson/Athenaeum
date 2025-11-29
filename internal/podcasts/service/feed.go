@@ -10,9 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gomarkdown/markdown"
-
 	"github.com/CallumKerson/podcasts"
+	"github.com/gomarkdown/markdown"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
@@ -23,7 +22,12 @@ var (
 	unixEpoch   = time.Unix(0, 0).UTC()
 )
 
-func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobooks.Audiobook, feedOpts *FeedOpts, writer io.Writer) error {
+func (s *Service) WriteFeedFromAudiobooks(
+	ctx context.Context,
+	books []audiobooks.Audiobook,
+	feedOpts *FeedOpts,
+	writer io.Writer,
+) error {
 	if feedOpts == nil {
 		return errNoConfig
 	}
@@ -48,11 +52,13 @@ func (s *Service) WriteFeedFromAudiobooks(ctx context.Context, books []audiobook
 		pubDate = pubDate.Add(8 * time.Hour)
 
 		pod.AddItem(&podcasts.Item{
-			Title:       books[bookIndex].Title,
-			Description: &podcasts.CDATAText{Value: fmt.Sprintf("%s by %s", books[bookIndex].Title, books[bookIndex].GetAuthor())},
-			PubDate:     podcasts.NewPubDate(pubDate),
-			Duration:    podcasts.NewDuration(books[bookIndex].Duration),
-			GUID:        hostedFile.String(),
+			Title: books[bookIndex].Title,
+			Description: &podcasts.CDATAText{
+				Value: fmt.Sprintf("%s by %s", books[bookIndex].Title, books[bookIndex].GetAuthor()),
+			},
+			PubDate:  podcasts.NewPubDate(pubDate),
+			Duration: podcasts.NewDuration(books[bookIndex].Duration),
+			GUID:     hostedFile.String(),
 			Enclosure: &podcasts.Enclosure{
 				URL:    hostedFile.String(),
 				Length: fmt.Sprintf("%d", books[bookIndex].FileSize),

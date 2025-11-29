@@ -1,9 +1,8 @@
 package logrus
 
 import (
-	"github.com/sirupsen/logrus"
-
 	"github.com/CallumKerson/loggerrific"
+	"github.com/sirupsen/logrus"
 )
 
 type Logger struct {
@@ -18,11 +17,11 @@ func NewLogger() *Logger {
 	return logrusLogger
 }
 
-func (l *Logger) WithField(key string, value interface{}) loggerrific.Entry {
+func (l *Logger) WithField(key string, value any) loggerrific.Entry {
 	return l.Logger.WithField(key, value)
 }
 
-func (l *Logger) WithFields(fields map[string]interface{}) loggerrific.Entry {
+func (l *Logger) WithFields(fields map[string]any) loggerrific.Entry {
 	return l.Logger.WithFields(fields)
 }
 

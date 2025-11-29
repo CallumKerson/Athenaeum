@@ -24,7 +24,10 @@ func TestService_GetAudiobooks(t *testing.T) {
 func TestService_UpdateAudiobooks(t *testing.T) {
 	svc := New(&DummyM4BService{}, dataloader.GetRootTestdata(t))
 
-	books, changed, err := svc.ScanForNewAndUpdatedAudiobooks(context.TODO(), []audiobooks.Audiobook{testbooks.Audiobooks[0]})
+	books, changed, err := svc.ScanForNewAndUpdatedAudiobooks(
+		context.TODO(),
+		[]audiobooks.Audiobook{testbooks.Audiobooks[0]},
+	)
 	assert.NoError(t, err)
 	assert.True(t, changed)
 	assert.ElementsMatch(t, testbooks.Audiobooks, books)

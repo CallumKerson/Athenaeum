@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE wait_for=["text:format"]
+#MISE sources=["**/*.md", "**/*.yaml", "**/*.json"]
+#MISE outputs={auto = true}
+
+
+prettier '**/*.{md,yaml,json}' --ignore-path=.gitignore

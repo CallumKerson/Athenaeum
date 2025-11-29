@@ -1,6 +1,7 @@
 package service
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 
@@ -64,12 +65,7 @@ func AndFilter(filters ...Filter) Filter {
 }
 
 func contains[K comparable](slice []K, item K) bool {
-	for _, v := range slice {
-		if v == item {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(slice, item)
 }
 
 func containsIgnoringCaseAndWhitespace(slice []string, item string) bool {

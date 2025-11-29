@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Compiles for the current OS and architecture"
+#MISE sources=["**/*.go", "go.mod", "go.sum"]
+#MISE outputs={auto = true}
+
+COMMIT=$(git rev-parse HEAD)
+VERSION="$(git describe --tags)-dev+$(git rev-parse --short HEAD)"
+go build -ldflags "-s -w -X main.Version=$VERSION -X main.Commit=$COMMIT -X main.Date=$(date +%Y-%m-%dT%H:%M:%S%z)" -o . ./...
