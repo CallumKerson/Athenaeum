@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.30](https://github.com/CallumKerson/Athenaeum/compare/v1.14.29...v1.14.30) (2025-11-29)
+
+
+### Bug Fixes
+
+* fix release process ([#146](https://github.com/CallumKerson/Athenaeum/issues/146)) ([84af719](https://github.com/CallumKerson/Athenaeum/commit/84af7198bfa72746f20487507bd8e9657fd0d80d))
+
 ## [1.14.29](https://github.com/CallumKerson/Athenaeum/compare/v1.14.28...v1.14.29) (2025-11-29)
 
 
