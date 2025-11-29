@@ -8,6 +8,7 @@
     "customManagers:githubActionsVersions",
     ":prHourlyLimit4"
   ],
+  "reviewers": ["CallumKerson"],
   "lockFileMaintenance": {
     "enabled": true
   },
