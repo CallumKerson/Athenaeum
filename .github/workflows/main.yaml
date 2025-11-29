@@ -32,11 +32,11 @@ jobs:
         with:
           release-type: go
           skip-github-release: true
-      - name: Rebase release PRs
+      - name: Update release PRs
         env:
           GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-        run: ./.github/scripts/rebase-release-prs.sh
+        run: ./.github/scripts/update-release-prs.sh
   goreleaser:
     runs-on: ubuntu-latest
     needs: release-please
