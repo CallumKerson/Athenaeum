@@ -189,6 +189,13 @@ func (s *Service) parseM4BInfo(m4bPath string, audiobook *audiobooks.Audiobook) 
 			(float32(info.Moov.Mvhd.Duration) / float32(info.Moov.Mvhd.Timescale)) * float32(time.Second))
 	}
 	audiobook.MIMEType = "audio/mp4a-latm"
+
+	// Check for image file with same base name
+	basePath := strings.TrimSuffix(m4bPath, filepath.Ext(m4bPath))
+	if imagePath := findImagePath(basePath); imagePath != "" {
+		audiobook.ImagePath = strings.TrimPrefix(imagePath, s.mediaRoot)
+	}
+
 	return nil
 }
 
@@ -198,6 +205,17 @@ func getM4BPathFromTOMLPath(tomlPath string) string {
 
 func getTOMLPathFromM4BPath(m4bPath string) string {
 	return fmt.Sprintf("%s.toml", strings.TrimSuffix(m4bPath, filepath.Ext(".m4b")))
+}
+
+func findImagePath(basePath string) string {
+	extensions := []string{".jpg", ".jpeg", ".png"}
+	for _, ext := range extensions {
+		imagePath := basePath + ext
+		if _, err := os.Stat(imagePath); err == nil {
+			return imagePath
+		}
+	}
+	return ""
 }
 
 func (s *Service) trackM4BParseTime(start time.Time, filename string) {

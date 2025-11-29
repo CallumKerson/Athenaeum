@@ -16,6 +16,7 @@
       <itunes:duration>0:04</itunes:duration>
       <itunes:subtitle>Ursula K. Le Guin</itunes:subtitle>
       <enclosure url="http://www.example-podcast.com/audiobooks/media/Ursula%20K%20Le%20Guin/Earthsea/1%20A%20Wizard%20of%20Earthsea/A%20Wizard%20of%20Earthsea.m4b" length="145565" type="audio/mp4a-latm"></enclosure>
+      <itunes:image href="http://www.example-podcast.com/audiobooks/media/Ursula%20K%20Le%20Guin/Earthsea/1%20A%20Wizard%20of%20Earthsea/A%20Wizard%20of%20Earthsea.png"></itunes:image>
     </item>
   </channel>
 </rss>

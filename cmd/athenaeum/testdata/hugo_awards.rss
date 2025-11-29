@@ -18,6 +18,7 @@
       <itunes:duration>0:04</itunes:duration>
       <itunes:subtitle>Amal El-Mohtar &amp; Max Gladstone</itunes:subtitle>
       <enclosure url="{{.}}/media/Amal%20El-Mohtar%20and%20Max%20Gladstone/This%20Is%20How%20You%20Lose%20the%20Time%20War/This%20Is%20How%20You%20Lose%20the%20Time%20War.m4b" length="145608" type="audio/mp4a-latm"></enclosure>
+      <itunes:image href="{{.}}/media/Amal%20El-Mohtar%20and%20Max%20Gladstone/This%20Is%20How%20You%20Lose%20the%20Time%20War/This%20Is%20How%20You%20Lose%20the%20Time%20War.png"></itunes:image>
     </item>
   </channel>
 </rss>
