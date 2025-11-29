@@ -4,4 +4,4 @@
 
 set -ex
 
-prettier '**/*.{md,yaml,json}' --write --ignore-path=.gitignore
+prettier '**/*.{md,yaml,json}' --write --ignore-path=.gitignore --ignore-path=.config/.prettierignore
