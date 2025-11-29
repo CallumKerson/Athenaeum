@@ -1,11 +1,6 @@
 extends: relaxed
-ignore: |
-  node_modules/
-  .venv/
 rules:
   line-length:
-    ignore:
-      - Pulumi.*.yaml
     level: warning
     max: 120
   truthy:

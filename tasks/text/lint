@@ -3,5 +3,8 @@
 #MISE sources=["**/*.md", "**/*.yaml", "**/*.json"]
 #MISE outputs={auto = true}
 
+set -ex
 
-prettier '**/*.{md,yaml,json}' --ignore-path=.gitignore
+prettier --check '**/*.{md,yaml,json}' --ignore-path=.gitignore
+markdownlint-cli2 --config ./.config/.markdownlint-cli2.yaml "**/*.md"
+yamllint -c .config/.yamllint.yaml .

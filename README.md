@@ -51,7 +51,12 @@ Genres = ["Children's", "Fantasy"]
 Narrators = ["Kobna Holdbrook-Smith"]
 
 [Description]
-Text = "<p>Ged, the greatest sorcerer in all Earthsea, was called Sparrowhawk in his reckless youth.</p><p>Hungry for power and knowledge, Sparrowhawk tampered with long-held secrets and loosed a terrible shadow upon the world. This is the tale of his testing, how he mastered the mighty words of power, tamed an ancient dragon, and crossed death's threshold to restore the balance.</p>"
+Text = '''Ged, the greatest sorcerer in all Earthsea, was called Sparrowhawk in his reckless youth.
+
+Hungry for power and knowledge, Sparrowhawk tampered with long-held secrets and loosed a terrible shadow upon the world.
+
+This is the tale of his testing, how he mastered the mighty words of power,
+tamed an ancient dragon, and crossed death's threshold to restore the balance.'''
 Format = "HTML"
 
 [Series]
@@ -87,4 +92,5 @@ be used internationally. According to their documentation [http://downpour.com](
 
 ## Note on test audiobooks
 
-Any `*.m4b` files found in this repo are short public domain sound clips with metadata that pretend to be audiobooks for testing purposes only.
+Any `*.m4b` files found in this repo are short public domain sound clips with
+metadata that pretend to be audiobooks for testing purposes only.
