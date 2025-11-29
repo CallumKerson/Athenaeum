@@ -8,10 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
-	bolt "go.etcd.io/bbolt"
-
 	"github.com/CallumKerson/loggerrific"
 	noOpLogger "github.com/CallumKerson/loggerrific/noop"
+	bolt "go.etcd.io/bbolt"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -44,7 +43,7 @@ func (s *AudiobookStore) getDBPath() string {
 }
 
 func (s *AudiobookStore) Initialise() error {
-	err := os.MkdirAll(s.databaseRoot, 0755)
+	err := os.MkdirAll(s.databaseRoot, 0o755)
 	if err != nil {
 		return err
 	}
@@ -110,7 +109,10 @@ func (s *AudiobookStore) GetAll(context.Context) ([]audiobooks.Audiobook, error)
 	})
 }
 
-func (s *AudiobookStore) Get(ctx context.Context, filter func(*audiobooks.Audiobook) bool) ([]audiobooks.Audiobook, error) {
+func (s *AudiobookStore) Get(
+	ctx context.Context,
+	filter func(*audiobooks.Audiobook) bool,
+) ([]audiobooks.Audiobook, error) {
 	boldDB, err := bolt.Open(s.getDBPath(), s.dbFilePermission, nil)
 	if err != nil {
 		return nil, err

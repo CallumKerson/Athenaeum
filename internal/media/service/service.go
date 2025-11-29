@@ -10,11 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alfg/mp4"
-	"github.com/pelletier/go-toml/v2"
-
 	"github.com/CallumKerson/loggerrific"
 	noOpLogger "github.com/CallumKerson/loggerrific/noop"
+	"github.com/alfg/mp4"
+	"github.com/pelletier/go-toml/v2"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/pkg/m4b"
@@ -44,7 +43,11 @@ func New(m4bMetadataReader M4BMetadataReader, mediaRoot string, opts ...Option) 
 
 func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook, error) {
 	var books []audiobooks.Audiobook
-	s.logger.Infoln("Starting scan of directory", s.mediaRoot, "for M4B audiobook files and associated TOML configuration files.")
+	s.logger.Infoln(
+		"Starting scan of directory",
+		s.mediaRoot,
+		"for M4B audiobook files and associated TOML configuration files.",
+	)
 	err := filepath.WalkDir(s.mediaRoot, func(path string, d fs.DirEntry, e error) error {
 		if e != nil {
 			return e
@@ -79,9 +82,16 @@ func (s *Service) GetAllAudiobooks(ctx context.Context) ([]audiobooks.Audiobook,
 	return books, err
 }
 
-func (s *Service) ScanForNewAndUpdatedAudiobooks(ctx context.Context, books []audiobooks.Audiobook) ([]audiobooks.Audiobook, bool, error) {
+func (s *Service) ScanForNewAndUpdatedAudiobooks(
+	ctx context.Context,
+	books []audiobooks.Audiobook,
+) ([]audiobooks.Audiobook, bool, error) {
 	booksMap := listToMap(s.mediaRoot, books)
-	s.logger.Infoln("Starting scan of directory", s.mediaRoot, "for M4B audiobook files and associated TOML configuration files.")
+	s.logger.Infoln(
+		"Starting scan of directory",
+		s.mediaRoot,
+		"for M4B audiobook files and associated TOML configuration files.",
+	)
 
 	m4bMetadataMap := map[string]string{}
 	err := filepath.WalkDir(s.mediaRoot, func(path string, d fs.DirEntry, e error) error {

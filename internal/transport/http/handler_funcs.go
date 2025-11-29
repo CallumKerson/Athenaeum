@@ -75,7 +75,8 @@ func (h *Handler) getTagFeed(writer http.ResponseWriter, request *http.Request) 
 }
 
 func (h *Handler) getFeedForStr(writer http.ResponseWriter, request *http.Request, pathVar string,
-	writeFunc func(context.Context, string, io.Writer) (bool, error)) {
+	writeFunc func(context.Context, string, io.Writer) (bool, error),
+) {
 	nameStr, err := url.PathUnescape(chi.URLParam(request, pathVar))
 	if err != nil {
 		SendJSONError(writer, http.StatusNotFound, err)
@@ -126,7 +127,7 @@ func (h *Handler) serveHTML(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Title":           "Audiobooks",
 		"Description":     "Like movies in your mind!",
 		"StaticServePath": StaticPath,

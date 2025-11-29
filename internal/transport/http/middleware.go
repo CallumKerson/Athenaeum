@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"golang.org/x/time/rate"
-
 	"github.com/CallumKerson/loggerrific"
+	"golang.org/x/time/rate"
 )
 
 type Middlewares struct {
@@ -18,7 +17,7 @@ type Middlewares struct {
 func GetLoggingMiddleware(logger loggerrific.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			logger.WithFields(map[string]interface{}{
+			logger.WithFields(map[string]any{
 				"method":    request.Method,
 				"path":      request.URL.Path,
 				"userAgent": request.UserAgent(),

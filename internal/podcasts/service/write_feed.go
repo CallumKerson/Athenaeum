@@ -69,7 +69,8 @@ func (s *Service) WriteTagAudiobookFeed(ctx context.Context, tag string, writer 
 }
 
 func (s *Service) writeAudiobookFeed(ctx context.Context, title, description string,
-	books []audiobooks.Audiobook, writer io.Writer) error {
+	books []audiobooks.Audiobook, writer io.Writer,
+) error {
 	feedOtps := &FeedOpts{
 		Title:       title,
 		Description: description,

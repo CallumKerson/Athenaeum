@@ -8,11 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	chiMiddleware "github.com/go-chi/chi/v5/middleware"
-
 	"github.com/CallumKerson/loggerrific"
 	noOpLogger "github.com/CallumKerson/loggerrific/noop"
+	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/static"
@@ -75,7 +74,12 @@ func (h *Handler) mapRoutes() {
 
 	h.Route(PodcastPath, func(router chi.Router) {
 		if h.CacheStore != nil {
-			h.Log.Infoln("Caching enabled on", PodcastPath, "endpoints is enabled with at TTL of", h.CacheStore.GetTTL().String())
+			h.Log.Infoln(
+				"Caching enabled on",
+				PodcastPath,
+				"endpoints is enabled with at TTL of",
+				h.CacheStore.GetTTL().String(),
+			)
 			router.Use(GetCachingMiddleware(h.CacheStore))
 		}
 		router.HandleFunc(fmt.Sprintf("/genre/{genre}/%s", PodcastFeedName), h.getGenreFeed)

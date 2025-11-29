@@ -1,0 +1,29 @@
+[tools]
+"github:golangci/golangci-lint" = "2.6.2"
+go = "1.25.4"
+prettier = "3.7.2"
+taplo = "0.10.0"
+
+[task_config]
+includes = ["tasks"]
+
+[tasks.format]
+description = "Runs all formatters"
+depends = ["*:format"]
+
+[tasks.lint]
+description = "Runs all linters"
+depends = ["*:lint"]
+wait_for = ["format"]
+
+[tasks.test]
+description = "Runs all tests"
+depends = ["*:test"]
+
+[tasks.ci]
+description = "Runs all CI checks - lint and test"
+depends = ["lint", "test"]
+
+[tasks.pre-commit]
+description = "Runs all pre-commit checks - format, lint, and test"
+depends = ["format", "lint", "test"]

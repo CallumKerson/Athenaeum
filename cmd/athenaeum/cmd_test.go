@@ -123,7 +123,11 @@ DB:
 Media:
     Root: "%s"
 `
-	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(configYAML, host, port, tempDir, dataloader.GetRootTestdata(t))), 0644)
+	err := os.WriteFile(
+		configFilePath,
+		fmt.Appendf(nil, configYAML, host, port, tempDir, dataloader.GetRootTestdata(t)),
+		0o644,
+	)
 	assert.NoError(t, err)
 
 	go func() {
@@ -153,7 +157,7 @@ func getFreePort(t *testing.T) int {
 	return l.Addr().(*net.TCPAddr).Port
 }
 
-func getExpected(t *testing.T, filename string, host interface{}) string {
+func getExpected(t *testing.T, filename string, host any) string {
 	var b bytes.Buffer
 	tpl, err := template.ParseFiles(filepath.Join("testdata", filename))
 	assert.NoError(t, err)

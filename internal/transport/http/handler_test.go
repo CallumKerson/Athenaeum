@@ -42,21 +42,126 @@ func TestHandler(t *testing.T) {
 		expectedContentType string
 		expectedBody        string
 	}{
-		{name: "index", method: "GET", path: "", expectedStatus: 200, expectedContentType: ContentTypeHTML, expectedBody: strings.TrimSpace(string(expectedIndex))},
-		{name: "health check", method: "GET", path: "/health", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"health\": \"ok\"\n}"},
-		{name: "readiness check", method: "GET", path: "/ready", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"readiness\": \"ok\"\n}"},
-		{name: "version", method: "GET", path: "/version", expectedStatus: 200, expectedContentType: ContentTypeJSON, expectedBody: "{\n  \"version\": \"1.0.0-test\"\n}"},
-		{name: "feed", method: "GET", path: "/podcast/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: testFeed},
-		{name: "genre feed", method: "GET", path: "/podcast/genre/scifi/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, audiobooks.SciFi.String())},
-		{name: "author feed", method: "GET", path: "/podcast/authors/Agatha%20Test-y/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testAuthor)},
-		{name: "no author feed", method: "GET", path: "/podcast/authors/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
-		{name: "narrator feed", method: "GET", path: "/podcast/narrators/David%20Crochet/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testNarrator)},
-		{name: "no narrator feed", method: "GET", path: "/podcast/narrators/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
-		{name: "tag feed", method: "GET", path: "/podcast/tags/Cosy%20Classics/feed.rss", expectedStatus: 200, expectedContentType: ContentTypeTextXML, expectedBody: fmt.Sprintf(feedFormat, testTag)},
-		{name: "no tag feed", method: "GET", path: "/podcast/tags/something/feed.rss", expectedStatus: 404, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Not Found"},
-		{name: "media", method: "GET", path: "/media/media.txt", expectedStatus: 200, expectedContentType: "text/plain; charset=utf-8", expectedBody: "served file"},
-		{name: "update", method: "POST", path: "/update", expectedStatus: 204, expectedContentType: "", expectedBody: ""},
-		{name: "update on get fails", method: "GET", path: "/update", expectedStatus: 405, expectedContentType: "text/plain; charset=utf-8", expectedBody: "Method Not Allowed"},
+		{
+			name:                "index",
+			method:              "GET",
+			path:                "",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeHTML,
+			expectedBody:        strings.TrimSpace(string(expectedIndex)),
+		},
+		{
+			name:                "health check",
+			method:              "GET",
+			path:                "/health",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeJSON,
+			expectedBody:        "{\n  \"health\": \"ok\"\n}",
+		},
+		{
+			name:                "readiness check",
+			method:              "GET",
+			path:                "/ready",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeJSON,
+			expectedBody:        "{\n  \"readiness\": \"ok\"\n}",
+		},
+		{
+			name:                "version",
+			method:              "GET",
+			path:                "/version",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeJSON,
+			expectedBody:        "{\n  \"version\": \"1.0.0-test\"\n}",
+		},
+		{
+			name:                "feed",
+			method:              "GET",
+			path:                "/podcast/feed.rss",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeTextXML,
+			expectedBody:        testFeed,
+		},
+		{
+			name:                "genre feed",
+			method:              "GET",
+			path:                "/podcast/genre/scifi/feed.rss",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeTextXML,
+			expectedBody:        fmt.Sprintf(feedFormat, audiobooks.SciFi.String()),
+		},
+		{
+			name:                "author feed",
+			method:              "GET",
+			path:                "/podcast/authors/Agatha%20Test-y/feed.rss",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeTextXML,
+			expectedBody:        fmt.Sprintf(feedFormat, testAuthor),
+		},
+		{
+			name:                "no author feed",
+			method:              "GET",
+			path:                "/podcast/authors/something/feed.rss",
+			expectedStatus:      404,
+			expectedContentType: "text/plain; charset=utf-8",
+			expectedBody:        "Not Found",
+		},
+		{
+			name:                "narrator feed",
+			method:              "GET",
+			path:                "/podcast/narrators/David%20Crochet/feed.rss",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeTextXML,
+			expectedBody:        fmt.Sprintf(feedFormat, testNarrator),
+		},
+		{
+			name:                "no narrator feed",
+			method:              "GET",
+			path:                "/podcast/narrators/something/feed.rss",
+			expectedStatus:      404,
+			expectedContentType: "text/plain; charset=utf-8",
+			expectedBody:        "Not Found",
+		},
+		{
+			name:                "tag feed",
+			method:              "GET",
+			path:                "/podcast/tags/Cosy%20Classics/feed.rss",
+			expectedStatus:      200,
+			expectedContentType: ContentTypeTextXML,
+			expectedBody:        fmt.Sprintf(feedFormat, testTag),
+		},
+		{
+			name:                "no tag feed",
+			method:              "GET",
+			path:                "/podcast/tags/something/feed.rss",
+			expectedStatus:      404,
+			expectedContentType: "text/plain; charset=utf-8",
+			expectedBody:        "Not Found",
+		},
+		{
+			name:                "media",
+			method:              "GET",
+			path:                "/media/media.txt",
+			expectedStatus:      200,
+			expectedContentType: "text/plain; charset=utf-8",
+			expectedBody:        "served file",
+		},
+		{
+			name:                "update",
+			method:              "POST",
+			path:                "/update",
+			expectedStatus:      204,
+			expectedContentType: "",
+			expectedBody:        "",
+		},
+		{
+			name:                "update on get fails",
+			method:              "GET",
+			path:                "/update",
+			expectedStatus:      405,
+			expectedContentType: "text/plain; charset=utf-8",
+			expectedBody:        "Method Not Allowed",
+		},
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -87,8 +192,18 @@ func TestHandler_Static(t *testing.T) {
 		expectedContentType string
 		expectedBodyLength  int
 	}{
-		{name: "itunes image", path: "/static/itunes_image.jpg", expectedContentType: "image/jpeg", expectedBodyLength: 261235},
-		{name: "itunes image small", path: "/static/itunes_image_small.jpg", expectedContentType: "image/jpeg", expectedBodyLength: 73150},
+		{
+			name:                "itunes image",
+			path:                "/static/itunes_image.jpg",
+			expectedContentType: "image/jpeg",
+			expectedBodyLength:  261235,
+		},
+		{
+			name:                "itunes image small",
+			path:                "/static/itunes_image_small.jpg",
+			expectedContentType: "image/jpeg",
+			expectedBodyLength:  73150,
+		},
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -105,8 +220,7 @@ func TestHandler_Static(t *testing.T) {
 	}
 }
 
-type DummyPodcastService struct {
-}
+type DummyPodcastService struct{}
 
 func (s *DummyPodcastService) WriteAllAudiobooksFeed(ctx context.Context, w io.Writer) error {
 	_, err := w.Write([]byte(testFeed))

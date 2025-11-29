@@ -15,19 +15,19 @@ import (
 
 // Audiobook - representation of a book.
 type Audiobook struct {
-	Path        string                   `json:"path" toml:",omitempty"`
+	Path        string                   `json:"path"                  toml:",omitempty"`
 	Title       string                   `json:"title"`
-	Subtitle    string                   `json:"subtitle" toml:",omitempty"`
+	Subtitle    string                   `json:"subtitle"              toml:",omitempty"`
 	Authors     []string                 `json:"authors"`
 	Description *description.Description `json:"description,omitempty" toml:",omitempty"`
 	ReleaseDate *toml.LocalDate          `json:"releaseDate,omitempty" toml:",omitempty"`
-	Genres      []Genre                  `json:"genres,omitempty" toml:",omitempty"`
-	Series      *Series                  `json:"series,omitempty" toml:",omitempty"`
-	Narrators   []string                 `json:"narrators" toml:",omitempty"`
-	Tags        []string                 `json:"tags,omitempty" toml:",omitempty"`
-	Duration    time.Duration            `json:"duration" toml:",omitempty"`
-	FileSize    uint64                   `json:"fileSize" toml:",omitempty"`
-	MIMEType    string                   `json:"mimeType" toml:",omitempty"`
+	Genres      []Genre                  `json:"genres,omitempty"      toml:",omitempty"`
+	Series      *Series                  `json:"series,omitempty"      toml:",omitempty"`
+	Narrators   []string                 `json:"narrators"             toml:",omitempty"`
+	Tags        []string                 `json:"tags,omitempty"        toml:",omitempty"`
+	Duration    time.Duration            `json:"duration"              toml:",omitempty"`
+	FileSize    uint64                   `json:"fileSize"              toml:",omitempty"`
+	MIMEType    string                   `json:"mimeType"              toml:",omitempty"`
 }
 
 // Person - representation of a person, for example an author or audiobook narrator.
@@ -40,7 +40,8 @@ type Series struct {
 }
 
 func NewBook(title string, desc *description.Description, authors []string, releaseDate *toml.LocalDate,
-	genreList []Genre, series *Series) Audiobook {
+	genreList []Genre, series *Series,
+) Audiobook {
 	return Audiobook{
 		Title:       title,
 		Authors:     authors,

@@ -108,8 +108,8 @@ func TestSet(t *testing.T) {
 		}
 
 		var testWaitGroup sync.WaitGroup
-		for i := 0; i < 100; i++ {
-			var i = uint64(i)
+		for i := range 100 {
+			i := uint64(i)
 
 			testWaitGroup.Add(1)
 			go func() {
