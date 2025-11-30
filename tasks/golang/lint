@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-#MISE depends=["golang:mod-tidy-check"]
-#MISE wait_for=["golang:format"]
-#MISE sources=["go.mod", "go.sum", "**/*.go"]
-#MISE outputs={auto = true}
-
-set -ex
-
-golangci-lint run --allow-parallel-runners --config ./.config/.golangci.yaml

@@ -1,0 +1,46 @@
+amends "package://github.com/jdx/hk/releases/download/v1.25.0/hk@1.25.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.25.0/hk@1.25.0#/Builtins.pkl"
+
+local linters = new Mapping<String, Step> {
+    ["prettier"] = (Builtins.prettier) {
+        check = "mise run text:check {{ files }}"
+        fix = "mise run text:fix {{ files }}"
+    }
+    ["shfmt"] = Builtins.shfmt
+    ["shellcheck"] = Builtins.shellcheck
+    ["pkl"] = Builtins.pkl
+    ["taplo"] = Builtins.taplo
+    ["yamllint"] = (Builtins.yamllint) {
+        check = "mise run yaml:check {{ files }}"
+    }
+    ["golangci-lint"] = (Builtins.golangci_lint) {
+        check = "mise run golang:check {{ files }}"
+        fix = "mise run golang:fix {{ files }}"
+    }
+    ["gomod-tidy"] = Builtins.gomod_tidy
+    ["newlines"] = Builtins.newlines
+    ["trailing-whitespace"] = Builtins.trailing_whitespace
+    ["markdown-lint"] = (Builtins.markdown_lint) {
+        check = "mise run  markdown:check {{ files }}"
+        fix = "mise run  markdown:fix {{ files }}"
+    }
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = true       // runs the fix step to make modifications
+        stash = "git"    // stashes unstaged changes before running fix steps
+        steps = linters
+    }
+    ["pre-push"] {
+        steps = linters
+    }
+    // "fix" and "check" are special steps for `hk fix` and `hk check` commands
+    ["fix"] {
+        fix = true
+        steps = linters
+    }
+    ["check"] {
+        steps = linters
+    }
+}

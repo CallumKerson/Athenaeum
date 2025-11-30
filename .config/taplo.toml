@@ -1,5 +1,5 @@
 exclude = [".venv/**/*"]
 
 [formatting]
-align_entries  = true
-reorder_keys   = true
+align_entries = true
+reorder_keys = true

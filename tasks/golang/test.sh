@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#MISE depends=["golang:mod-tidy"]
 #MISE sources=["go.mod", "go.sum", "**/*.go"]
 #MISE outputs={auto = true}
 
