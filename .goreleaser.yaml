@@ -16,57 +16,27 @@ builds:
       - arm64
     ldflags:
       - -s -w -X main.Version={{.Version}} -X main.Commit={{.Commit}} -X main.Date={{.Date}}
-dockers:
-  - use: buildx
-    goos: linux
-    goarch: amd64
+dockers_v2:
+  - id: athenaeum
     dockerfile: Dockerfile
-    image_templates:
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Version }}-amd64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}-amd64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}-amd64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:latest-amd64"
-    build_flag_templates:
-      - "--platform=linux/amd64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-  - use: buildx
-    goos: linux
-    goarch: arm64
-    dockerfile: Dockerfile
-    image_templates:
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Version }}-arm64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}-arm64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}-arm64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:latest-arm64"
-    build_flag_templates:
-      - "--platform=linux/arm64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-docker_manifests:
-  - name_template: "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Version }}"
-    image_templates:
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Version }}-amd64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Version }}-arm64"
-  - name_template: "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}"
-    image_templates:
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}-amd64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}-arm64"
-  - name_template: "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}"
-    image_templates:
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}-amd64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}-arm64"
-  - name_template: "ghcr.io/callumkerson/{{ .ProjectName }}:latest"
-    image_templates:
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:latest-amd64"
-      - "ghcr.io/callumkerson/{{ .ProjectName }}:latest-arm64"
+    images:
+      - "ghcr.io/callumkerson/{{ .ProjectName }}"
+    tags:
+      - "{{ .Version }}"
+      - "{{ .Major }}"
+      - "{{ .Major }}.{{ .Minor }}"
+      - latest
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.title": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
 changelog:
   use: github-native
-brews:
+homebrew_casks:
   - repository:
       owner: CallumKerson
       name: homebrew-tap
@@ -74,9 +44,6 @@ brews:
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     homepage: "https://github.com/CallumKerson/Athenaeum"
     license: "MIT"
-    directory: Formula
-    test: |
-      system "#{bin}/athenaeum --version"
     service: |
       run [opt_bin/"athenaeum", "run"]
       keep_alive true
@@ -94,3 +61,9 @@ brews:
       To restart the athenaeum service run:
         brew services restart CallumKerson/homebrew-tap/athenaeum
       ****************************************************************
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/athenaeum"]
+          end
