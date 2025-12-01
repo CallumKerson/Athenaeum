@@ -5,8 +5,4 @@
 
 set -ex
 
-if [ $# -eq 0 ]; then
-	yamllint -c .config/.yamllint.yaml .
-else
-	yamllint -c .config/.yamllint.yaml "$@"
-fi
+yamllint -c .config/.yamllint.yaml "${@:-.}"

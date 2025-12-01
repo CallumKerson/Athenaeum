@@ -3,12 +3,6 @@
 #MISE sources=["**/*.md", "**/*.yaml", "**/*.json", "**/*.html"]
 #MISE outputs={auto = true}
 
-set -e
+set -ex
 
-if [ $# -eq 0 ]; then
-	set -x
-	prettier '**/*.{md,yaml,json,html}' --check --ignore-path=.gitignore --ignore-path=.config/.prettierignore
-else
-	set -x
-	prettier --check --ignore-path=.gitignore --ignore-path=.config/.prettierignore "$@"
-fi
+prettier --check --ignore-path=.gitignore --ignore-path=.config/.prettierignore "${@:-.}"

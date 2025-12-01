@@ -2,45 +2,67 @@ amends "package://github.com/jdx/hk/releases/download/v1.25.0/hk@1.25.0#/Config.
 import "package://github.com/jdx/hk/releases/download/v1.25.0/hk@1.25.0#/Builtins.pkl"
 
 local linters = new Mapping<String, Step> {
-    ["prettier"] = (Builtins.prettier) {
-        check = "mise run text:check {{ files }}"
-        fix = "mise run text:fix {{ files }}"
+    ["prettier"] {
+        stage = "<JOB_FILES>"
+        glob = List("**/*.md", "**/*.yaml", "**/*.json", "**/*.html")
+        check = "mise run --force text:check {{ files }}"
+        fix = "mise run --force text:fix {{ files }}"
     }
     ["shfmt"] = Builtins.shfmt
     ["shellcheck"] = Builtins.shellcheck
     ["pkl"] = Builtins.pkl
     ["taplo"] = Builtins.taplo
     ["yamllint"] = (Builtins.yamllint) {
-        check = "mise run yaml:check {{ files }}"
-    }
-    ["golangci-lint"] = (Builtins.golangci_lint) {
-        check = "mise run golang:check {{ files }}"
-        fix = "mise run golang:fix {{ files }}"
+        check = "mise run --force yaml:check {{ files }}"
     }
     ["gomod-tidy"] = Builtins.gomod_tidy
     ["newlines"] = Builtins.newlines
     ["trailing-whitespace"] = Builtins.trailing_whitespace
     ["markdown-lint"] = (Builtins.markdown_lint) {
-        check = "mise run  markdown:check {{ files }}"
-        fix = "mise run  markdown:fix {{ files }}"
+        check = "mise run --force markdown:check {{ files }}"
+        fix = "mise run --force markdown:fix {{ files }}"
     }
 }
 
 hooks {
     ["pre-commit"] {
-        fix = true       // runs the fix step to make modifications
-        stash = "git"    // stashes unstaged changes before running fix steps
-        steps = linters
+        fix = true
+        stash = "git"
+        steps {
+            ...linters
+            ["golangci-lint"] = (Builtins.golangci_lint) {
+                check = "mise run golang:check --fast-only --new-from-rev HEAD"
+                fix = "mise run golang:fix --fast-only --new-from-rev HEAD"
+            }
+        }
     }
     ["pre-push"] {
-        steps = linters
+        steps {
+            ...linters
+            ["golangci-lint"] = (Builtins.golangci_lint) {
+                check = "mise run golang:check --new-from-rev HEAD"
+                fix = "mise run golang:fix --new-from-rev HEAD"
+            }
+        }
     }
     // "fix" and "check" are special steps for `hk fix` and `hk check` commands
     ["fix"] {
         fix = true
-        steps = linters
+        steps {
+            ...linters
+            ["golangci-lint"] = (Builtins.golangci_lint) {
+                check = "mise run golang:check"
+                fix = "mise run golang:fix"
+            }
+        }
     }
     ["check"] {
-        steps = linters
+        steps {
+            ...linters
+            ["golangci-lint"] = (Builtins.golangci_lint) {
+                check = "mise run golang:check"
+                fix = "mise run golang:fix"
+            }
+        }
     }
 }

@@ -6,8 +6,4 @@
 
 set -ex
 
-if [ $# -eq 0 ]; then
-	markdownlint-cli2 --config ./.config/.markdownlint-cli2.yaml "**/*.md"
-else
-	markdownlint-cli2 --config ./.config/.markdownlint-cli2.yaml "$@"
-fi
+markdownlint-cli2 --config ./.config/.markdownlint-cli2.yaml "${@:-.}"

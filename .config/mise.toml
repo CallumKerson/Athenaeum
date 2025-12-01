@@ -10,7 +10,7 @@ pkl = "0.30.0"
 jq = "1.8.1"
 yq = "4.49.2"
 "go:mvdan.cc/sh/v3/cmd/shfmt" = "3.12.0"
-shellcheck = "latest"
+shellcheck = "0.11.0"
 
 
 [task_config]
