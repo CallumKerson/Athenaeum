@@ -11,7 +11,13 @@ local linters = new Mapping<String, Step> {
     ["shfmt"] = Builtins.shfmt
     ["shellcheck"] = Builtins.shellcheck
     ["pkl"] = Builtins.pkl
-    ["taplo"] = Builtins.taplo
+    ["taplo"] = (Builtins.taplo) {
+        check = "mise run --force toml:check {{ files }}"
+    }
+    ["taplo-format"] = (Builtins.taplo) {
+        check = "mise run --force toml:check-format {{ files }}"
+        fix = "mise run --force toml:fix-format {{ files }}"
+    }
     ["yamllint"] = (Builtins.yamllint) {
         check = "mise run --force yaml:check {{ files }}"
     }
@@ -42,6 +48,10 @@ hooks {
             ["golangci-lint"] = (Builtins.golangci_lint) {
                 check = "mise run golang:check --new-from-rev HEAD"
                 fix = "mise run golang:fix --new-from-rev HEAD"
+            }
+            ["go:test"] {
+                glob = List("**/*.go", "**/go.mod", "**/go.sum")
+                check = "mise run golang:test"
             }
         }
     }

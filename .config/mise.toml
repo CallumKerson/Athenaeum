@@ -1,41 +1,34 @@
 [tools]
 "github:golangci/golangci-lint" = "2.6.2"
-go = "1.25.4"
-prettier = "3.7.2"
-taplo = "0.10.0"
-markdownlint-cli2 = "0.19.1"
-yamllint = "1.37.1"
-hk = "1.25.0"
-pkl = "0.30.0"
-jq = "1.8.1"
-yq = "4.49.2"
-"go:mvdan.cc/sh/v3/cmd/shfmt" = "3.12.0"
-shellcheck = "0.11.0"
+go                              = "1.25.4"
+"go:mvdan.cc/sh/v3/cmd/shfmt"   = "3.12.0"
+hk                              = "1.25.0"
+jq                              = "1.8.1"
+markdownlint-cli2               = "0.19.1"
+pkl                             = "0.30.0"
+prettier                        = "3.7.2"
+shellcheck                      = "0.11.0"
+taplo                           = "0.10.0"
+yamllint                        = "1.37.1"
+yq                              = "4.49.2"
 
 
 [task_config]
 includes = ["tasks"]
 
-[tasks.format]
-description = "Runs all formatters"
-depends = ["*:format"]
-
-[tasks.lint]
-description = "Runs all linters"
-depends = ["*:lint"]
-wait_for = ["format"]
-
 [tasks.test]
+depends     = ["*:test"]
 description = "Runs all tests"
-depends = ["*:test"]
+
+[tasks.check]
+run = "hk run check"
+
+[tasks."check:all"]
+run = "hk run check --all"
+
+[tasks.fix]
+run = "hk run fix"
 
 [tasks.ci]
+depends     = ["check:all", "test"]
 description = "Runs all CI checks - lint and test"
-depends = ["lint", "test"]
-
-[tasks.pre-commit-old]
-description = "Runs all pre-commit checks - format, lint, and test"
-depends = ["format", "lint", "test"]
-
-[tasks.pre-commit]
-run = "hk run pre-commit"
