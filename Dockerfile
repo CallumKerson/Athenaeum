@@ -2,7 +2,7 @@ FROM gcr.io/distroless/static-debian11:debug-nonroot@sha256:55716e80a7d4320ce9bc
 
 ARG TARGETPLATFORM
 COPY ${TARGETPLATFORM}/athenaeum /usr/bin/athenaeum
-COPY --from=busybox:1.37.0-uclibc@sha256:cc57e0ff4b6d3138931ff5c7180d18078813300e2508a25fb767a4d36df30d4d /bin/wget /usr/bin/wget
+COPY --from=busybox:1.37.0-uclibc@sha256:e58014df10240c35c7b1df7ff8e859ad6a54d061bde77c249f96880e15d83049 /bin/wget /usr/bin/wget
 
 EXPOSE 8080
 ENV ATHENAEUM_DB_ROOT=/home/nonroot/athenaeum
