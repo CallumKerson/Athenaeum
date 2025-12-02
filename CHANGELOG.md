@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.1](https://github.com/CallumKerson/Athenaeum/compare/v1.15.0...v1.15.1) (2025-12-02)
+
+
+### Bug Fixes
+
+* update release to use homebrew casks ([#154](https://github.com/CallumKerson/Athenaeum/issues/154)) ([4a9aa78](https://github.com/CallumKerson/Athenaeum/commit/4a9aa780d87ab80a2585c0c487bba322f3923c02))
+
 ## [1.15.0](https://github.com/CallumKerson/Athenaeum/compare/v1.14.30...v1.15.0) (2025-11-29)
 
 
