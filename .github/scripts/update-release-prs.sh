@@ -10,8 +10,6 @@ gh pr list --label "autorelease: pending" --state open --json number --jq '.[].n
     for attempt in 1 2 3 4 5; do
         if gh pr update-branch "$pr_number" --rebase; then
             echo "Successfully rebased PR #${pr_number}"
-            gh pr edit "$pr_number" --add-reviewer "$REPO_OWNER"
-            echo "Added $REPO_OWNER as reviewer to PR #${pr_number}"
             break
         fi
         if [ "$attempt" -lt 5 ]; then
