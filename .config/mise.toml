@@ -1,6 +1,6 @@
 [tools]
 "github:golangci/golangci-lint" = "2.6.2"
-go = "1.25.4"
+go = "1.25.5"
 prettier = "3.7.2"
 taplo = "0.10.0"
 markdownlint-cli2 = "0.19.1"
