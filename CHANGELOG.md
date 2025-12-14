@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.1](https://github.com/CallumKerson/Athenaeum/compare/v1.15.0...v1.15.1) (2025-12-14)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/spf13/cobra to v1.10.2 ([#159](https://github.com/CallumKerson/Athenaeum/issues/159)) ([50e23f1](https://github.com/CallumKerson/Athenaeum/commit/50e23f1c2dd8c96a68c648eac3feeb915d8a1875))
+* update release to use homebrew casks ([#154](https://github.com/CallumKerson/Athenaeum/issues/154)) ([4a9aa78](https://github.com/CallumKerson/Athenaeum/commit/4a9aa780d87ab80a2585c0c487bba322f3923c02))
+
 ## [1.15.0](https://github.com/CallumKerson/Athenaeum/compare/v1.14.30...v1.15.0) (2025-11-29)
 
 
