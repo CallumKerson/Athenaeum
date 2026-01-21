@@ -4,7 +4,7 @@ go = "1.25.5"
 prettier = "3.7.2"
 taplo = "0.10.0"
 markdownlint-cli2 = "0.19.1"
-yamllint = "1.37.1"
+yamllint = "1.38.0"
 
 [task_config]
 includes = ["tasks"]
