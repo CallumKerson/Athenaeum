@@ -4,6 +4,7 @@
     "config:best-practices",
     "schedule:daily",
     ":automergeStableNonMajor",
+    ":automergeDigest",
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions",
     ":prHourlyLimit4"
@@ -21,6 +22,12 @@
       "description": "Use ci semantic type for some deps",
       "matchFileNames": [".github/workflows/**"],
       "semanticCommitType": "ci"
+    },
+    {
+      "description": "Merge digests faster",
+      "digests": {
+        "minimumReleaseAge": "1 day"
+      }
     }
   ]
 }
