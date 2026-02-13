@@ -25,9 +25,8 @@
     },
     {
       "description": "Merge digests faster",
-      "digests": {
-        "minimumReleaseAge": "1 day"
-      }
+      "matchUpdateTypes": ["digest"],
+      "minimumReleaseAge": "1 day"
     }
   ]
 }
