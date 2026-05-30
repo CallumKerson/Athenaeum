@@ -2,7 +2,7 @@ module github.com/CallumKerson/Athenaeum
 
 go 1.24.0
 
-toolchain go1.25.10
+toolchain go1.26.3
 
 require (
 	github.com/CallumKerson/loggerrific v1.1.2
