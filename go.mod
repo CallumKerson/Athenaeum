@@ -9,7 +9,7 @@ require (
 	github.com/CallumKerson/podcasts v1.0.0
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
 	github.com/carlmjohnson/requests v0.25.1
-	github.com/go-chi/chi/v5 v5.2.5
+	github.com/go-chi/chi/v5 v5.3.0
 	github.com/gomarkdown/markdown v0.0.0-20260217112301-37c66b85d6ab
 	github.com/pelletier/go-toml/v2 v2.3.1
 	github.com/shopspring/decimal v1.4.0
