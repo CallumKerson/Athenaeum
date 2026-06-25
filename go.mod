@@ -1,6 +1,6 @@
 module github.com/CallumKerson/Athenaeum
 
-go 1.24.0
+go 1.25.0
 
 toolchain go1.25.11
 
@@ -18,7 +18,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/ybbus/httpretry v1.0.2
-	go.etcd.io/bbolt v1.4.3
+	go.etcd.io/bbolt v1.5.0
 	golang.org/x/time v0.14.0
 	gopkg.in/h2non/baloo.v3 v3.1.0
 )
@@ -41,7 +41,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	gopkg.in/h2non/gentleman.v2 v2.0.5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
