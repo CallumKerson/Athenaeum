@@ -11,22 +11,22 @@ aube = "latest"
 includes = ["tasks"]
 
 [tasks.check]
-run = "hk check"
+run = "hk check --no-fail-fast"
 
 [tasks.check-pr]
-run = "hk check --from-ref origin/main --to-ref HEAD"
+run = "hk check --from-ref origin/main --to-ref HEAD --no-fail-fast"
 
 [tasks.check-all]
-run = "hk check --all"
+run = "hk check --all --no-fail-fast"
 
 [tasks.fix]
-run = "hk fix"
+run = "hk fix --no-fail-fast"
 
 [tasks.fix-pr]
-run = "hk fix --from-ref origin/main --to-ref HEAD"
+run = "hk fix --from-ref origin/main --to-ref HEAD --no-fail-fast"
 
 [tasks.fix-all]
-run = "hk fix --all"
+run = "hk fix --all --no-fail-fast"
 
 [tasks.test]
 description = "Runs all tests"
