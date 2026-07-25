@@ -1,0 +1,28 @@
+# rumdl configuration file
+# Global configuration options
+[global]
+
+# List of file/directory patterns to exclude from linting
+exclude = [
+  # Common directories to exclude
+  ".git",
+  ".github",
+  "node_modules",
+  "vendor",
+  "dist",
+  "build",
+
+  # Specific files or patterns
+  "CHANGELOG.md",
+  "LICENSE.md",
+]
+
+flavor = "gfm"
+
+# Rule-specific configurations (uncomment and modify as needed)
+
+[MD013]
+line-length = 120 # Line length
+code-blocks = false # Exclude code blocks from line length check
+# tables = false  # Exclude tables from line length check
+# headings = true  # Include headings in line length check

@@ -1,22 +1,32 @@
 [tools]
 "github:golangci/golangci-lint" = "2.6.2"
 go = "1.25.6"
-prettier = "3.8.4"
-taplo = "0.10.0"
-markdownlint-cli2 = "0.22.1"
-yamllint = "1.38.0"
+hk = "latest"
+typos = "latest"
+rumdl = "latest"
+oxfmt = { depends = "aube", "version" = "latest" }
+aube = "latest"
 
 [task_config]
 includes = ["tasks"]
 
-[tasks.format]
-description = "Runs all formatters"
-depends = ["*:format"]
+[tasks.check]
+run = "hk check"
 
-[tasks.lint]
-description = "Runs all linters"
-depends = ["*:lint"]
-wait_for = ["format"]
+[tasks.check-pr]
+run = "hk check --from-ref origin/main --to-ref HEAD"
+
+[tasks.check-all]
+run = "hk check --all"
+
+[tasks.fix]
+run = "hk fix"
+
+[tasks.fix-pr]
+run = "hk fix --from-ref origin/main --to-ref HEAD"
+
+[tasks.fix-all]
+run = "hk fix --all"
 
 [tasks.test]
 description = "Runs all tests"
@@ -24,8 +34,4 @@ depends = ["*:test"]
 
 [tasks.ci]
 description = "Runs all CI checks - lint and test"
-depends = ["lint", "test"]
-
-[tasks.pre-commit]
-description = "Runs all pre-commit checks - format, lint, and test"
-depends = ["format", "lint", "test"]
+depends = ["check-pr", "test"]

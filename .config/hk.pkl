@@ -1,0 +1,40 @@
+amends "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Builtins.pkl"
+
+local fast_linters = new Mapping<String, Step> {
+    ["gomodtidy"] = Builtins.gomod_tidy
+    ["gofmt"] = Builtins.go_fmt
+    ["rumdl"] = Builtins.rumdl
+    ["oxfmt"] = Builtins.oxfmt
+    ["newlines"] = Builtins.newlines
+    ["trailing_whitespace"] = Builtins.trailing_whitespace
+}
+
+local slow_linters = new Mapping<String, Step> {
+    ["golangci-lint"] = Builtins.golangci_lint
+}
+
+local all_linters = new Mapping<String, Step> {
+    ...fast_linters
+    ...slow_linters
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = true
+        stash = "git"
+        steps = fast_linters
+    }
+    ["pre-push"] {
+        fix = true
+        stash = "git"
+        steps = all_linters
+    }
+    ["fix"] {
+        fix = true
+        steps = all_linters
+    }
+    ["check"] {
+        steps = all_linters
+    }
+}

@@ -1,8 +1,0 @@
-extends: relaxed
-rules:
-  line-length:
-    level: warning
-    max: 120
-  truthy:
-    ignore:
-      - .github/workflows/**/*.yaml
