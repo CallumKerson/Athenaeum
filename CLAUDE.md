@@ -9,71 +9,66 @@ Run `mise tasks` to see all available tasks.
 
 ### Building and Testing
 
-- **Compile only**: `mise run golang:compile` - Compiles binary for current OS/architecture
-- **Linux compile**: `mise run golang:linux-compile` - Cross-compiles for Linux deployment
+- **Compile**: `mise run golang:compile` - Compiles the binary for the current OS/architecture
 - **Test**: `mise run test` or `go test ./...` - Run all tests
-- **Format**: `mise run format` - Runs all formatters (Go and text files)
-- **Lint**: `mise run lint` - Runs all linters (Go and text files)
-- **Pre-commit**: `mise run pre-commit` - Runs format, lint, and test (recommended before committing)
-- **CI**: `mise run ci` - Runs lint and test (used in CI pipeline)
+- **Fix**: `mise run fix-all` - Runs all formatters and auto-fixable linters via [hk](https://hk.jdx.dev/)
+- **Check**: `mise run check-all` - Runs all linters without fixing
+- **CI**: `mise run ci` - Runs `check-pr` and `test` (used in CI pipeline)
 
-### Docker
-
-- **Docker build and run**: `mise run docker:run` - Runs pre-commit checks, builds Linux binary, and starts with
-  docker-compose
-
-### Task Structure
-
-Tasks are organized in the `tasks/` directory by category:
-
-- `golang/` - Go-specific tasks (compile, test, lint, format, mod-tidy)
-- `text/` - Text file tasks (markdown/YAML formatting and linting)
-- `docker/` - Container tasks
+Run `mise run fix-all` and `mise run test` before committing.
+Linters are also wired to git hooks through `.config/hk.pkl`: fast formatters on pre-commit, golangci-lint as well on pre-push.
 
 ## Architecture Overview
 
-Athenaeum is an audiobook server that provides podcast feeds, built with a
-layered architecture following clean architecture principles.
+Athenaeum is a static site generator.
+`athenaeum build` scans a library of `.m4b` audiobooks and writes a tree of podcast feeds, which any web server can serve.
+There is no server process, no database and no request path.
 
-### Core Architecture
+### Packages
 
-- **Domain Layer** (`pkg/`): Core entities (Audiobook, Genre, etc.) and domain interfaces
-- **Service Layer** (`internal/*/service/`): Business logic for media scanning, audiobook management, and podcast
-  generation
-- **Adapter Layer** (`internal/adapters/`): External integrations (BoltDB storage, M4B metadata extraction, logging)
-- **Transport Layer** (`internal/transport/http/`): HTTP handlers, middleware, and REST endpoints
-- **CLI Layer** (`cmd/athenaeum/`): Command-line interface and service composition
-
-### Key Services
-
-- **Media Service**: Scans filesystem for `.m4b` audiobook files and their `.toml` metadata companions
-- **Audiobooks Service**: Orchestrates scanning, storage (BoltDB), and third-party notifications (Overcast)
-- **Podcasts Service**: Generates RSS 2.0 feeds with iTunes compatibility from audiobook collections
+- `pkg/audiobooks` - The `Audiobook` entity, the `Genre` enum and description formatting
+- `internal/scan` - Walks the media root, reads `.toml` metadata and `.m4b` durations, with a duration cache
+- `internal/feed` - Renders a list of audiobooks as an iTunes-compatible RSS 2.0 feed
+- `internal/site` - Decides which feeds exist at which paths (`plan.go`) and writes the tree (`build.go`)
+- `internal/fsutil` - Atomic and write-if-changed file helpers
+- `cmd/athenaeum` - Cobra commands and config loading
+- `static`, `templates` - Embedded assets and the index page template
 
 ### Data Flow
 
-1. Media Service scans filesystem for `.m4b` + `.toml` file pairs
-2. Audiobooks Service extracts metadata and stores in BoltDB via Bolt adapter
-3. Podcasts Service generates filtered RSS feeds (by author, genre, narrator, etc.)
-4. HTTP Transport serves feeds at `/podcast/feed.rss` and media files at `/media/*`
+1. `scan.Library` walks the media root for `.m4b` + `.toml` file pairs
+2. `site.Plan` groups the books into feeds — all, by author, narrator, genre and tag — and assigns each a set of paths
+3. `site.Build` renders each feed with `feed.Renderer` and writes it to every path in its plan
+4. Stale files from previous builds are swept, and Overcast is optionally notified
 
-### Storage
+### Constraints that must not be broken
 
-- **Primary**: BoltDB embedded database (JSON serialization of audiobook entities)
-- **Caching**: In-memory LRU cache with TTL for HTTP responses
-- **Media**: Direct filesystem serving of `.m4b` files
+- **A feed item's `<guid>` is its enclosure URL.**
+  Changing how either is built makes every subscriber re-download the whole library.
+  `feed.mediaURL` is the only place URLs are constructed, and file paths are assigned to `url.URL.Path` so that `?`, `#` and `%` in filenames are escaped rather than parsed.
+- **Rebuilds must be idempotent.**
+  Rendering is deterministic — no timestamps in the output — and `fsutil.WriteIfChanged` skips unchanged files so their mtimes, and therefore the web server's ETags, stay stable.
+- **One book can be reachable under several spellings.**
+  Names that normalise identically (`V.E. Schwab` / `V. E. Schwab`) each need their own feed path, and every genre gets a feed even when empty.
+- **The build refuses to write into a directory it does not own**, recognised by the `.athenaeum-site` marker file,
+  because it sweeps files it did not write.
 
 ### Configuration
 
-- YAML/TOML config file (default: `~/.athenaeum/config.yaml`)
-- Required: `Host` (external URL) and `Media.Root` (audiobook directory path)
+- TOML config at `~/.config/athenaeum/athenaeum.toml` (XDG paths resolved by hand — `os.UserConfigDir()` returns
+  `~/Library/...` on macOS and ignores `XDG_CONFIG_HOME`)
+- Duration cache at `~/.cache/athenaeum/m4b.json`
+- Required: `Host` (external URL), `Media.Root` (library path) and `Site.Root` (output path)
 - Audiobook layout: `$MEDIA_ROOT/Author/Audiobook/Audiobook.m4b` + `Audiobook.toml`
 
 ### Testing
 
 - Unit tests use testify/assert and testify/require
-- Integration tests with test audiobooks in `testdata/`
-- HTTP handler tests use `gopkg.in/h2non/baloo.v3` for API testing
+- `internal/feed/testdata` holds feeds captured from the previous server implementation; they are matched byte for byte
+  as a parity guarantee for existing subscribers
+- `internal/site/testdata/golden_manifest.txt` hashes the build plan rather than the output tree, because a case insensitive filesystem would fold distinct feed paths together and make a golden tree unportable.
+  Regenerate with `go test ./internal/site -update`
+- Test audiobooks live in the root `testdata/` directory
 
 ## Import Organization
 
@@ -84,8 +79,5 @@ layered architecture following clean architecture principles.
 
 ## Code Patterns
 
-- **Options Pattern**: Services accept `opts ...Option` for configuration
-- **Interface Segregation**: Clear interfaces for storage (`AudiobookStore`), metadata reading (`M4BMetadataReader`),
-  logging
-- **Filter Pattern**: Functional composition for audiobook queries (`AuthorFilter`, `GenreFilter`, etc.)
-- **Dependency Injection**: Services depend on interfaces, configured in `cmd/athenaeum/cmd.go`
+- Prefer direct functions; structs are for data, not for behaviour that a function would express as well
+- Comments explain why a thing is the way it is, not what the line does

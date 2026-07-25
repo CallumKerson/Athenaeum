@@ -16,24 +16,6 @@ builds:
       - arm64
     ldflags:
       - -s -w -X main.Version={{.Version}} -X main.Commit={{.Commit}} -X main.Date={{.Date}}
-dockers_v2:
-  - id: athenaeum
-    dockerfile: Dockerfile
-    images:
-      - "ghcr.io/callumkerson/{{ .ProjectName }}"
-    tags:
-      - "{{ .Version }}"
-      - "{{ .Major }}"
-      - "{{ .Major }}.{{ .Minor }}"
-      - latest
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    labels:
-      "org.opencontainers.image.created": "{{.Date}}"
-      "org.opencontainers.image.title": "{{.ProjectName}}"
-      "org.opencontainers.image.revision": "{{.FullCommit}}"
-      "org.opencontainers.image.version": "{{.Version}}"
 changelog:
   use: github-native
 homebrew_casks:
@@ -44,22 +26,11 @@ homebrew_casks:
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     homepage: "https://github.com/CallumKerson/Athenaeum"
     license: "MIT"
-    service: |
-      run [opt_bin/"athenaeum", "run"]
-      keep_alive true
-      error_log_path var/"log/athenaeum.log"
-      log_path var/"log/athenaeum.log"
     caveats: |
       ****************************************************************
-      Below are services commands to run to manage the athenaeum service.
-      If you wish to run the athenaeum at boot prefix these commands with sudo
-      otherwise the service will run at login.
-      To start the athenaeum service run:
-        brew services start CallumKerson/homebrew-tap/athenaeum
-      To stop the athenaeum service run:
-        brew services stop CallumKerson/homebrew-tap/athenaeum
-      To restart the athenaeum service run:
-        brew services restart CallumKerson/homebrew-tap/athenaeum
+      Athenaeum generates a static site. Run `athenaeum build` to
+      regenerate it, and serve the output directory with a web server.
+      Configuration lives at ~/.config/athenaeum/athenaeum.toml
       ****************************************************************
     hooks:
       post:

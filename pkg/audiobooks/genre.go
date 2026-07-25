@@ -3,6 +3,7 @@ package audiobooks
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -80,6 +81,29 @@ var (
 // String allows Genre to implement fmt.Stringer.
 func (g Genre) String() string {
 	return genreName[uint8(g)]
+}
+
+// Aliases returns every string ParseGenre accepts for this genre, sorted so the
+// result is stable. Used to emit one feed per spelling a URL might use.
+func (g Genre) Aliases() []string {
+	aliases := []string{}
+	for name, value := range genreValue {
+		if value == uint8(g) {
+			aliases = append(aliases, name)
+		}
+	}
+	slices.Sort(aliases)
+	return aliases
+}
+
+// AllGenres returns every defined genre, in declaration order.
+func AllGenres() []Genre {
+	genres := make([]Genre, 0, len(genreName))
+	for value := range genreName {
+		genres = append(genres, Genre(value))
+	}
+	slices.Sort(genres)
+	return genres
 }
 
 // Convert a string to a Genre, returns an error if the string is unknown.
