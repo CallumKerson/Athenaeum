@@ -5,7 +5,11 @@ local fast_linters = new Mapping<String, Step> {
     ["gomodtidy"] = Builtins.gomod_tidy
     ["gofmt"] = Builtins.go_fmt
     ["rumdl"] = Builtins.rumdl
-    ["oxfmt"] = Builtins.oxfmt
+    ["oxfmt"] = (Builtins.oxfmt) {
+        check = "oxfmt --no-error-on-unmatched-pattern --check {{ files }}"
+        check_list_files = "oxfmt --no-error-on-unmatched-pattern --list-different {{ files }}"
+        fix = "oxfmt --no-error-on-unmatched-pattern --write {{ files }}"
+    }
     ["newlines"] = Builtins.newlines
     ["trailing_whitespace"] = Builtins.trailing_whitespace
 }
