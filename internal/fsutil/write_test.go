@@ -20,6 +20,17 @@ func TestWriteAtomicCreatesParentDirectories(t *testing.T) {
 	assert.Equal(t, "hello", string(contents))
 }
 
+// os.CreateTemp defaults to 0600, which would make the published files
+// unreadable by a web server running as any other user.
+func TestWriteAtomicIsWorldReadable(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "file.txt")
+	require.NoError(t, WriteAtomic(path, []byte("hello")))
+
+	info, err := os.Stat(path)
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0o644), info.Mode().Perm())
+}
+
 func TestWriteAtomicLeavesNoTemporaryFiles(t *testing.T) {
 	dir := t.TempDir()
 	require.NoError(t, WriteAtomic(filepath.Join(dir, "file.txt"), []byte("hello")))

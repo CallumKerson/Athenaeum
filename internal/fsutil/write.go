@@ -29,6 +29,11 @@ func WriteAtomic(path string, contents []byte) error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
+	// os.CreateTemp makes the file 0600, which is wrong for something a web
+	// server has to read — it only works while the server runs as the same user.
+	if err := os.Chmod(tmpName, 0o644); err != nil {
+		return err
+	}
 	return os.Rename(tmpName, path)
 }
 
