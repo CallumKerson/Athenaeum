@@ -1,0 +1,90 @@
+version = "2"
+
+[linters]
+default = "none"
+enable = [
+  "bodyclose",
+  "dogsled",
+  "dupl",
+  "err113",
+  "exhaustive",
+  "funlen",
+  "gochecknoinits",
+  "goconst",
+  "gocritic",
+  "gocyclo",
+  "goprintffuncname",
+  "gosec",
+  "govet",
+  "ineffassign",
+  "lll",
+  "makezero",
+  "misspell",
+  "modernize",
+  "nakedret",
+  "noctx",
+  "nolintlint",
+  "prealloc",
+  "predeclared",
+  "rowserrcheck",
+  "staticcheck",
+  "unconvert",
+  "unparam",
+  "unused",
+  "varnamelen",
+  "whitespace",
+]
+
+[linters.settings.dupl]
+threshold = 100
+
+[linters.settings.funlen]
+lines = 100
+statements = 50
+
+[linters.settings.goconst]
+min-len = 2
+min-occurrences = 2
+
+[linters.settings.gocritic]
+disabled-checks = ["dupImport", "ifElseChain", "octalLiteral", "whyNoLint", "wrapperFunc"]
+enabled-tags = ["diagnostic", "experimental", "opinionated", "performance", "style"]
+
+[linters.settings.gocyclo]
+min-complexity = 15
+
+[linters.settings.gosec.config]
+G306 = "0755"
+
+[linters.settings.lll]
+line-length = 140
+
+[linters.settings.misspell]
+locale = "UK"
+
+[linters.settings.nolintlint]
+require-explanation = false
+require-specific = false
+allow-unused = false
+
+[linters.exclusions]
+generated = "lax"
+presets = ["comments", "common-false-positives", "legacy", "std-error-handling"]
+paths = ["third_party$", "builtin$", "examples$"]
+
+[[linters.exclusions.rules]]
+linters = ["bodyclose", "funlen", "gosec", "lll"]
+path = "_test\\.go"
+
+[formatters]
+enable = ["gci", "gofumpt", "golines"]
+
+[formatters.settings.gci]
+sections = ["standard", "default", "localmodule"]
+
+[formatters.settings.gofumpt]
+module-path = "github.com/CallumKerson/Athenaeum"
+extra-rules = true
+
+[formatters.settings.golines]
+max-len = 120
