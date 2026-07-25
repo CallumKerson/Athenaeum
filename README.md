@@ -11,8 +11,8 @@ An audiobook server that provides a podcast feed.
 
 ## Basics
 
-This server will create a podcast feed from a collection of `.m4b` audiobooks and server that podcast feed on a selected
-port. A config file (by default located at `~/.athenaeum/config.yaml`) can be used to customize the server.
+This server will create a podcast feed from a collection of `.m4b` audiobooks and server that podcast feed on a selected port.
+A config file (by default located at `~/.athenaeum/config.yaml`) can be used to customize the server.
 
 For example, a minimal config file would look like:
 
@@ -22,11 +22,13 @@ Media:
   Root: ~/audiobooks
 ```
 
-This tells the server where it is hosted, and where the root for the `.m4b` audiobooks is. To set up the host, a reverse
-proxy is recommended. [Nginx](https://www.nginx.com) is standard, but for simple home use I would recommend [Caddy](https://caddyserver.com).
+This tells the server where it is hosted, and where the root for the `.m4b` audiobooks is.
+To set up the host, a reverse proxy is recommended.
+[Nginx](https://www.nginx.com) is standard, but for simple home use I would recommend
+[Caddy](https://caddyserver.com).
 
-The above config file would produce a podcast feed at `https://athenaeum.testserver.net/podcast/feed.rss`, which can
-then be added to your favourite podcast player. I use [Overcast](https://overcast.fm).
+The above config file would produce a podcast feed at `https://athenaeum.testserver.net/podcast/feed.rss`, which can then be added to your favourite podcast player.
+I use [Overcast](https://overcast.fm).
 
 ### Audiobook Media Layout
 
@@ -36,10 +38,9 @@ The layout of the audiobooks in the root media folder is quite flexible, but the
 $MEDIA_ROOT/Author/Audiobook/Audiobook.m4b
 ```
 
-To detect a `.m4b` audiobook, a corresponding `.toml` file must exist in the same directory and with the same name as the
-audiobook file. This file provides metadata for Athenaeum to use when constructing a podcast feed.
-For example, if `A Wizard of Earthsea.m4b` exists in the media root, then `A Wizard of Earthsea.toml` must exist in the
-same directory for Athenaeum to discover it and serve it in the podcast feed.
+To detect a `.m4b` audiobook, a corresponding `.toml` file must exist in the same directory and with the same name as the audiobook file.
+This file provides metadata for Athenaeum to use when constructing a podcast feed.
+For example, if `A Wizard of Earthsea.m4b` exists in the media root, then `A Wizard of Earthsea.toml` must exist in the same directory for Athenaeum to discover it and serve it in the podcast feed.
 
 The following an example of the format for a `.toml` metadata file:
 
@@ -84,11 +85,11 @@ brew update && brew upgrade athenaeum
 
 ## DRM-Free M4B Audiobooks
 
-Athenaeum only works on DRM-free `.m4b` audiobooks, and should only be used for private use of personally purchased audiobooks.
+Athenaeum only works on DRM-free `.m4b` audiobooks, and should only be used for private use of personally purchased
+audiobooks.
 
-To buy audiobooks that are compatible with Athenaeum, I would recommend [https://libro.fm](https://libro.fm), which can
-be used internationally. According to their documentation [http://downpour.com](http://downpour.com) also provides DRM-free
-`.m4b` audiobooks, though it requires a US credit card.
+To buy audiobooks that are compatible with Athenaeum, I would recommend [https://libro.fm](https://libro.fm), which can be used internationally.
+According to their documentation [http://downpour.com](http://downpour.com) also provides DRM-free `.m4b` audiobooks, though it requires a US credit card.
 
 ## Note on test audiobooks
 

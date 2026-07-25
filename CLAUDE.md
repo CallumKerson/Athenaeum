@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-This project uses [mise](https://mise.jdx.dev/) for task running and tool
-version management. Run `mise tasks` to see all available tasks.
+This project uses [mise](https://mise.jdx.dev/) for task running and tool version management.
+Run `mise tasks` to see all available tasks.
 
 ### Building and Testing
 
@@ -19,7 +19,8 @@ version management. Run `mise tasks` to see all available tasks.
 
 ### Docker
 
-- **Docker build and run**: `mise run docker:run` - Runs pre-commit checks, builds Linux binary, and starts with docker-compose
+- **Docker build and run**: `mise run docker:run` - Runs pre-commit checks, builds Linux binary, and starts with
+  docker-compose
 
 ### Task Structure
 
@@ -37,7 +38,8 @@ layered architecture following clean architecture principles.
 ### Core Architecture
 
 - **Domain Layer** (`pkg/`): Core entities (Audiobook, Genre, etc.) and domain interfaces
-- **Service Layer** (`internal/*/service/`): Business logic for media scanning, audiobook management, and podcast generation
+- **Service Layer** (`internal/*/service/`): Business logic for media scanning, audiobook management, and podcast
+  generation
 - **Adapter Layer** (`internal/adapters/`): External integrations (BoltDB storage, M4B metadata extraction, logging)
 - **Transport Layer** (`internal/transport/http/`): HTTP handlers, middleware, and REST endpoints
 - **CLI Layer** (`cmd/athenaeum/`): Command-line interface and service composition
@@ -83,6 +85,7 @@ layered architecture following clean architecture principles.
 ## Code Patterns
 
 - **Options Pattern**: Services accept `opts ...Option` for configuration
-- **Interface Segregation**: Clear interfaces for storage (`AudiobookStore`), metadata reading (`M4BMetadataReader`), logging
+- **Interface Segregation**: Clear interfaces for storage (`AudiobookStore`), metadata reading (`M4BMetadataReader`),
+  logging
 - **Filter Pattern**: Functional composition for audiobook queries (`AuthorFilter`, `GenreFilter`, etc.)
 - **Dependency Injection**: Services depend on interfaces, configured in `cmd/athenaeum/cmd.go`
