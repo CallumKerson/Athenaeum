@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/pelletier/go-toml/v2"
+
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
 
 const (
@@ -21,13 +23,8 @@ const (
 	legacyConfigPath = ".athenaeum/config.yaml"
 )
 
-// Site is where the generated tree is written.
-type Site struct {
-	Root string
-}
-
-// BuildConfig is everything `athenaeum build` needs. It reuses the server's
-// config types so the two read the same keys during the migration.
+// BuildConfig is everything `athenaeum build` needs. The key names match the
+// server's old YAML config, so an existing config translates across unchanged.
 type BuildConfig struct {
 	Host                   string
 	Media                  Media
@@ -37,6 +34,53 @@ type BuildConfig struct {
 	ExclusionsFromMainFeed ExclusionsFromMainFeed
 }
 
+// Media is where the audiobook library lives.
+type Media struct {
+	Root string
+}
+
+// Site is where the generated tree is written.
+type Site struct {
+	Root string
+}
+
+// Podcast holds the channel-level iTunes metadata shared by every feed.
+type Podcast struct {
+	Explicit     bool
+	Language     string
+	Author       string
+	Email        string
+	PreUnixEpoch PreUnixEpoch
+}
+
+// PreUnixEpoch controls whether release dates before 1970 are clamped up to the
+// epoch, since podcast clients vary in how they treat negative timestamps.
+type PreUnixEpoch struct {
+	Handle bool
+}
+
+type ThirdParty struct {
+	NotifyOvercast bool
+}
+
+// ExclusionsFromMainFeed names genres that appear in their own feed but not in
+// the main one.
+type ExclusionsFromMainFeed struct {
+	Genres []string
+}
+
+func (e ExclusionsFromMainFeed) GetGenres() ([]audiobooks.Genre, error) {
+	genres := make([]audiobooks.Genre, 0, len(e.Genres))
+	for _, genreName := range e.Genres {
+		genre, err := audiobooks.ParseGenre(genreName)
+		if err != nil {
+			return nil, err
+		}
+		genres = append(genres, genre)
+	}
+	return genres, nil
+}
+
 // LoadBuildConfig reads the TOML config file, falling back to defaults for
 // anything it does not set. A missing config file is not an error — every value
 // can also come from a flag.
@@ -44,7 +88,6 @@ func LoadBuildConfig(pathToConfigFile string, out io.Writer) (*BuildConfig, erro
 	cfg := &BuildConfig{
 		Host: "http://localhost:8080",
 		Podcast: Podcast{
-			Copyright:    "None",
 			Explicit:     true,
 			Language:     "EN",
 			PreUnixEpoch: PreUnixEpoch{Handle: true},

@@ -14,9 +14,8 @@ var (
 
 func NewVersionCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:               "version",
-		Short:             "Print version and build information",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error { return nil },
+		Use:   "version",
+		Short: "Print version and build information",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprintln(cmd.OutOrStdout(), "version: ", Version)
 			fmt.Fprintln(cmd.OutOrStdout(), "commit:  ", Commit)

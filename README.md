@@ -5,30 +5,66 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/CallumKerson/Athenaeum.svg)](https://pkg.go.dev/github.com/CallumKerson/Athenaeum)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CallumKerson/Athenaeum?style=flat-square)](https://goreportcard.com/report/github.com/CallumKerson/Athenaeum)
 
-An audiobook server that provides a podcast feed.
+Turns a collection of `.m4b` audiobooks into podcast feeds you can subscribe to.
 
 ![Athenaeum](docs/athenaeum.jpg)
 
 ## Basics
 
-This server will create a podcast feed from a collection of `.m4b` audiobooks and server that podcast feed on a selected port.
-A config file (by default located at `~/.athenaeum/config.yaml`) can be used to customize the server.
+`athenaeum build` scans a library of `.m4b` audiobooks and writes a static site of podcast feeds.
+There is no server and no database — serve the output directory with any web server and re-run the command whenever the library changes.
 
-For example, a minimal config file would look like:
+A config file at `~/.config/athenaeum/athenaeum.toml` tells it where the library
+is, where to write the site, and the public URL the site is served from:
 
-```yaml
-Host: https://athenaeum.testserver.net
-Media:
-  Root: ~/audiobooks
+```toml
+Host = "https://athenaeum.testserver.net"
+
+[Media]
+Root = "~/audiobooks"
+
+[Site]
+Root = "~/Sites/athenaeum"
 ```
 
-This tells the server where it is hosted, and where the root for the `.m4b` audiobooks is.
-To set up the host, a reverse proxy is recommended.
-[Nginx](https://www.nginx.com) is standard, but for simple home use I would recommend
-[Caddy](https://caddyserver.com).
+`Host` is used to build the enclosure URLs, so it must match the address the site is actually served from.
+Every setting can also be given as a flag; run `athenaeum build --help` for the full list.
 
-The above config file would produce a podcast feed at `https://athenaeum.testserver.net/podcast/feed.rss`, which can then be added to your favourite podcast player.
+That config produces a feed at `https://athenaeum.testserver.net/podcast/feed.rss`, which can be added to your favourite podcast player.
 I use [Overcast](https://overcast.fm).
+
+Alongside the main feed, the build writes one feed per author, narrator, genre and
+tag, under `/podcast/authors/`, `/podcast/narrators/`, `/podcast/genre/` and
+`/podcast/tags/`.
+
+### Serving the site
+
+The site references the audiobook files under `/media/`, so the web server needs to serve the library at that prefix alongside the generated tree.
+With [Caddy](https://caddyserver.com):
+
+```caddyfile
+athenaeum.testserver.net {
+	handle_path /media/* {
+		root * /home/you/audiobooks
+		file_server
+	}
+	handle {
+		root * /home/you/Sites/athenaeum
+		encode zstd gzip
+		file_server
+	}
+}
+```
+
+### Rebuilding
+
+`athenaeum build` is safe to run repeatedly.
+It only writes files whose contents have changed, which keeps modification times — and so the web server's ETags — stable, and it caches the durations it reads out of each `.m4b` so that a rebuild only has to parse newly added books.
+
+Files left over from a previous build are removed.
+As a guard against pointing `Site.Root` at the wrong directory, the build refuses to write into a non-empty directory it did not create, which it recognises by the `.athenaeum-site` marker file it leaves there.
+
+If `ThirdParty.NotifyOvercast` is set, a build that changed something pings Overcast to re-fetch the feeds.
 
 ### Audiobook Media Layout
 
@@ -74,7 +110,6 @@ Via [Homebrew](https://brew.sh):
 ```shell
 brew tap CallumKerson/homebrew-tap/athenaeum
 brew install athenaeum
-brew services start CallumKerson/homebrew-tap/athenaeum
 ```
 
 To upgrade:

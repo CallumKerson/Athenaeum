@@ -46,9 +46,6 @@ func NewBuildCommand() *cobra.Command {
 		Use:          "build",
 		Short:        "Generate the podcast feed site from the audiobook library",
 		SilenceUsage: true,
-		// Overrides the root command's config loading: build reads TOML from the
-		// XDG path rather than the server's YAML config.
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error { return nil },
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runBuild(cmd, &flags)
 		},
