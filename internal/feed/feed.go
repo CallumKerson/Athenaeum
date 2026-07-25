@@ -82,7 +82,7 @@ func (r *Renderer) Render(books []audiobooks.Audiobook, title, description strin
 }
 
 func (r *Renderer) item(book *audiobooks.Audiobook) (*podcasts.Item, error) {
-	hostedFile, err := url.Parse(r.mediaURL(book.Path))
+	hostedFile, err := r.mediaURL(book.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -96,9 +96,9 @@ func (r *Renderer) item(book *audiobooks.Audiobook) (*podcasts.Item, error) {
 		Duration: podcasts.NewDuration(book.Duration),
 		// The GUID is the enclosure URL. Changing how either is built makes every
 		// subscriber treat every book as new and re-download the whole library.
-		GUID: hostedFile.String(),
+		GUID: hostedFile,
 		Enclosure: &podcasts.Enclosure{
-			URL:    hostedFile.String(),
+			URL:    hostedFile,
 			Length: fmt.Sprintf("%d", book.FileSize),
 			Type:   book.MIMEType,
 		},
@@ -107,8 +107,8 @@ func (r *Renderer) item(book *audiobooks.Audiobook) (*podcasts.Item, error) {
 	}
 
 	if book.ImagePath != "" {
-		if imageURL, imageErr := url.Parse(r.mediaURL(book.ImagePath)); imageErr == nil {
-			item.Image = &podcasts.ItunesImage{Href: imageURL.String()}
+		if imageURL, imageErr := r.mediaURL(book.ImagePath); imageErr == nil {
+			item.Image = &podcasts.ItunesImage{Href: imageURL}
 		}
 	}
 
@@ -121,8 +121,28 @@ func (r *Renderer) host() string {
 	return strings.Trim(r.Host, "/")
 }
 
-func (r *Renderer) mediaURL(path string) string {
-	return fmt.Sprintf("%s/%s%s", r.host(), strings.Trim(r.MediaPath, "/"), path)
+// mediaURL builds the public URL of a file inside the media root.
+//
+// The file path is assigned to url.URL.Path and escaped by String(), rather
+// than being pasted into a string and parsed back out. Parsing a concatenation
+// hands the filename to the URL grammar, where three characters do damage:
+//
+//	?  starts the query string   — the library really does contain "What If?2"
+//	#  starts the fragment       — everything after it silently disappears
+//	%  begins a percent-escape   — "%20" decodes to a space, and a bare "%"
+//	                               fails to parse, which fails the whole build
+//
+// Assigning to Path keeps the filename as data, so each of those is escaped
+// into the URL rather than interpreted as part of it.
+func (r *Renderer) mediaURL(filePath string) (string, error) {
+	base, err := url.Parse(r.host())
+	if err != nil {
+		return "", err
+	}
+	base.Path = strings.TrimSuffix(base.Path, "/") + "/" + strings.Trim(r.MediaPath, "/") + filePath
+	// Path has been rewritten, so any escaping the host carried is now stale.
+	base.RawPath = ""
+	return base.String(), nil
 }
 
 // pubDate offsets release dates by eight hours so that a book released on a

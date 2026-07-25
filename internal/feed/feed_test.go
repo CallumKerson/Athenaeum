@@ -1,6 +1,7 @@
 package feed
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -77,6 +78,71 @@ func TestRenderMatchesServerOutput(t *testing.T) {
 			assert.Equal(t, strings.TrimSpace(string(expected)), string(rendered))
 		})
 	}
+}
+
+// Filenames are data, not URL syntax. Each of these characters is meaningful in
+// a URL and would otherwise truncate or corrupt the path — and the enclosure URL
+// is also the GUID, so getting one wrong makes a book permanently unreachable.
+func TestMediaURLEscapesCharactersWithURLMeaning(t *testing.T) {
+	renderer := &Renderer{Host: "https://example.com", MediaPath: "/media"}
+
+	tests := []struct {
+		name     string
+		path     string
+		expected string
+	}{
+		{
+			name:     "question mark would start the query string",
+			path:     "/Randall Munroe/What If?2/What If?2.m4b",
+			expected: "https://example.com/media/Randall%20Munroe/What%20If%3F2/What%20If%3F2.m4b",
+		},
+		{
+			name:     "hash would start the fragment and drop the rest",
+			path:     "/Artist/Album #2/Track #2.m4b",
+			expected: "https://example.com/media/Artist/Album%20%232/Track%20%232.m4b",
+		},
+		{
+			name:     "percent would be read as an escape sequence",
+			path:     "/Author/100% Cotton/100% Cotton.m4b",
+			expected: "https://example.com/media/Author/100%25%20Cotton/100%25%20Cotton.m4b",
+		},
+		{
+			name:     "a literal %20 must not decode to a space",
+			path:     "/Author/Odd%20Name/Odd%20Name.m4b",
+			expected: "https://example.com/media/Author/Odd%2520Name/Odd%2520Name.m4b",
+		},
+		{
+			name: "ampersands and apostrophes keep their existing encoding",
+			path: "/M. A. Carrick/Rook & Rose/2 The Liar's Knot/The Liar's Knot.m4b",
+			expected: "https://example.com/media/M.%20A.%20Carrick/Rook%20&%20Rose/" +
+				"2%20The%20Liar%27s%20Knot/The%20Liar%27s%20Knot.m4b",
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual, err := renderer.mediaURL(testCase.path)
+			require.NoError(t, err)
+			assert.Equal(t, testCase.expected, actual)
+
+			// The escaped URL must name the file we started from.
+			parsed, err := url.Parse(actual)
+			require.NoError(t, err)
+			assert.Equal(t, "/media"+testCase.path, parsed.Path)
+			assert.Empty(t, parsed.RawQuery)
+			assert.Empty(t, parsed.Fragment)
+		})
+	}
+}
+
+// A host carrying a path prefix must keep it.
+func TestMediaURLKeepsHostPathPrefix(t *testing.T) {
+	renderer := &Renderer{Host: "http://www.example-podcast.com/audiobooks/", MediaPath: "/media/"}
+
+	actual, err := renderer.mediaURL("/Author/Book/Book.m4b")
+
+	require.NoError(t, err)
+	assert.Equal(t, "http://www.example-podcast.com/audiobooks/media/Author/Book/Book.m4b", actual)
 }
 
 func TestRenderIsDeterministic(t *testing.T) {
