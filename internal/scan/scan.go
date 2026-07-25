@@ -35,8 +35,6 @@ var coverExtensions = []string{".jpg", ".jpeg", ".png"}
 // The cache is consulted for durations and updated in place; entries for files
 // that no longer exist are pruned.
 func Library(mediaRoot string, cache *Cache, logger *slog.Logger) ([]audiobooks.Audiobook, error) {
-	mediaRoot = strings.TrimSuffix(mediaRoot, string(os.PathSeparator))
-
 	var books []audiobooks.Audiobook
 	seen := map[string]bool{}
 
@@ -54,10 +52,19 @@ func Library(mediaRoot string, cache *Cache, logger *slog.Logger) ([]audiobooks.
 			return nil
 		}
 
-		relPath := strings.TrimPrefix(path, mediaRoot)
+		// WalkDir normalises the paths it emits, so they are not always literally
+		// prefixed by mediaRoot as written — a root of "./books" yields
+		// "books/x.m4b". Trimming the string would leave the root in the path, and
+		// from there in every enclosure URL and GUID.
+		relPath, relErr := filepath.Rel(mediaRoot, path)
+		if relErr != nil {
+			logger.Warn("audiobook is not under the media root, skipping", "m4b", path, "error", relErr)
+			return nil
+		}
+		relPath = "/" + filepath.ToSlash(relPath)
 		seen[relPath] = true
 
-		book, bookErr := readAudiobook(path, tomlPath, relPath, mediaRoot, cache)
+		book, bookErr := readAudiobook(path, tomlPath, relPath, cache)
 		if bookErr != nil {
 			logger.Warn("could not read audiobook, skipping", "m4b", path, "error", bookErr)
 			return nil
@@ -77,7 +84,7 @@ func Library(mediaRoot string, cache *Cache, logger *slog.Logger) ([]audiobooks.
 // readAudiobook fills an audiobook from its metadata file, then overwrites the
 // fields derived from the media file itself. The TOML is parsed first so that
 // hand-written values can never shadow the real duration or file size.
-func readAudiobook(m4bPath, tomlPath, relPath, mediaRoot string, cache *Cache) (audiobooks.Audiobook, error) {
+func readAudiobook(m4bPath, tomlPath, relPath string, cache *Cache) (audiobooks.Audiobook, error) {
 	var book audiobooks.Audiobook
 
 	tomlFile, err := os.Open(tomlPath)
@@ -106,8 +113,10 @@ func readAudiobook(m4bPath, tomlPath, relPath, mediaRoot string, cache *Cache) (
 	book.FileSize = uint64(info.Size()) //nolint:gosec // file sizes are never negative
 	book.Duration = duration
 	book.MIMEType = mimeType
+	// The cover sits beside the book, so its path is the book's with the
+	// extension swapped — derived from relPath so it cannot disagree with it.
 	if coverPath := findCover(m4bPath); coverPath != "" {
-		book.ImagePath = strings.TrimPrefix(coverPath, mediaRoot)
+		book.ImagePath = strings.TrimSuffix(relPath, filepath.Ext(relPath)) + filepath.Ext(coverPath)
 	}
 
 	return book, nil

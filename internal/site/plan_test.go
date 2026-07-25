@@ -116,6 +116,18 @@ func TestPlanPublishesEverySpellingSeen(t *testing.T) {
 	assert.Contains(t, page.Paths, "podcast/authors/v.e.schwab/feed.rss")
 }
 
+// A book listing two spellings of the same name belongs in that feed once. The
+// server filtered per book, so an item appearing twice — with the same GUID as
+// itself — would be a regression as well as a bug.
+func TestPlanCountsABookOncePerFeed(t *testing.T) {
+	pages := Plan([]audiobooks.Audiobook{
+		book("Only", nil, []string{"V.E. Schwab", "V. E. Schwab"}, nil, []string{"tag", "tag"}),
+	}, nil)
+
+	assert.Len(t, pageFor(t, pages, "podcast/authors/V.E. Schwab/feed.rss").Books, 1)
+	assert.Len(t, pageFor(t, pages, "podcast/tags/tag/feed.rss").Books, 1)
+}
+
 // Unlike the server, which echoed the requested spelling back as the feed title,
 // every alias now carries the canonical name.
 func TestPlanAliasesShareCanonicalTitle(t *testing.T) {

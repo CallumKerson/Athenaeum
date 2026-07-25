@@ -51,6 +51,17 @@ func TestLibraryToleratesTrailingSeparator(t *testing.T) {
 	assert.Equal(t, withoutSlash, withSlash)
 }
 
+// WalkDir cleans the paths it emits, so a root that is not already clean is not
+// a prefix of them. Trimming it as a string would leave it in every GUID.
+func TestLibraryToleratesUncleanRoot(t *testing.T) {
+	unclean, err := Library("./"+mediaRoot, NewCache(), testLogger())
+	require.NoError(t, err)
+	clean, err := Library(mediaRoot, NewCache(), testLogger())
+	require.NoError(t, err)
+
+	assert.Equal(t, clean, unclean)
+}
+
 // One book missing its metadata should cost that book, not the whole build.
 func TestLibrarySkipsM4BWithoutMetadata(t *testing.T) {
 	root := t.TempDir()
@@ -157,6 +168,21 @@ func TestLoadCacheCorruptFile(t *testing.T) {
 
 	require.Error(t, err)
 	assert.NotNil(t, cache, "a usable empty cache should still come back")
+}
+
+// "null" is valid JSON that unmarshals a map to nil rather than failing, so it
+// would otherwise return a cache that panics on the first Store.
+func TestLoadCacheNullFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "null.json")
+	require.NoError(t, os.WriteFile(path, []byte("null"), 0o644))
+
+	cache, err := LoadCache(path)
+
+	require.NoError(t, err)
+	require.NotNil(t, cache)
+	assert.NotPanics(t, func() {
+		cache.Store("/Book.m4b", 1, time.Now(), time.Minute)
+	})
 }
 
 func copyFile(from, to string) error {

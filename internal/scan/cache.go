@@ -46,6 +46,11 @@ func LoadCache(path string) (*Cache, error) {
 	if err := json.Unmarshal(contents, &cache.entries); err != nil {
 		return NewCache(), err
 	}
+	// A cache file of "null" unmarshals to a nil map without error, which would
+	// panic on the first Store.
+	if cache.entries == nil {
+		cache.entries = map[string]Entry{}
+	}
 	return cache, nil
 }
 

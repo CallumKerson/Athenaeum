@@ -106,6 +106,10 @@ func personFeeds(
 	var order []string
 
 	for index := range books {
+		// One book can list several spellings that normalise to the same key, so
+		// it would otherwise be appended to that feed once per spelling — a
+		// duplicate item sharing a GUID with the original.
+		counted := map[string]bool{}
 		for _, name := range names(&books[index]) {
 			key := normalise(name)
 			if key == "" {
@@ -118,7 +122,10 @@ func personFeeds(
 			if !slices.Contains(variants[key], name) {
 				variants[key] = append(variants[key], name)
 			}
-			grouped[key] = append(grouped[key], books[index])
+			if !counted[key] {
+				counted[key] = true
+				grouped[key] = append(grouped[key], books[index])
+			}
 		}
 	}
 
