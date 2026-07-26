@@ -1,8 +1,6 @@
 package audiobooks
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -31,26 +29,10 @@ type Audiobook struct {
 	ImagePath   string                   `json:"imagePath,omitempty"   toml:",omitempty"`
 }
 
-// Person - representation of a person, for example an author or audiobook narrator.
-type Person string
-
 // Series - representation of a series of books.
 type Series struct {
 	Sequence decimal.Decimal `json:"sequence"`
 	Title    string          `json:"title"`
-}
-
-func NewBook(title string, desc *description.Description, authors []string, releaseDate *toml.LocalDate,
-	genreList []Genre, series *Series,
-) Audiobook {
-	return Audiobook{
-		Title:       title,
-		Authors:     authors,
-		Description: desc,
-		ReleaseDate: releaseDate,
-		Genres:      genreList,
-		Series:      series,
-	}
 }
 
 func (b *Audiobook) GetAuthor() string {
@@ -70,10 +52,4 @@ func GetPersonsString(persons []string) string {
 	default:
 		return fmt.Sprintf("%s & %s", strings.Join(persons[:len(persons)-1], ", "), persons[len(persons)-1])
 	}
-}
-
-func Equal(a, b *Audiobook) bool {
-	aBytes, _ := json.Marshal(a)
-	bBytes, _ := json.Marshal(b)
-	return bytes.Equal(aBytes, bBytes)
 }

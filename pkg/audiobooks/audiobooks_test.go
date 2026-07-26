@@ -45,10 +45,17 @@ func TestAudiobooks_Persons(t *testing.T) {
 			expectedPersons:  "Cynthia Farrell & Emily Woo Zeller",
 		},
 		{
-			name: "Multiple narrators", expectsNarrators: true,
+			name:             "Multiple narrators",
+			expectsNarrators: true,
 			audiobook: Audiobook{
 				Narrators: []string{
-					"Jay Snyder", "Brandon Rubin", "Fred Berman", "Lauren Fortgang", "Roger Clark", "Elizabeth Evans", "Tristan Morris",
+					"Jay Snyder",
+					"Brandon Rubin",
+					"Fred Berman",
+					"Lauren Fortgang",
+					"Roger Clark",
+					"Elizabeth Evans",
+					"Tristan Morris",
 				},
 			},
 			expectedPersons: "Jay Snyder, Brandon Rubin, Fred Berman, Lauren Fortgang, Roger Clark, Elizabeth Evans & Tristan Morris",
@@ -65,158 +72,6 @@ func TestAudiobooks_Persons(t *testing.T) {
 			assert.Equal(t, testCase.expectedPersons, personString)
 		})
 	}
-}
-
-func TestNewBook(t *testing.T) {
-	title := "The Left Hand of Darkness"
-	authors := []string{"Ursula K. Le Guin"}
-
-	book := NewBook(title, nil, authors, nil, nil, nil)
-
-	assert.Equal(t, title, book.Title)
-	assert.Equal(t, authors, book.Authors)
-	assert.Empty(t, book.Narrators)
-
-	// Check that other fields are initialised to zero values
-	assert.Empty(t, book.Path)
-	assert.Empty(t, book.Genres)
-	assert.Empty(t, book.Tags)
-	assert.Zero(t, book.Duration)
-	assert.Zero(t, book.FileSize)
-	assert.Empty(t, book.MIMEType)
-}
-
-func TestNewBook_EmptyInputs(t *testing.T) {
-	book := NewBook("", nil, nil, nil, nil, nil)
-
-	assert.Empty(t, book.Title)
-	assert.Nil(t, book.Authors)
-	assert.Empty(t, book.Narrators)
-}
-
-func TestAudiobook_Equal(t *testing.T) {
-	book1 := Audiobook{
-		Title:     "Test Book",
-		Authors:   []string{"Author One", "Author Two"},
-		Narrators: []string{"Narrator One"},
-		Genres:    []Genre{SciFi, Fantasy},
-		Tags:      []string{"award-winner", "classic"},
-		Path:      "/path/to/book.m4b",
-		Duration:  10 * time.Hour,
-		FileSize:  1024 * 1024 * 500, // 500MB
-		MIMEType:  "audio/mp4a-latm",
-		Series: &Series{
-			Title:    "Test Series",
-			Sequence: decimal.NewFromFloat(1.5),
-		},
-		Description: &description.Description{
-			Text:   "A great book",
-			Format: description.Markdown,
-		},
-	}
-
-	book2 := book1 // Copy
-
-	// Should be equal
-	assert.True(t, Equal(&book1, &book2))
-	assert.True(t, Equal(&book2, &book1))
-}
-
-func TestAudiobook_Equal_Different(t *testing.T) {
-	book1 := Audiobook{
-		Title:   "Book One",
-		Authors: []string{"Author One"},
-	}
-
-	book2 := Audiobook{
-		Title:   "Book Two",
-		Authors: []string{"Author One"},
-	}
-
-	// Should not be equal due to different titles
-	assert.False(t, Equal(&book1, &book2))
-}
-
-func TestAudiobook_Equal_NilPointers(t *testing.T) {
-	book1 := Audiobook{Title: "Test"}
-
-	// Both nil
-	assert.True(t, Equal(nil, nil))
-
-	// One nil, one not
-	assert.False(t, Equal(&book1, nil))
-	assert.False(t, Equal(nil, &book1))
-}
-
-func TestAudiobook_Equal_NilSeries(t *testing.T) {
-	book1 := Audiobook{
-		Title:  "Test Book",
-		Series: nil,
-	}
-
-	book2 := Audiobook{
-		Title:  "Test Book",
-		Series: &Series{Title: "Test Series", Sequence: decimal.NewFromInt(1)},
-	}
-
-	book3 := Audiobook{
-		Title:  "Test Book",
-		Series: nil,
-	}
-
-	// book1 and book3 should be equal (both nil series)
-	assert.True(t, Equal(&book1, &book3))
-
-	// book1 and book2 should not be equal (nil vs non-nil series)
-	assert.False(t, Equal(&book1, &book2))
-	assert.False(t, Equal(&book2, &book1))
-}
-
-func TestAudiobook_Equal_DifferentSeries(t *testing.T) {
-	book1 := Audiobook{
-		Title:  "Test Book",
-		Series: &Series{Title: "Series One", Sequence: decimal.NewFromInt(1)},
-	}
-
-	book2 := Audiobook{
-		Title:  "Test Book",
-		Series: &Series{Title: "Series Two", Sequence: decimal.NewFromInt(1)},
-	}
-
-	book3 := Audiobook{
-		Title:  "Test Book",
-		Series: &Series{Title: "Series One", Sequence: decimal.NewFromInt(2)},
-	}
-
-	// Different series name
-	assert.False(t, Equal(&book1, &book2))
-
-	// Different sequence
-	assert.False(t, Equal(&book1, &book3))
-}
-
-func TestAudiobook_Equal_NilDescription(t *testing.T) {
-	book1 := Audiobook{
-		Title:       "Test Book",
-		Description: nil,
-	}
-
-	book2 := Audiobook{
-		Title:       "Test Book",
-		Description: &description.Description{Text: "Test", Format: description.Plain},
-	}
-
-	book3 := Audiobook{
-		Title:       "Test Book",
-		Description: nil,
-	}
-
-	// book1 and book3 should be equal (both nil description)
-	assert.True(t, Equal(&book1, &book3))
-
-	// book1 and book2 should not be equal (nil vs non-nil description)
-	assert.False(t, Equal(&book1, &book2))
-	assert.False(t, Equal(&book2, &book1))
 }
 
 func TestAudiobook_JSONMarshaling(t *testing.T) {
@@ -249,8 +104,7 @@ func TestAudiobook_JSONMarshaling(t *testing.T) {
 	err = json.Unmarshal(data, &unmarshaled)
 	require.NoError(t, err)
 
-	// Should be equal
-	assert.True(t, Equal(&book, &unmarshaled))
+	assert.Equal(t, book, unmarshaled)
 }
 
 func TestAudiobook_TOMLMarshaling(t *testing.T) {
@@ -283,8 +137,7 @@ func TestAudiobook_TOMLMarshaling(t *testing.T) {
 	err = toml.Unmarshal(data, &unmarshaled)
 	require.NoError(t, err)
 
-	// Should be equal
-	assert.True(t, Equal(&book, &unmarshaled))
+	assert.Equal(t, book, unmarshaled)
 }
 
 func TestAudiobook_EmptySlicesMarshaling(t *testing.T) {
@@ -296,38 +149,35 @@ func TestAudiobook_EmptySlicesMarshaling(t *testing.T) {
 		Tags:      []string{},
 	}
 
-	// JSON round trip
+	// An empty slice does not survive a round trip through either format when the
+	// field is omitempty — it is dropped on the way out and comes back nil. Nothing
+	// distinguishes "no genres" from "an empty list of genres", so this is only
+	// worth pinning down, not fixing.
 	jsonData, err := json.Marshal(book)
 	require.NoError(t, err)
 
 	var jsonUnmarshaled Audiobook
 	err = json.Unmarshal(jsonData, &jsonUnmarshaled)
 	require.NoError(t, err)
-	assert.True(t, Equal(&book, &jsonUnmarshaled))
+	assert.Equal(t, []string{}, jsonUnmarshaled.Authors, "Authors is not omitempty in JSON")
+	assert.Equal(t, []string{}, jsonUnmarshaled.Narrators, "Narrators is not omitempty in JSON")
+	assert.Nil(t, jsonUnmarshaled.Genres)
+	assert.Nil(t, jsonUnmarshaled.Tags)
 
-	// TOML round trip
 	tomlData, err := toml.Marshal(book)
 	require.NoError(t, err)
 
 	var tomlUnmarshaled Audiobook
 	err = toml.Unmarshal(tomlData, &tomlUnmarshaled)
 	require.NoError(t, err)
+	assert.Equal(t, []string{}, tomlUnmarshaled.Authors, "Authors is not omitempty in TOML")
+	assert.Nil(t, tomlUnmarshaled.Narrators)
+	assert.Nil(t, tomlUnmarshaled.Genres)
+	assert.Nil(t, tomlUnmarshaled.Tags)
 
-	// Handle nil vs empty slice differences in TOML marshalling
-	if tomlUnmarshaled.Authors == nil {
-		tomlUnmarshaled.Authors = []string{}
-	}
-	if tomlUnmarshaled.Narrators == nil {
-		tomlUnmarshaled.Narrators = []string{}
-	}
-	if tomlUnmarshaled.Genres == nil {
-		tomlUnmarshaled.Genres = []Genre{}
-	}
-	if tomlUnmarshaled.Tags == nil {
-		tomlUnmarshaled.Tags = []string{}
-	}
-
-	assert.True(t, Equal(&book, &tomlUnmarshaled))
+	// Everything that is not a slice still survives both round trips.
+	assert.Equal(t, book.Title, jsonUnmarshaled.Title)
+	assert.Equal(t, book.Title, tomlUnmarshaled.Title)
 }
 
 func TestSeries_DecimalSequence(t *testing.T) {

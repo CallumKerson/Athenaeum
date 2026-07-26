@@ -11,6 +11,8 @@ import (
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
 )
 
+var audiobookMIMEType = "audio/mp4a-latm"
+
 var Audiobooks = []audiobooks.Audiobook{
 	{
 		Title:       "This Is How You Lose the Time War",
@@ -19,7 +21,7 @@ var Audiobooks = []audiobooks.Audiobook{
 		Path:        "/Amal El-Mohtar and Max Gladstone/This Is How You Lose the Time War/This Is How You Lose the Time War.m4b",
 		ImagePath:   "/Amal El-Mohtar and Max Gladstone/This Is How You Lose the Time War/This Is How You Lose the Time War.png",
 		FileSize:    145608,
-		MIMEType:    "audio/mp4a-latm",
+		MIMEType:    audiobookMIMEType,
 		Duration:    time.Nanosecond * 4671000064,
 		ReleaseDate: &toml.LocalDate{Year: 2019, Month: 0o7, Day: 16},
 		Genres:      []audiobooks.Genre{audiobooks.SciFi, audiobooks.LGBT},
@@ -41,7 +43,7 @@ var Audiobooks = []audiobooks.Audiobook{
 		Path:        "/Ursula K Le Guin/Earthsea/1 A Wizard of Earthsea/A Wizard of Earthsea.m4b",
 		ImagePath:   "/Ursula K Le Guin/Earthsea/1 A Wizard of Earthsea/A Wizard of Earthsea.png",
 		FileSize:    145565,
-		MIMEType:    "audio/mp4a-latm",
+		MIMEType:    audiobookMIMEType,
 		Duration:    time.Nanosecond * 4671000064,
 		ReleaseDate: &toml.LocalDate{Year: 1968, Month: 11, Day: 1},
 		Genres:      []audiobooks.Genre{audiobooks.Childrens, audiobooks.Fantasy},
