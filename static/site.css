@@ -1,0 +1,230 @@
+:root {
+  --bg: #fdfdfc;
+  --panel: #f4f3f0;
+  --text: #23211e;
+  --muted: #6d6a64;
+  --line: #ddd9d2;
+  --link: #8a4b1e;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1917;
+    --panel: #24231f;
+    --text: #ebe8e2;
+    --muted: #a19d94;
+    --line: #383630;
+    --link: #e0a672;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* The list rows below set display, which would otherwise beat the [hidden]
+   attribute the filter script uses to take a row out of the page. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  padding: 0 1.25rem 4rem;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    1rem/1.5 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+a {
+  color: var(--link);
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+header,
+main,
+footer {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: baseline;
+  padding: 1.5rem 0 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+h1 {
+  margin: 1.75rem 0 0.25rem;
+  font-size: 1.6rem;
+  line-height: 1.25;
+}
+
+.blurb,
+.empty {
+  color: var(--muted);
+  margin: 0.25rem 0 1rem;
+}
+
+.feed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+button.copy {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.5rem;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+button.copy:hover {
+  color: var(--text);
+}
+
+form.search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+}
+
+form.search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font: inherit;
+  padding: 0.5rem 0.75rem;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+}
+
+#filter-count,
+.count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+ul.sections,
+ul.entries,
+ul.books {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+ul.sections li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.75rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+ul.sections a {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+ul.sections .note {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+ul.entries li,
+ul.books li {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Name on the left, count and feed links against the right edge, so a long list
+   of names stays scannable down one column. */
+ul.entries li {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+ul.books li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rss {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.subtitle,
+.meta,
+.labels {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.meta .date {
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.labels {
+  font-size: 0.8rem;
+}
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}

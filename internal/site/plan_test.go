@@ -22,11 +22,11 @@ func book(title string, genres []audiobooks.Genre, authors, narrators, tags []st
 	}
 }
 
-func pageFor(t *testing.T, pages []Page, path string) Page {
+func pageFor(t *testing.T, content Content, path string) Page {
 	t.Helper()
-	index := slices.IndexFunc(pages, func(page Page) bool { return slices.Contains(page.Paths, path) })
+	index := slices.IndexFunc(content.Feeds, func(page Page) bool { return slices.Contains(page.Paths, path) })
 	require.GreaterOrEqual(t, index, 0, "no page published at %s", path)
-	return pages[index]
+	return content.Feeds[index]
 }
 
 func TestPlanExcludesGenresFromMainFeedOnly(t *testing.T) {
@@ -69,8 +69,8 @@ func TestPlanOmitsNamesWithNoBooks(t *testing.T) {
 	}, nil)
 
 	published := map[string]bool{}
-	for index := range pages {
-		for _, path := range pages[index].Paths {
+	for index := range pages.Feeds {
+		for _, path := range pages.Feeds[index].Paths {
 			published[path] = true
 		}
 	}

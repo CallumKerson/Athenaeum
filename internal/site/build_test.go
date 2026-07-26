@@ -33,7 +33,7 @@ const mediaRoot = "../../testdata"
 //
 // Run with -update to regenerate.
 func TestPlanGolden(t *testing.T) {
-	manifest := renderManifest(t, testPlan(t))
+	manifest := renderManifest(t, testPlan(t).Feeds)
 	goldenPath := filepath.Join("testdata", "golden_manifest.txt")
 
 	if *update {
@@ -51,7 +51,7 @@ func TestPlanGolden(t *testing.T) {
 // rendered XML shows up as a readable diff rather than a changed hash. The other
 // feed shapes are covered byte for byte in the feed package.
 func TestMainFeedGolden(t *testing.T) {
-	pages := testPlan(t)
+	pages := testPlan(t).Feeds
 	index := slices.IndexFunc(pages, func(page Page) bool {
 		return slices.Contains(page.Paths, "podcast/feed.rss")
 	})
@@ -76,9 +76,10 @@ func TestMainFeedGolden(t *testing.T) {
 // identical bytes either way, so this passes on both kinds of filesystem.
 func TestBuildPublishesEveryPlannedPath(t *testing.T) {
 	root := t.TempDir()
-	pages := testPlan(t)
+	content := testPlan(t)
+	pages := content.Feeds
 
-	_, err := Build(root, pages, testRenderer(), true, testLogger())
+	_, err := Build(root, content, testRenderer(), true, testLogger())
 	require.NoError(t, err)
 
 	for index := range pages {
@@ -138,7 +139,7 @@ func TestBuildKeepsStaleFilesWhenSweepDisabled(t *testing.T) {
 	stale := filepath.Join(root, "podcast", "stray.rss")
 	require.NoError(t, os.WriteFile(stale, []byte("old"), 0o644))
 
-	_, err = Build(root, nil, testRenderer(), false, testLogger())
+	_, err = Build(root, Content{}, testRenderer(), false, testLogger())
 	require.NoError(t, err)
 	assert.FileExists(t, stale)
 }
@@ -149,18 +150,18 @@ func TestBuildRefusesDirectoryWithoutMarker(t *testing.T) {
 	root := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(root, "important.txt"), []byte("mine"), 0o644))
 
-	_, err := Build(root, nil, testRenderer(), true, testLogger())
+	_, err := Build(root, Content{}, testRenderer(), true, testLogger())
 
 	require.ErrorIs(t, err, errNotSiteDir)
 	assert.FileExists(t, filepath.Join(root, "important.txt"))
 }
 
 func TestBuildAcceptsEmptyDirectory(t *testing.T) {
-	_, err := Build(t.TempDir(), nil, testRenderer(), true, testLogger())
+	_, err := Build(t.TempDir(), Content{}, testRenderer(), true, testLogger())
 	require.NoError(t, err)
 }
 
-func testPlan(t *testing.T) []Page {
+func testPlan(t *testing.T) Content {
 	t.Helper()
 	books, err := scan.Library(mediaRoot, scan.NewCache(), testLogger())
 	require.NoError(t, err)
