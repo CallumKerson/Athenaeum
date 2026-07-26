@@ -31,64 +31,69 @@ const (
 
 var (
 	errParsingGenre = errors.New("cannot parse genre")
-	genreName       = map[uint8]string{
-		1:  "Literary",
-		2:  "Mystery",
-		3:  "Romance",
-		4:  "Comedy",
-		5:  "Children's",
-		6:  "Young Adult",
-		7:  "Science Fiction",
-		8:  "Fantasy",
-		9:  "Non-fiction",
-		10: "Biography",
-		11: "Historical Fiction",
-		12: "Thriller",
-		13: "Horror",
-		14: "LGBT+",
-		15: "Erotica",
+	// genreName is the display spelling of each genre. It is also the directory
+	// name its feed is written under, so changing a value moves a feed.
+	genreName = map[Genre]string{
+		Literary:   "Literary",
+		Mystery:    "Mystery",
+		Romance:    "Romance",
+		Comedy:     "Comedy",
+		Childrens:  "Children's",
+		YoungAdult: "Young Adult",
+		SciFi:      "Science Fiction",
+		Fantasy:    "Fantasy",
+		NonFiction: "Non-fiction",
+		Biography:  "Biography",
+		Historical: "Historical Fiction",
+		Thriller:   "Thriller",
+		Horror:     "Horror",
+		LGBT:       "LGBT+",
+		Erotica:    "Erotica",
 	}
-	genreValue = map[string]uint8{
-		"literary":           1,
-		"mystery":            2,
-		"romance":            3,
-		"comedy":             4,
-		"children's":         5,
-		"children":           5,
-		"childrens":          5,
-		"young adult":        6,
-		"youngadult":         6,
-		"ya":                 6,
-		"science fiction":    7,
-		"sciencefiction":     7,
-		"sci-fi":             7,
-		"scifi":              7,
-		"fantasy":            8,
-		"non-fiction":        9,
-		"nonfiction":         9,
-		"biography":          10,
-		"historical":         11,
-		"historical fiction": 11,
-		"historicalfiction":  11,
-		"thriller":           12,
-		"horror":             13,
-		"lgbt":               14,
-		"lgbt+":              14,
-		"erotica":            15,
+	// genreValue is every spelling ParseGenre accepts, lowercased. Each one also
+	// becomes an alias path for the genre's feed, so entries may be added but
+	// never removed: a subscription pointing at one must not start 404ing.
+	genreValue = map[string]Genre{
+		"literary":           Literary,
+		"mystery":            Mystery,
+		"romance":            Romance,
+		"comedy":             Comedy,
+		"children's":         Childrens,
+		"children":           Childrens,
+		"childrens":          Childrens,
+		"young adult":        YoungAdult,
+		"youngadult":         YoungAdult,
+		"ya":                 YoungAdult,
+		"science fiction":    SciFi,
+		"sciencefiction":     SciFi,
+		"sci-fi":             SciFi,
+		"scifi":              SciFi,
+		"fantasy":            Fantasy,
+		"non-fiction":        NonFiction,
+		"nonfiction":         NonFiction,
+		"biography":          Biography,
+		"historical":         Historical,
+		"historical fiction": Historical,
+		"historicalfiction":  Historical,
+		"thriller":           Thriller,
+		"horror":             Horror,
+		"lgbt":               LGBT,
+		"lgbt+":              LGBT,
+		"erotica":            Erotica,
 	}
 )
 
 // String allows Genre to implement fmt.Stringer.
 func (g Genre) String() string {
-	return genreName[uint8(g)]
+	return genreName[g]
 }
 
 // Aliases returns every string ParseGenre accepts for this genre, sorted so the
 // result is stable. Used to emit one feed per spelling a URL might use.
 func (g Genre) Aliases() []string {
 	aliases := []string{}
-	for name, value := range genreValue {
-		if value == uint8(g) {
+	for name, genre := range genreValue {
+		if genre == g {
 			aliases = append(aliases, name)
 		}
 	}
@@ -96,11 +101,13 @@ func (g Genre) Aliases() []string {
 	return aliases
 }
 
-// AllGenres returns every defined genre, in declaration order.
+// AllGenres returns every defined genre. Map iteration is random, so the result
+// is sorted by value — which is declaration order, since the values come from
+// iota — to keep the set of genre feeds stable between builds.
 func AllGenres() []Genre {
 	genres := make([]Genre, 0, len(genreName))
-	for value := range genreName {
-		genres = append(genres, Genre(value))
+	for genre := range genreName {
+		genres = append(genres, genre)
 	}
 	slices.Sort(genres)
 	return genres
@@ -110,12 +117,12 @@ func AllGenres() []Genre {
 func ParseGenre(s string) (Genre, error) {
 	s = strings.TrimSpace(strings.ToLower(s))
 
-	value, ok := genreValue[s]
+	genre, ok := genreValue[s]
 	if !ok {
-		return Genre(0), fmt.Errorf("%w: %q is not a valid genre", errParsingGenre, s)
+		return UndefinedGenre, fmt.Errorf("%w: %q is not a valid genre", errParsingGenre, s)
 	}
 
-	return Genre(value), nil
+	return genre, nil
 }
 
 func (g Genre) MarshalText() ([]byte, error) {
