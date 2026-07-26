@@ -1,0 +1,11 @@
+{{define "content"}}
+      <ul class="sections">
+        {{- range .Sections}}
+        <li>
+          <a href="{{.Href}}">{{.Name}}</a>
+          <span class="count">{{.Count}}</span>
+          {{- with .Note}}<span class="note">{{.}}</span>{{end}}
+        </li>
+        {{- end}}
+      </ul>
+{{- end}}

@@ -1,0 +1,121 @@
+{{define "layout" -}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="{{.Root}}static/site.css" />
+    {{- with .FeedHref}}
+    <link rel="alternate" type="application/rss+xml" title="{{$.Heading}}" href="{{.}}" />
+    {{- end}}
+  </head>
+
+  <body>
+    <header>
+      <a class="brand" href="{{.Root}}">Athenaeum 🎧📚</a>
+      <nav>
+        {{- range .Nav}}
+        <a href="{{.Href}}">{{.Name}}</a>
+        {{- end}}
+      </nav>
+    </header>
+
+    <main>
+      <h1>{{.Heading}}</h1>
+      {{- with .Blurb}}
+      <p class="blurb">{{.}}</p>
+      {{- end}}
+      {{- with .FeedHref}}
+      <p class="feed"><a href="{{.}}">Subscribe to this feed</a><button class="copy" type="button" hidden>copy URL</button></p>
+      {{- end}}
+      {{- if .Search}}
+      <form class="search" onsubmit="return false" hidden>
+        <input id="filter" type="search" placeholder="{{.SearchLabel}}" autocomplete="off" spellcheck="false" />
+        <span id="filter-count"></span>
+      </form>
+      {{- end}}
+      {{- template "content" .}}
+    </main>
+
+    <footer>
+      Built by <a href="https://github.com/CallumKerson/Athenaeum">Athenaeum</a>.
+    </footer>
+
+    <script>
+      // The feed URL a podcast app needs is absolute, and the links on the page are
+      // relative so that the site works wherever it is mounted — so resolve against
+      // the current location rather than baking a host into the page.
+      document.querySelectorAll("button.copy").forEach(function (button) {
+        button.hidden = false;
+      });
+      document.addEventListener("click", function (event) {
+        const button = event.target.closest("button.copy");
+        if (!button) return;
+        const url = new URL(button.previousElementSibling.getAttribute("href"), location.href).href;
+        navigator.clipboard.writeText(url).then(
+          function () { flash(button, "copied"); },
+          function () { flash(button, "copy failed"); }
+        );
+      });
+      function flash(button, message) {
+        const original = button.textContent;
+        button.textContent = message;
+        setTimeout(function () { button.textContent = original; }, 1500);
+      }
+    </script>
+    {{- if .Search}}
+    <script>
+      const form = document.querySelector("form.search");
+      const input = document.getElementById("filter");
+      const counter = document.getElementById("filter-count");
+      const rows = Array.from(document.querySelectorAll("[data-search]"));
+      form.hidden = false;
+
+      function apply() {
+        const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+        let shown = 0;
+        for (const row of rows) {
+          const match = terms.every(function (term) { return row.dataset.search.includes(term); });
+          row.hidden = !match;
+          if (match) shown++;
+        }
+        counter.textContent = terms.length ? shown + " of " + rows.length : "";
+      }
+
+      input.addEventListener("input", apply);
+      // Prefill from ?q= so a search can be linked to or bookmarked.
+      input.value = new URLSearchParams(location.search).get("q") || "";
+      apply();
+    </script>
+    {{- end}}
+  </body>
+</html>
+{{- end}}
+
+{{define "links"}}{{range $index, $link := .}}{{if $index}}, {{end}}{{if $link.Href}}<a href="{{$link.Href}}">{{$link.Name}}</a>{{else}}{{$link.Name}}{{end}}{{end}}{{end}}
+
+{{define "booklist"}}
+{{- if .Books}}
+      <ul class="books">
+        {{- range .Books}}
+        <li data-search="{{.Search}}">
+          <span class="title">{{.Title}}</span>
+          {{- with .Subtitle}}<span class="subtitle">{{.}}</span>{{end}}
+          <span class="meta">
+            {{- with .Date}}<span class="date">{{.}}</span>{{end}}
+            {{- if .Authors}}<span>by {{template "links" .Authors}}</span>{{end}}
+            {{- if .Narrators}}<span>read by {{template "links" .Narrators}}</span>{{end}}
+            {{- with .Series}}<span>{{.}}</span>{{end}}
+            {{- with .Duration}}<span>{{.}}</span>{{end}}
+          </span>
+          {{- if or .Genres .Tags}}
+          <span class="labels">{{template "links" .Genres}}{{if and .Genres .Tags}} · {{end}}{{template "links" .Tags}}</span>
+          {{- end}}
+        </li>
+        {{- end}}
+      </ul>
+{{- else}}
+      <p class="empty">No books here yet.</p>
+{{- end}}
+{{- end}}

@@ -29,17 +29,18 @@ There is no server process, no database and no request path.
 - `pkg/audiobooks` - The `Audiobook` entity, the `Genre` enum and description formatting
 - `internal/scan` - Walks the media root, reads `.toml` metadata and `.m4b` durations, with a duration cache
 - `internal/feed` - Renders a list of audiobooks as an iTunes-compatible RSS 2.0 feed
-- `internal/site` - Decides which feeds exist at which paths (`plan.go`) and writes the tree (`build.go`)
+- `internal/site` - Decides which feeds exist at which paths (`plan.go`), renders the browsable HTML pages (`html.go`) and writes the tree (`build.go`)
 - `internal/fsutil` - Atomic and write-if-changed file helpers
 - `cmd/athenaeum` - Cobra commands and config loading
-- `static`, `templates` - Embedded assets and the index page template
+- `static`, `templates` - Embedded assets (artwork, stylesheet) and the HTML page templates
 
 ### Data Flow
 
 1. `scan.Library` walks the media root for `.m4b` + `.toml` file pairs
 2. `site.Plan` groups the books into feeds — all, by author, narrator, genre and tag — and assigns each a set of paths
 3. `site.Build` renders each feed with `feed.Renderer` and writes it to every path in its plan
-4. Stale files from previous builds are swept, and Overcast is optionally notified
+4. `site.buildHTML` renders the browsable pages: a home page, `/books/` with a client-side filter, and an index plus a page per name for each section
+5. Stale files from previous builds are swept, and Overcast is optionally notified
 
 ### Constraints that must not be broken
 

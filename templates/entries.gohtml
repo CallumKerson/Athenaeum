@@ -1,0 +1,13 @@
+{{define "content"}}
+      <ul class="entries">
+        {{- range .Entries}}
+        <li data-search="{{.Search}}">
+          <a href="{{.Href}}">{{.Name}}</a>
+          <span class="count">{{.Count}}</span>
+          {{- with .FeedHref}}
+          <a class="rss" href="{{.}}">rss</a><button class="copy" type="button" hidden>copy URL</button>
+          {{- end}}
+        </li>
+        {{- end}}
+      </ul>
+{{- end}}

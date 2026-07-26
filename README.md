@@ -37,6 +37,19 @@ Alongside the main feed, the build writes one feed per author, narrator, genre a
 tag, under `/podcast/authors/`, `/podcast/narrators/`, `/podcast/genre/` and
 `/podcast/tags/`.
 
+### Browsing the library
+
+The build also writes a plain HTML site for finding your way around those feeds:
+
+- `/` links to each way of browsing, and to the main feed
+- `/books/` lists every book, with a search box that filters as you type — `?q=` prefills it, so a search can be bookmarked
+- `/authors/`, `/narrators/`, `/genre/` and `/tags/` list every name, with the feed URL alongside
+- `/authors/<name>/` and friends show that name's books and the URL to subscribe to
+
+Links between pages are relative, so the site works wherever it is mounted, and
+every page is readable without JavaScript — the search box and the copy-URL
+buttons appear only when there is JavaScript to run them.
+
 ### Serving the site
 
 The site references the audiobook files under `/media/`, so the web server needs to serve the library at that prefix alongside the generated tree.

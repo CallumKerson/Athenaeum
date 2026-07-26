@@ -16,6 +16,14 @@ const (
 	byFormat    = "Audiobooks by %s"
 	readFormat  = "Audiobooks Narrated by %s"
 	plainFormat = "%s Audiobooks"
+
+	// The directory each kind of feed lives in, under podcastDir. The HTML tree
+	// reuses these names one level up, so /authors/ and /podcast/authors/ are
+	// obviously the same set of feeds.
+	authorsDir   = "authors"
+	narratorsDir = "narrators"
+	genresDir    = "genre"
+	tagsDir      = "tags"
 )
 
 // Page is one rendered feed together with every path it is published at. The
@@ -26,24 +34,35 @@ type Page struct {
 	Title       string
 	Description string
 	Books       []audiobooks.Audiobook
+	// Section is the feed directory this page belongs to, or "" for the main feed.
+	Section string
+	// FeedPath is the one of Paths that the HTML pages link to.
+	FeedPath string
+}
+
+// Content is everything a build publishes: the library the HTML pages list, and
+// the feeds planned from it.
+type Content struct {
+	Books []audiobooks.Audiobook
+	Feeds []Page
 }
 
 // Plan works out the complete set of feeds to publish for a library.
 //
 // Books are assumed to be sorted already; every feed preserves that order.
-func Plan(books []audiobooks.Audiobook, excludedFromMainFeed []audiobooks.Genre) []Page {
+func Plan(books []audiobooks.Audiobook, excludedFromMainFeed []audiobooks.Genre) Content {
 	pages := []Page{mainFeed(books, excludedFromMainFeed)}
 	pages = append(pages, genreFeeds(books)...)
-	pages = append(pages, personFeeds(books, "authors", byFormat, func(b *audiobooks.Audiobook) []string {
+	pages = append(pages, personFeeds(books, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
 		return b.Authors
 	})...)
-	pages = append(pages, personFeeds(books, "narrators", readFormat, func(b *audiobooks.Audiobook) []string {
+	pages = append(pages, personFeeds(books, narratorsDir, readFormat, func(b *audiobooks.Audiobook) []string {
 		return b.Narrators
 	})...)
-	pages = append(pages, personFeeds(books, "tags", plainFormat, func(b *audiobooks.Audiobook) []string {
+	pages = append(pages, personFeeds(books, tagsDir, plainFormat, func(b *audiobooks.Audiobook) []string {
 		return b.Tags
 	})...)
-	return pages
+	return Content{Books: books, Feeds: pages}
 }
 
 func mainFeed(books []audiobooks.Audiobook, excluded []audiobooks.Genre) Page {
@@ -53,11 +72,13 @@ func mainFeed(books []audiobooks.Audiobook, excluded []audiobooks.Genre) Page {
 			included = append(included, books[index])
 		}
 	}
+	mainPath := path.Join(podcastDir, feedName)
 	return Page{
-		Paths:       []string{path.Join(podcastDir, feedName)},
+		Paths:       []string{mainPath},
 		Title:       allTitle,
 		Description: allSummary,
 		Books:       included,
+		FeedPath:    mainPath,
 	}
 }
 
@@ -73,11 +94,14 @@ func genreFeeds(books []audiobooks.Audiobook) []Page {
 				matching = append(matching, books[index])
 			}
 		}
+		canonical, paths := feedPaths(genresDir, genre.String(), genreAliases(genre))
 		pages = append(pages, Page{
-			Paths:       feedPaths("genre", genreAliases(genre)),
+			Paths:       paths,
 			Title:       genre.String(),
 			Description: fmt.Sprintf(plainFormat, genre),
 			Books:       matching,
+			Section:     genresDir,
+			FeedPath:    canonical,
 		})
 	}
 	return pages
@@ -137,11 +161,14 @@ func personFeeds(
 		for _, variant := range variants[key] {
 			aliases = append(aliases, nameAliases(variant)...)
 		}
+		feedPath, paths := feedPaths(dir, name, dedupe(aliases))
 		pages = append(pages, Page{
-			Paths:       feedPaths(dir, dedupe(aliases)),
+			Paths:       paths,
 			Title:       name,
 			Description: fmt.Sprintf(descriptionFormat, name),
 			Books:       grouped[key],
+			Section:     dir,
+			FeedPath:    feedPath,
 		})
 	}
 	return pages
@@ -149,7 +176,12 @@ func personFeeds(
 
 // feedPaths turns alias names into output paths, dropping any that cannot
 // safely be a directory name.
-func feedPaths(dir string, aliases []string) []string {
+//
+// The first return is the path the HTML pages link to: the display spelling
+// where that can be a directory name, since that is the tidiest of the aliases,
+// and otherwise whichever alias survived. A name with no usable spelling at all
+// gets no feed, and so no link.
+func feedPaths(dir, name string, aliases []string) (canonical string, all []string) {
 	paths := make([]string, 0, len(aliases))
 	for _, alias := range aliases {
 		if !safeSegment(alias) {
@@ -157,7 +189,15 @@ func feedPaths(dir string, aliases []string) []string {
 		}
 		paths = append(paths, path.Join(podcastDir, dir, alias, feedName))
 	}
-	return paths
+
+	switch {
+	case safeSegment(name):
+		return path.Join(podcastDir, dir, name, feedName), paths
+	case len(paths) > 0:
+		return paths[0], paths
+	default:
+		return "", paths
+	}
 }
 
 func hasAnyGenre(book *audiobooks.Audiobook, genres []audiobooks.Genre) bool {

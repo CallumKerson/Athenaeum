@@ -66,7 +66,16 @@ func TestSafeSegment(t *testing.T) {
 }
 
 func TestFeedPathsDropUnsafeNames(t *testing.T) {
-	assert.Equal(t,
-		[]string{"podcast/authors/ok/feed.rss"},
-		feedPaths("authors", []string{"..", "ok", "a/b"}))
+	canonical, paths := feedPaths("authors", "ok", []string{"..", "ok", "a/b"})
+
+	assert.Equal(t, []string{"podcast/authors/ok/feed.rss"}, paths)
+	assert.Equal(t, "podcast/authors/ok/feed.rss", canonical)
+}
+
+// A name that cannot be a directory at all has no feed, so nothing to link to.
+func TestFeedPathsWithNoUsableSpelling(t *testing.T) {
+	canonical, paths := feedPaths("authors", "a/b", []string{"a/b"})
+
+	assert.Empty(t, paths)
+	assert.Empty(t, canonical)
 }

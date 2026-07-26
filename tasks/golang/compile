@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Compiles for the current OS and architecture"
-#MISE sources=["**/*.go", "go.mod", "go.sum"]
+#MISE sources=["**/*.go", "**/*.gohtml", "static/**/*.css", "go.mod", "go.sum"]
 #MISE outputs={auto = true}
 
 set -ex
