@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/CallumKerson/Athenaeum/compare/v2.0.1...v2.1.0) (2026-07-26)
+
+
+### Features
+
+* **site:** rework site to include all feeds ([#238](https://github.com/CallumKerson/Athenaeum/issues/238)) ([118b627](https://github.com/CallumKerson/Athenaeum/commit/118b62749c4a04c27e631f23f62b7fd687a4fa76))
+
 ## [2.0.1](https://github.com/CallumKerson/Athenaeum/compare/v2.0.0...v2.0.1) (2026-07-26)
 
 
