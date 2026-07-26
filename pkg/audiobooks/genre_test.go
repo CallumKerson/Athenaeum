@@ -170,6 +170,38 @@ func TestGenre_UnmarshalText_Error(t *testing.T) {
 	assert.Contains(t, err.Error(), "not a valid genre")
 }
 
+// TestAllGenres_CoversEveryDeclaredGenre walks the constants themselves rather
+// than a hand-written list, so a genre added to the block but not to genreName
+// fails here instead of silently getting no feed.
+func TestAllGenres_CoversEveryDeclaredGenre(t *testing.T) {
+	declared := []Genre{}
+	for genre := UndefinedGenre + 1; genre <= Erotica; genre++ {
+		declared = append(declared, genre)
+	}
+
+	assert.Equal(t, declared, AllGenres())
+
+	for _, genre := range declared {
+		t.Run(genre.String(), func(t *testing.T) {
+			// A genre with no name would be written to an empty directory name.
+			require.NotEmpty(t, genre.String())
+
+			// Every genre's display name is one of the spellings ParseGenre takes,
+			// so the feed at its canonical path is reachable by that name.
+			parsed, err := ParseGenre(genre.String())
+			require.NoError(t, err)
+			assert.Equal(t, genre, parsed)
+
+			// Aliases become feed paths, so each must resolve back to this genre.
+			for _, alias := range genre.Aliases() {
+				parsedAlias, aliasErr := ParseGenre(alias)
+				require.NoError(t, aliasErr)
+				assert.Equal(t, genre, parsedAlias)
+			}
+		})
+	}
+}
+
 func TestGenre_RoundTrip(t *testing.T) {
 	// Test that marshalling and unmarshalling preserves the genre
 	allGenres := []Genre{
