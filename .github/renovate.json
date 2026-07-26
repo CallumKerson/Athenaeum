@@ -16,7 +16,6 @@
   "postUpdateOptions": ["gomodTidy"],
   "internalChecksFilter": "strict",
   "minimumReleaseAge": "1 week",
-  "osvVulnerabilityAlerts": true,
   "packageRules": [
     {
       "description": "Use ci semantic type for some deps",
@@ -27,12 +26,6 @@
       "description": "Merge digests faster",
       "matchUpdateTypes": ["digest"],
       "minimumReleaseAge": "1 day"
-    },
-    {
-      "description": "gomarkdown/markdown has no tagged releases, so it must stay on loose versioning; a vulnerability alert otherwise forces semver versioning, which can't parse its pseudo-versions and silently drops the dependency from tracking",
-      "matchDatasources": ["go"],
-      "matchPackageNames": ["github.com/gomarkdown/markdown"],
-      "versioning": "loose"
     }
   ]
 }
