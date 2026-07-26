@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CallumKerson/podcasts"
+	"github.com/CallumKerson/podcasts/v2"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
