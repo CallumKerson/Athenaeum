@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/CallumKerson/Athenaeum/compare/v2.0.0...v2.0.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* **deps:** update github.com/gomarkdown/markdown digest to 8435af3 ([#236](https://github.com/CallumKerson/Athenaeum/issues/236)) ([b646268](https://github.com/CallumKerson/Athenaeum/commit/b64626871af688235b9c76625cca0ef87c38d82b))
+* **deps:** update module github.com/pelletier/go-toml/v2 to v2.4.3 ([#228](https://github.com/CallumKerson/Athenaeum/issues/228)) ([29a4af6](https://github.com/CallumKerson/Athenaeum/commit/29a4af623e059eaa5a9fa8c2aee77b736cbf4a31))
+
 ## [2.0.0](https://github.com/CallumKerson/Athenaeum/compare/v1.15.0...v2.0.0) (2026-07-25)
 
 
