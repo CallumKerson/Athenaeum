@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/CallumKerson/Athenaeum/compare/v2.1.0...v2.1.1) (2026-08-03)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/callumkerson/podcasts/v2 to v2.1.0 ([#244](https://github.com/CallumKerson/Athenaeum/issues/244)) ([ccb1fea](https://github.com/CallumKerson/Athenaeum/commit/ccb1feabf0b5870d11aba3c144a943dace89df5e))
+
 ## [2.1.0](https://github.com/CallumKerson/Athenaeum/compare/v2.0.1...v2.1.0) (2026-07-26)
 
 
