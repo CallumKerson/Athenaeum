@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/CallumKerson/Athenaeum/compare/v2.1.0...v2.2.0) (2026-08-16)
+
+
+### Features
+
+* **audiobooks:** support omnibus series sequences ([#247](https://github.com/CallumKerson/Athenaeum/issues/247)) ([2a133d3](https://github.com/CallumKerson/Athenaeum/commit/2a133d351ba31ea2dcddeee3e1bfea1a2b2f8efc))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/callumkerson/podcasts/v2 to v2.1.0 ([#244](https://github.com/CallumKerson/Athenaeum/issues/244)) ([ccb1fea](https://github.com/CallumKerson/Athenaeum/commit/ccb1feabf0b5870d11aba3c144a943dace89df5e))
+
 ## [2.1.0](https://github.com/CallumKerson/Athenaeum/compare/v2.0.1...v2.1.0) (2026-07-26)
 
 
