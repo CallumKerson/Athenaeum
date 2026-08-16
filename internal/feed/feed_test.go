@@ -6,12 +6,16 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/pelletier/go-toml/v2"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/CallumKerson/Athenaeum/internal/testing/testbooks"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
+	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
 )
 
 // The golden files here are copies of the ones the server's podcast service was
@@ -201,4 +205,118 @@ func TestRenderWithoutReleaseDate(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Contains(t, string(rendered), "<title>Undated</title>")
+}
+
+// The channel-level iTunes metadata is optional, so the golden feeds above are
+// rendered without any of it. These cover the branches that set it.
+func TestRenderSetsChannelMetadata(t *testing.T) {
+	renderer := &Renderer{
+		Host:      "http://www.example-podcast.com",
+		MediaPath: "/media/",
+		Author:    "Athenaeum",
+		Email:     "books@example.com",
+		Explicit:  true,
+		ImageLink: "http://www.example-podcast.com/static/itunes_image.jpg",
+		Language:  "EN",
+	}
+
+	rendered, err := renderer.Render(testbooks.Audiobooks, "Audiobooks", "Like movies in your mind!")
+
+	require.NoError(t, err)
+	feed := string(rendered)
+	assert.Contains(t, feed, "<itunes:author>Athenaeum</itunes:author>")
+	assert.Contains(t, feed, "<itunes:name>Athenaeum</itunes:name>")
+	assert.Contains(t, feed, "<itunes:email>books@example.com</itunes:email>")
+	assert.Contains(t, feed, "<itunes:explicit>yes</itunes:explicit>")
+	assert.Contains(t, feed, `<itunes:image href="http://www.example-podcast.com/static/itunes_image.jpg">`)
+	assert.Contains(t, feed, "<language>EN</language>")
+}
+
+// A Host that url.Parse rejects has to fail the build rather than produce a feed
+// full of broken enclosure URLs, which are also the GUIDs.
+func TestRenderRejectsUnparseableHost(t *testing.T) {
+	renderer := &Renderer{Host: "http://[::1", MediaPath: "/media/"}
+
+	_, err := renderer.Render(testbooks.Audiobooks, "Audiobooks", "Like movies in your mind!")
+
+	require.Error(t, err)
+}
+
+// Podcast clients disagree about negative timestamps, so a release date before
+// 1970 is clamped up to the epoch — plus the eight hour offset every pubDate gets.
+func TestPubDateClampsPreUnixEpochDates(t *testing.T) {
+	preEpoch := toml.LocalDate{Year: 1968, Month: 11, Day: 1}
+	book := audiobooks.Audiobook{Title: "A Wizard of Earthsea", ReleaseDate: &preEpoch}
+
+	clamping := &Renderer{HandlePreUnixEpoch: true}
+	assert.Equal(t, unixEpoch.Add(8*time.Hour), clamping.pubDate(&book))
+
+	passingThrough := &Renderer{}
+	assert.Equal(t, preEpoch.AsTime(time.UTC).Add(8*time.Hour), passingThrough.pubDate(&book))
+}
+
+func TestSummaryHTMLRepeatsTitleForSubtitledBook(t *testing.T) {
+	summary := summaryHTML(&audiobooks.Audiobook{
+		Title:    "What If?",
+		Subtitle: "Serious Scientific Answers to Absurd Hypothetical Questions",
+		Authors:  []string{"Randall Munroe"},
+	})
+
+	assert.Contains(t, summary, "<h1>What If?</h1>")
+	// Reproduces the original: the title, not the subtitle, is repeated.
+	assert.Contains(t, summary, "<h4>What If?</h4>")
+	assert.NotContains(t, summary, "Absurd Hypothetical")
+}
+
+func TestSummaryHTMLDescriptionFormats(t *testing.T) {
+	tests := []struct {
+		name   string
+		format description.Format
+		text   string
+		want   string
+	}{
+		{
+			name:   "markdown becomes HTML",
+			format: description.Markdown,
+			text:   "A *terrible* shadow.",
+			want:   "<em>terrible</em>",
+		},
+		{
+			name:   "HTML passes through",
+			format: description.HTML,
+			text:   "<p>A <em>terrible</em> shadow.</p>",
+			want:   "<p>A <em>terrible</em> shadow.</p>",
+		},
+		{
+			name:   "plain text becomes paragraphs",
+			format: description.Plain,
+			text:   "First line.\nSecond line.",
+			want:   "<p>First line.</p><p>Second line.</p>",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			summary := summaryHTML(&audiobooks.Audiobook{
+				Title:       "A Wizard of Earthsea",
+				Authors:     []string{"Ursula K. Le Guin"},
+				Description: &description.Description{Text: test.text, Format: test.format},
+			})
+
+			assert.Contains(t, summary, test.want)
+		})
+	}
+}
+
+func TestSummaryHTMLIncludesSeriesAndNarrator(t *testing.T) {
+	summary := summaryHTML(&audiobooks.Audiobook{
+		Title:     "A Wizard of Earthsea",
+		Authors:   []string{"Ursula K. Le Guin"},
+		Narrators: []string{"Kobna Holdbrook-Smith"},
+		Series:    &audiobooks.Series{Title: "Earthsea", Sequence: decimal.NewFromInt(1)},
+	})
+
+	assert.Contains(t, summary, "<h2>By Ursula K. Le Guin</h2>")
+	assert.Contains(t, summary, "<h4>Earthsea Book 1</h4>")
+	assert.Contains(t, summary, "<h4>Narrated by Kobna Holdbrook-Smith</h4>")
 }
