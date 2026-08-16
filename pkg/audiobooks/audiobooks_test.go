@@ -87,7 +87,7 @@ func TestAudiobook_JSONMarshaling(t *testing.T) {
 		MIMEType:  "audio/mp4a-latm",
 		Series: &Series{
 			Title:    "Test Series",
-			Sequence: decimal.NewFromFloat(1.5),
+			Sequence: Sequence{First: decimal.NewFromFloat(1.5)},
 		},
 		Description: &description.Description{
 			Text:   "A test audiobook for unit testing",
@@ -120,7 +120,7 @@ func TestAudiobook_TOMLMarshaling(t *testing.T) {
 		MIMEType:  "audio/mp4a-latm",
 		Series: &Series{
 			Title:    "TOML Test Series",
-			Sequence: decimal.NewFromInt(2),
+			Sequence: Sequence{First: decimal.NewFromInt(2)},
 		},
 		Description: &description.Description{
 			Text:   "A test audiobook for TOML serialisation testing",
@@ -180,22 +180,32 @@ func TestAudiobook_EmptySlicesMarshaling(t *testing.T) {
 	assert.Equal(t, book.Title, tomlUnmarshaled.Title)
 }
 
-func TestSeries_DecimalSequence(t *testing.T) {
-	series := Series{
-		Title:    "Test Series",
-		Sequence: decimal.NewFromFloat(1.5),
+func TestSeries_SequenceJSON(t *testing.T) {
+	tests := []struct {
+		name     string
+		sequence string
+		expected string
+	}{
+		{"Whole number", "2", `{"sequence":"2","title":"Test Series"}`},
+		{"Decimal", "1.5", `{"sequence":"1.5","title":"Test Series"}`},
+		{"Omnibus", "1-3", `{"sequence":"1-3","title":"Test Series"}`},
 	}
 
-	// Test that decimal sequence is preserved in JSON
-	data, err := json.Marshal(series)
-	require.NoError(t, err)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			sequence, err := ParseSequence(testCase.sequence)
+			require.NoError(t, err)
+			series := Series{Title: "Test Series", Sequence: sequence}
 
-	var unmarshaled Series
-	err = json.Unmarshal(data, &unmarshaled)
-	require.NoError(t, err)
+			data, err := json.Marshal(series)
+			require.NoError(t, err)
+			assert.JSONEq(t, testCase.expected, string(data))
 
-	assert.Equal(t, series.Title, unmarshaled.Title)
-	assert.True(t, series.Sequence.Equal(unmarshaled.Sequence))
+			var unmarshaled Series
+			require.NoError(t, json.Unmarshal(data, &unmarshaled))
+			assert.Equal(t, series, unmarshaled)
+		})
+	}
 }
 
 func TestGetPersonsString_EdgeCases(t *testing.T) {

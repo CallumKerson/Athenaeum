@@ -54,7 +54,10 @@ var Audiobooks = []audiobooks.Audiobook{
 				"and crossed death's threshold to restore the balance.</p>",
 			Format: description.HTML,
 		},
-		Series: &audiobooks.Series{Sequence: decimal.NewFromInt(1), Title: "Earthsea"},
+		Series: &audiobooks.Series{
+			Sequence: audiobooks.Sequence{First: decimal.NewFromInt(1)},
+			Title:    "Earthsea",
+		},
 	},
 }
 

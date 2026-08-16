@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/shopspring/decimal"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks/description"
 )
@@ -31,8 +30,8 @@ type Audiobook struct {
 
 // Series - representation of a series of books.
 type Series struct {
-	Sequence decimal.Decimal `json:"sequence"`
-	Title    string          `json:"title"`
+	Sequence Sequence `json:"sequence"`
+	Title    string   `json:"title"`
 }
 
 func (b *Audiobook) GetAuthor() string {

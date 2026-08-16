@@ -164,6 +164,34 @@ func TestBookDateMatchesTheFeed(t *testing.T) {
 	assert.Empty(t, books[1].Date)
 }
 
+// An omnibus stands in for several books in its series, and the page says so.
+func TestBookSeriesLine(t *testing.T) {
+	tests := []struct {
+		name     string
+		sequence string
+		expected string
+	}{
+		{"Single book", "1", "Earthsea book 1"},
+		{"Omnibus", "1-3", "Earthsea books 1-3"},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			sequence, err := audiobooks.ParseSequence(testCase.sequence)
+			require.NoError(t, err)
+
+			audiobook := book("Earthsea", nil, []string{"Ursula K. Le Guin"}, nil, nil)
+			audiobook.Series = &audiobooks.Series{Title: "Earthsea", Sequence: sequence}
+
+			books := newHTMLBuilder(Plan([]audiobooks.Audiobook{audiobook}, nil)).allBooks().Books
+			require.Len(t, books, 1)
+
+			assert.Equal(t, testCase.expected, books[0].Series)
+			assert.Contains(t, books[0].Search, strings.ToLower(testCase.expected))
+		})
+	}
+}
+
 // A book is found by anything a reader might remember about it.
 func TestBookSearchTextCoversEveryField(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{{
