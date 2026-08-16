@@ -116,6 +116,18 @@ Title = "Earthsea"
 
 The only required fields are `Title`, `Authors` and `ReleaseDate`.
 
+`Series.Sequence` is a book's place in its series.
+It is usually a single number, and a decimal such as `"1.5"` covers a novella that sits between two books.
+An omnibus gives the span it covers instead, written as two numbers joined by a hyphen:
+
+```toml
+[Series]
+Sequence = "1-3"
+Title = "Earthsea"
+```
+
+Such a book is listed as `Earthsea books 1-3` rather than `Earthsea book 1`.
+
 ## Installation
 
 Via [Homebrew](https://brew.sh):

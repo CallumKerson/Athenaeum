@@ -156,6 +156,37 @@ func TestRenderIsDeterministic(t *testing.T) {
 	assert.Equal(t, string(first), string(second))
 }
 
+// An omnibus stands in for several books in its series, and its heading says so.
+func TestRenderSeriesHeading(t *testing.T) {
+	tests := []struct {
+		name     string
+		sequence string
+		expected string
+	}{
+		{"Single book", "1", "<h4>Earthsea Book 1</h4>"},
+		{"Omnibus", "1-3", "<h4>Earthsea Books 1-3</h4>"},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			sequence, err := audiobooks.ParseSequence(testCase.sequence)
+			require.NoError(t, err)
+
+			renderer := &Renderer{Host: "https://example.com", MediaPath: "/media"}
+			rendered, err := renderer.Render([]audiobooks.Audiobook{{
+				Title:    "Earthsea",
+				Authors:  []string{"Ursula K. Le Guin"},
+				Path:     "/Ursula K Le Guin/Earthsea/Earthsea.m4b",
+				MIMEType: "audio/mp4a-latm",
+				Series:   &audiobooks.Series{Title: "Earthsea", Sequence: sequence},
+			}}, "Audiobooks", "Like movies in your mind!")
+
+			require.NoError(t, err)
+			assert.Contains(t, string(rendered), testCase.expected)
+		})
+	}
+}
+
 // A book with no release date must not panic the renderer, even though every
 // book in the real library has one.
 func TestRenderWithoutReleaseDate(t *testing.T) {
