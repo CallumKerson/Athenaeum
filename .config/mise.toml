@@ -1,6 +1,6 @@
 [tools]
 "github:golangci/golangci-lint" = "2.12.2"
-go = "1.26.5"
+go = "1.26.6"
 hk = "latest"
 typos = "latest"
 rumdl = "latest"
