@@ -2,7 +2,7 @@ module github.com/CallumKerson/Athenaeum
 
 go 1.25
 
-toolchain go1.26.5
+toolchain go1.26.6
 
 require (
 	github.com/CallumKerson/podcasts/v2 v2.1.0
