@@ -7,7 +7,7 @@ toolchain go1.26.5
 require (
 	github.com/CallumKerson/podcasts/v2 v2.1.0
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
-	github.com/gomarkdown/markdown v0.0.0-20260725000948-8435af3f5984
+	github.com/gomarkdown/markdown v0.0.0-20260824154242-13c5cf49db8d
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/cobra v1.10.2
