@@ -1,44 +1,47 @@
-amends "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Config.pkl"
-import "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Builtins.pkl"
+amends "package://github.com/jdx/hk/releases/download/v2.0.1/hk@2.0.1#/Config.pkl"
+
+import "package://github.com/jdx/hk/releases/download/v2.0.1/hk@2.0.1#/Builtins.pkl"
+
+min_hk_version = "2.0.1"
 
 local fast_linters = new Mapping<String, Step> {
-    ["gomodtidy"] = Builtins.gomod_tidy
-    ["gofmt"] = Builtins.go_fmt
-    ["rumdl"] = Builtins.rumdl
-    ["oxfmt"] = (Builtins.oxfmt) {
-        check = "oxfmt --no-error-on-unmatched-pattern --check {{ files }}"
-        check_list_files = "oxfmt --no-error-on-unmatched-pattern --list-different {{ files }}"
-        fix = "oxfmt --no-error-on-unmatched-pattern --write {{ files }}"
-    }
-    ["newlines"] = Builtins.newlines
-    ["trailing_whitespace"] = Builtins.trailing_whitespace
+  ["gomodtidy"] = Builtins.gomod_tidy
+  ["gofmt"] = Builtins.go_fmt
+  ["rumdl"] = Builtins.rumdl
+  ["oxfmt"] = (Builtins.oxfmt) {
+    check = "oxfmt --no-error-on-unmatched-pattern --check {{ files }}"
+    check_list_files = "oxfmt --no-error-on-unmatched-pattern --list-different {{ files }}"
+    fix = "oxfmt --no-error-on-unmatched-pattern --write {{ files }}"
+  }
+  ["newlines"] = Builtins.newlines
+  ["trailing_whitespace"] = Builtins.trailing_whitespace
 }
 
 local slow_linters = new Mapping<String, Step> {
-    ["golangci-lint"] = Builtins.golangci_lint
+  ["golangci-lint"] = Builtins.golangci_lint
 }
 
 local all_linters = new Mapping<String, Step> {
-    ...fast_linters
-    ...slow_linters
+  ...fast_linters
+  ...slow_linters
 }
 
 hooks {
-    ["pre-commit"] {
-        fix = true
-        stash = "git"
-        steps = fast_linters
-    }
-    ["pre-push"] {
-        fix = true
-        stash = "git"
-        steps = all_linters
-    }
-    ["fix"] {
-        fix = true
-        steps = all_linters
-    }
-    ["check"] {
-        steps = all_linters
-    }
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps = fast_linters
+  }
+  ["pre-push"] {
+    fix = true
+    stash = "git"
+    steps = all_linters
+  }
+  ["fix"] {
+    fix = true
+    steps = all_linters
+  }
+  ["check"] {
+    steps = all_linters
+  }
 }
