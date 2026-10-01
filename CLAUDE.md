@@ -52,8 +52,8 @@ There is no server process, no database and no request path.
   Rendering is deterministic — no timestamps in the output — and `fsutil.WriteIfChanged` skips unchanged files so their mtimes, and therefore the web server's ETags, stay stable.
 - **One book can be reachable under several spellings.**
   Names that normalise identically (`V.E. Schwab` / `V. E. Schwab`) each need their own feed path, and every genre gets a feed even when empty.
-- **The build refuses to write into a directory it does not own**, recognised by the `.athenaeum-site` marker file,
-  because it sweeps files it did not write.
+- **The build refuses to write into a directory it does not own**, recognised by the `.athenaeum-site` marker file.
+  The sweep only removes paths listed in the previous build's `.athenaeum-manifest`, never other files in the site root.
 
 ### Configuration
 
