@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pelletier/go-toml/v2"
 
@@ -100,6 +101,10 @@ func LoadBuildConfig(pathToConfigFile string, out io.Writer) (*BuildConfig, erro
 		}
 		pathToConfigFile = defaultPath
 	}
+	pathToConfigFile, err := expandHome(pathToConfigFile)
+	if err != nil {
+		return nil, err
+	}
 
 	contents, err := os.ReadFile(pathToConfigFile)
 	if err != nil {
@@ -129,6 +134,19 @@ func noteLegacyConfig(out io.Writer) {
 		fmt.Fprintln(out, "Found the old server config at", legacy+".",
 			"`athenaeum build` reads TOML from the XDG path instead.")
 	}
+}
+
+// expandHome expands a leading ~ the way a shell would, because TOML values and
+// `--flag=~/path` never pass through one.
+func expandHome(path string) (string, error) {
+	if path != "~" && !strings.HasPrefix(path, "~/") {
+		return path, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, path[1:]), nil
 }
 
 // DefaultConfigPath is $XDG_CONFIG_HOME/athenaeum/athenaeum.toml.

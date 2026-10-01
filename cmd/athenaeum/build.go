@@ -132,6 +132,12 @@ func resolveConfig(flags *buildFlags, out io.Writer) (*BuildConfig, error) {
 	if cfg.Site.Root == "" {
 		return nil, errNoSiteRoot
 	}
+	if cfg.Media.Root, err = expandHome(cfg.Media.Root); err != nil {
+		return nil, err
+	}
+	if cfg.Site.Root, err = expandHome(cfg.Site.Root); err != nil {
+		return nil, err
+	}
 	if cfg.Host, err = normaliseHost(cfg.Host); err != nil {
 		return nil, err
 	}
@@ -162,9 +168,11 @@ func scanLibrary(
 	flags *buildFlags,
 	logger *slog.Logger,
 ) ([]audiobooks.Audiobook, *scan.Cache, error) {
-	cachePath := flags.cachePath
+	cachePath, err := expandHome(flags.cachePath)
+	if err != nil {
+		return nil, nil, err
+	}
 	if cachePath == "" {
-		var err error
 		if cachePath, err = DefaultCachePath(); err != nil {
 			return nil, nil, err
 		}
