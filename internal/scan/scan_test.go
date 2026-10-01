@@ -73,6 +73,38 @@ func TestLibrarySkipsM4BWithoutMetadata(t *testing.T) {
 	assert.Empty(t, books)
 }
 
+// An unreadable author directory should cost that author's books, not the
+// whole build.
+func TestLibrarySkipsUnreadableDirectory(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("root can read any directory")
+	}
+	root := t.TempDir()
+	readable := filepath.Join(root, "Readable")
+	unreadable := filepath.Join(root, "Unreadable")
+	require.NoError(t, os.MkdirAll(readable, 0o755))
+	require.NoError(t, os.MkdirAll(unreadable, 0o755))
+	require.NoError(t, copyFile(
+		filepath.Join(mediaRoot, "Ursula K Le Guin", "Earthsea", "1 A Wizard of Earthsea", "A Wizard of Earthsea.m4b"),
+		filepath.Join(readable, "Book.m4b"),
+	))
+	require.NoError(t, os.WriteFile(filepath.Join(readable, "Book.toml"), []byte("Title = \"Readable\"\n"), 0o644))
+	require.NoError(t, os.Chmod(unreadable, 0o000))
+	t.Cleanup(func() { _ = os.Chmod(unreadable, 0o755) })
+
+	books, err := Library(root, NewCache(), testLogger())
+
+	require.NoError(t, err)
+	require.Len(t, books, 1)
+	assert.Equal(t, "Readable", books[0].Title)
+}
+
+func TestLibraryFailsWhenRootIsMissing(t *testing.T) {
+	_, err := Library(filepath.Join(t.TempDir(), "absent"), NewCache(), testLogger())
+
+	require.ErrorIs(t, err, os.ErrNotExist)
+}
+
 func TestLibraryUsesAndFillsCache(t *testing.T) {
 	cache := NewCache()
 

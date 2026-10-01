@@ -40,7 +40,16 @@ func Library(mediaRoot string, cache *Cache, logger *slog.Logger) ([]audiobooks.
 
 	err := filepath.WalkDir(mediaRoot, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
-			return walkErr
+			// Without the root there is no library at all; anything below it is
+			// one unreadable corner of it, which costs only the books inside.
+			if path == mediaRoot {
+				return walkErr
+			}
+			logger.Warn("could not read path in the media root, skipping", "path", path, "error", walkErr)
+			if entry != nil && entry.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
 		}
 		if entry.IsDir() || filepath.Ext(entry.Name()) != ".m4b" {
 			return nil
