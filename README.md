@@ -75,6 +75,7 @@ athenaeum.testserver.net {
 It only writes files whose contents have changed, which keeps modification times — and so the web server's ETags — stable, and it caches the durations it reads out of each `.m4b` so that a rebuild only has to parse newly added books.
 
 Files left over from a previous build are removed.
+Only files a build wrote, which it lists in `.athenaeum-manifest`, are ever removed, so anything else you put in the output directory, such as a `robots.txt`, is left alone.
 As a guard against pointing `Site.Root` at the wrong directory, the build refuses to write into a non-empty directory it did not create, which it recognises by the `.athenaeum-site` marker file it leaves there.
 
 If `ThirdParty.NotifyOvercast` is set, a build that changed something pings Overcast to re-fetch the feeds.

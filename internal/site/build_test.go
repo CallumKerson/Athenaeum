@@ -116,12 +116,16 @@ func TestBuildSkipsUnchangedFiles(t *testing.T) {
 
 func TestBuildSweepsStaleFiles(t *testing.T) {
 	root := t.TempDir()
-	_, err := buildTestSite(t, root)
-	require.NoError(t, err)
-
 	stale := filepath.Join(root, "podcast", "authors", "Someone Who Left", "feed.rss")
-	require.NoError(t, os.MkdirAll(filepath.Dir(stale), 0o755))
-	require.NoError(t, os.WriteFile(stale, []byte("old"), 0o644))
+
+	content := testPlan(t)
+	content.Feeds = append(content.Feeds, Page{
+		Title: "Someone Who Left",
+		Paths: []string{"podcast/authors/Someone Who Left/feed.rss"},
+	})
+	_, err := Build(root, content, testRenderer(), true, testLogger())
+	require.NoError(t, err)
+	require.FileExists(t, stale)
 
 	result, err := buildTestSite(t, root)
 	require.NoError(t, err)
@@ -129,6 +133,28 @@ func TestBuildSweepsStaleFiles(t *testing.T) {
 	assert.Equal(t, 1, result.Removed)
 	assert.NoFileExists(t, stale)
 	assert.NoDirExists(t, filepath.Dir(stale), "emptied directories should be pruned")
+	assert.DirExists(t, filepath.Join(root, "podcast", "authors"))
+}
+
+// Only files a previous build wrote are swept. Anything else in the site root —
+// a robots.txt, or a symlink to the media library — belongs to someone else.
+func TestBuildKeepsFilesItDidNotWrite(t *testing.T) {
+	root := t.TempDir()
+	_, err := buildTestSite(t, root)
+	require.NoError(t, err)
+
+	robots := filepath.Join(root, "robots.txt")
+	require.NoError(t, os.WriteFile(robots, []byte("User-agent: *\n"), 0o644))
+	media := filepath.Join(root, "media")
+	require.NoError(t, os.Symlink(t.TempDir(), media))
+
+	result, err := buildTestSite(t, root)
+	require.NoError(t, err)
+
+	assert.Zero(t, result.Removed)
+	assert.FileExists(t, robots)
+	_, err = os.Lstat(media)
+	assert.NoError(t, err)
 }
 
 func TestBuildKeepsStaleFilesWhenSweepDisabled(t *testing.T) {
@@ -136,12 +162,33 @@ func TestBuildKeepsStaleFilesWhenSweepDisabled(t *testing.T) {
 	_, err := buildTestSite(t, root)
 	require.NoError(t, err)
 
-	stale := filepath.Join(root, "podcast", "stray.rss")
-	require.NoError(t, os.WriteFile(stale, []byte("old"), 0o644))
-
 	_, err = Build(root, Content{}, testRenderer(), false, testLogger())
 	require.NoError(t, err)
-	assert.FileExists(t, stale)
+	assert.FileExists(t, filepath.Join(root, "podcast", "feed.rss"))
+
+	// The skipped files are still remembered as the build's own, so the next
+	// build that does sweep removes them.
+	result, err := Build(root, Content{}, testRenderer(), true, testLogger())
+	require.NoError(t, err)
+	assert.Positive(t, result.Removed)
+	assert.NoFileExists(t, filepath.Join(root, "podcast", "feed.rss"))
+}
+
+// The manifest is read back from disk, so a hand-edited one must not be able to
+// send the sweep outside the site root.
+func TestBuildIgnoresManifestPathsOutsideRoot(t *testing.T) {
+	parent := t.TempDir()
+	root := filepath.Join(parent, "site")
+	outside := filepath.Join(parent, "outside.txt")
+	require.NoError(t, os.WriteFile(outside, []byte("mine"), 0o644))
+
+	_, err := Build(root, Content{}, testRenderer(), true, testLogger())
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(root, manifestName), []byte("../outside.txt\n"), 0o644))
+
+	_, err = Build(root, Content{}, testRenderer(), true, testLogger())
+	require.NoError(t, err)
+	assert.FileExists(t, outside)
 }
 
 // The sweep deletes files, so it must never take ownership of a directory it

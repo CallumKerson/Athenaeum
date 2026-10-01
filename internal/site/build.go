@@ -23,6 +23,10 @@ const (
 	// have files deleted from it, so pointing --out at a home directory cannot
 	// destroy anything.
 	MarkerName = ".athenaeum-site"
+	// manifestName lists every path the last build published. The sweep only
+	// removes paths listed there, so files someone else put in the site root —
+	// a robots.txt, or a symlink to the media library — are never touched.
+	manifestName = ".athenaeum-manifest"
 
 	staticDir = "static"
 	indexName = "index.html"
@@ -50,10 +54,14 @@ func Build(root string, content Content, renderer *feed.Renderer, sweep bool, lo
 	if err := prepareRoot(root); err != nil {
 		return result, err
 	}
+	previous, err := readManifest(root)
+	if err != nil {
+		return result, err
+	}
 
 	// Every path the site should contain after this build, used to decide what to
-	// sweep. The marker is included so the sweep never deletes its own guard.
-	published := map[string]bool{MarkerName: true}
+	// sweep.
+	published := map[string]bool{}
 
 	writeFile := func(relPath string, contents []byte) error {
 		published[relPath] = true
@@ -87,14 +95,20 @@ func Build(root string, content Content, renderer *feed.Renderer, sweep bool, lo
 	}
 
 	if sweep {
-		removed, err := sweepStale(root, published, logger)
+		removed, err := sweepStale(root, previous, published, logger)
 		if err != nil {
 			return result, err
 		}
 		result.Removed = removed
+	} else {
+		// Unswept files stay in the manifest, so a later build that does sweep
+		// still knows they are its own.
+		for relPath := range previous {
+			published[relPath] = true
+		}
 	}
 
-	return result, nil
+	return result, writeManifest(root, published)
 }
 
 // prepareRoot creates the output directory and its marker, refusing to take
@@ -146,51 +160,75 @@ func writeAssets(content Content, writeFile func(relPath string, contents []byte
 	return nil
 }
 
-// sweepStale removes files this build did not publish, then prunes the
-// directories that leaves empty, so a renamed author does not linger forever.
-func sweepStale(root string, published map[string]bool, logger *slog.Logger) (int, error) {
-	var stale, dirs []string
-
-	err := filepath.WalkDir(root, func(fullPath string, entry fs.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		relPath, relErr := filepath.Rel(root, fullPath)
-		if relErr != nil {
-			return relErr
-		}
-		if relPath == "." {
-			return nil
-		}
-		if entry.IsDir() {
-			dirs = append(dirs, fullPath)
-			return nil
-		}
-		if !published[filepath.ToSlash(relPath)] {
-			stale = append(stale, fullPath)
-		}
-		return nil
-	})
+// readManifest returns the paths the previous build published. A site built
+// before the manifest existed has none, so nothing is swept until one is written.
+func readManifest(root string) (map[string]bool, error) {
+	contents, err := os.ReadFile(filepath.Join(root, manifestName))
+	if errors.Is(err, os.ErrNotExist) {
+		return map[string]bool{}, nil
+	}
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	for _, fullPath := range stale {
-		if err := os.Remove(fullPath); err != nil {
-			return 0, err
+	paths := map[string]bool{}
+	for relPath := range strings.SplitSeq(string(contents), "\n") {
+		// A hand-edited manifest must not be able to point the sweep outside root.
+		if relPath != "" && filepath.IsLocal(filepath.FromSlash(relPath)) {
+			paths[relPath] = true
 		}
-		logger.Debug("removed stale file", "path", fullPath)
 	}
+	return paths, nil
+}
 
-	// Deepest first, so a directory emptied by removing its children is itself
-	// removable. os.Remove refuses to delete non-empty directories, which is
-	// exactly the check we want.
-	sort.Slice(dirs, func(i, j int) bool {
-		return strings.Count(dirs[i], string(filepath.Separator)) > strings.Count(dirs[j], string(filepath.Separator))
-	})
-	for _, dir := range dirs {
-		_ = os.Remove(dir)
+func writeManifest(root string, published map[string]bool) error {
+	paths := make([]string, 0, len(published))
+	for relPath := range published {
+		paths = append(paths, relPath)
 	}
+	sort.Strings(paths)
+	_, err := fsutil.WriteIfChanged(filepath.Join(root, manifestName), []byte(strings.Join(paths, "\n")+"\n"))
+	return err
+}
 
-	return len(stale), nil
+// sweepStale removes the files the previous build published and this one did
+// not, then prunes the directories that leaves empty, so a renamed author does
+// not linger forever.
+func sweepStale(root string, previous, published map[string]bool, logger *slog.Logger) (int, error) {
+	var stale []string
+	for relPath := range previous {
+		if !published[relPath] {
+			stale = append(stale, relPath)
+		}
+	}
+	sort.Strings(stale)
+
+	removed := 0
+	for _, relPath := range stale {
+		fullPath := filepath.Join(root, filepath.FromSlash(relPath))
+		err := os.Remove(fullPath)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return removed, err
+		}
+		removed++
+		logger.Debug("removed stale file", "path", relPath)
+		pruneEmptyDirs(root, filepath.Dir(fullPath))
+	}
+	return removed, nil
+}
+
+// pruneEmptyDirs removes dir and its parents up to, but not including, root.
+// os.Remove refuses to delete a non-empty directory, which is exactly the check
+// we want, so the first failure ends the climb.
+func pruneEmptyDirs(root, dir string) {
+	for {
+		relDir, err := filepath.Rel(root, dir)
+		if err != nil || relDir == "." || !filepath.IsLocal(relDir) || os.Remove(dir) != nil {
+			return
+		}
+		dir = filepath.Dir(dir)
+	}
 }
