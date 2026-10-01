@@ -26,6 +26,12 @@ func WriteAtomic(path string, contents []byte) error {
 		tmp.Close()
 		return err
 	}
+	// Without a sync, a crash shortly after the rename can leave the final name
+	// pointing at an empty file on filesystems that delay allocation.
+	if err = tmp.Sync(); err != nil {
+		tmp.Close()
+		return err
+	}
 	if err := tmp.Close(); err != nil {
 		return err
 	}
@@ -34,6 +40,8 @@ func WriteAtomic(path string, contents []byte) error {
 	if err := os.Chmod(tmpName, 0o644); err != nil {
 		return err
 	}
+	// The directory is not synced after the rename: losing the rename in a crash
+	// leaves the previous, complete file, which the next build rewrites anyway.
 	return os.Rename(tmpName, path)
 }
 
