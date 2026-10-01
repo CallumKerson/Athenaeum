@@ -3,6 +3,9 @@ import "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Builtins.
 
 min_hk_version = "2.4.0"
 
+// mise verifies its lockfile and sidecar locks by digest, so formatting them breaks `mise install --locked`
+exclude = List(".config/mise.lock", ".config/mise/locks")
+
 local fast_linters = new Mapping<String, Step> {
     ["gomodtidy"] = Builtins.gomod_tidy
     ["gofmt"] = Builtins.go_fmt
