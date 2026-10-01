@@ -76,6 +76,7 @@ It only writes files whose contents have changed, which keeps modification times
 
 Files left over from a previous build are removed.
 Only files a build wrote, which it lists in `.athenaeum-manifest`, are ever removed, so anything else you put in the output directory, such as a `robots.txt`, is left alone.
+A build that finds no audiobooks at all fails rather than emptying every feed, since that usually means the media root is not mounted; pass `--allow-empty` to build anyway.
 As a guard against pointing `Site.Root` at the wrong directory, the build refuses to write into a non-empty directory it did not create, which it recognises by the `.athenaeum-site` marker file it leaves there.
 
 If `ThirdParty.NotifyOvercast` is set, a build that changed something pings Overcast to re-fetch the feeds.

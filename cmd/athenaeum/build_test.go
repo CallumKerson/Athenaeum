@@ -114,6 +114,44 @@ func TestBuildCommandRejectsForeignOutputDirectory(t *testing.T) {
 	assert.FileExists(t, filepath.Join(out, "important.txt"))
 }
 
+// An unmounted media root looks like an empty library. Building it would empty
+// every feed subscribers have, so it is refused unless asked for.
+func TestBuildCommandRefusesEmptyLibrary(t *testing.T) {
+	isolateEnv(t)
+	out := t.TempDir()
+	cachePath := filepath.Join(t.TempDir(), "m4b.json")
+	run := func(mediaRoot string, extraArgs ...string) error {
+		cmd := NewRootCommand()
+		cmd.SetOut(&bytes.Buffer{})
+		cmd.SetErr(&bytes.Buffer{})
+		cmd.SetArgs(append([]string{
+			"build", "--media-root", mediaRoot, "--out", out,
+			"--host", "https://books.example.com", "--cache", cachePath,
+		}, extraArgs...))
+		return cmd.ExecuteContext(context.Background())
+	}
+	require.NoError(t, run(mediaRoot))
+	feed, err := os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
+	require.NoError(t, err)
+	cache, err := os.ReadFile(cachePath)
+	require.NoError(t, err)
+
+	err = run(t.TempDir())
+
+	require.ErrorIs(t, err, errNoBooks)
+	after, readErr := os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
+	require.NoError(t, readErr)
+	assert.Equal(t, string(feed), string(after))
+	cacheAfter, readErr := os.ReadFile(cachePath)
+	require.NoError(t, readErr)
+	assert.Equal(t, string(cache), string(cacheAfter))
+
+	require.NoError(t, run(t.TempDir(), "--allow-empty"))
+	after, err = os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(after), "A Wizard of Earthsea")
+}
+
 func TestBuildCommandRejectsUnknownExcludedGenre(t *testing.T) {
 	isolateEnv(t)
 	configPath := filepath.Join(t.TempDir(), configName)
