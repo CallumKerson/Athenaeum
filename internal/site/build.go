@@ -203,9 +203,20 @@ func sweepStale(root string, previous, published map[string]bool, logger *slog.L
 	}
 	sort.Strings(stale)
 
+	publishedFolded := make(map[string]string, len(published))
+	for relPath := range published {
+		publishedFolded[strings.ToLower(relPath)] = relPath
+	}
+
 	removed := 0
 	for _, relPath := range stale {
 		fullPath := filepath.Join(root, filepath.FromSlash(relPath))
+		// On a case-insensitive filesystem, a name whose spelling changed only in
+		// case was written into the old file, so removing the old name would
+		// delete the feed just published.
+		if current, ok := publishedFolded[strings.ToLower(relPath)]; ok && sameFile(root, relPath, current) {
+			continue
+		}
 		err := os.Remove(fullPath)
 		if errors.Is(err, os.ErrNotExist) {
 			continue
@@ -218,6 +229,15 @@ func sweepStale(root string, previous, published map[string]bool, logger *slog.L
 		pruneEmptyDirs(root, filepath.Dir(fullPath))
 	}
 	return removed, nil
+}
+
+func sameFile(root, relPath, otherRelPath string) bool {
+	info, err := os.Stat(filepath.Join(root, filepath.FromSlash(relPath)))
+	if err != nil {
+		return false
+	}
+	otherInfo, err := os.Stat(filepath.Join(root, filepath.FromSlash(otherRelPath)))
+	return err == nil && os.SameFile(info, otherInfo)
 }
 
 // pruneEmptyDirs removes dir and its parents up to, but not including, root.

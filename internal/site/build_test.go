@@ -174,6 +174,53 @@ func TestBuildKeepsStaleFilesWhenSweepDisabled(t *testing.T) {
 	assert.NoFileExists(t, filepath.Join(root, "podcast", "feed.rss"))
 }
 
+// On a case-insensitive filesystem, renaming an author from "Le Guin" to
+// "LE GUIN" writes the new feed into the old file. On a case-sensitive
+// filesystem a hard link stands in for that.
+func TestSweepKeepsFileRenamedOnlyInCase(t *testing.T) {
+	root := t.TempDir()
+	oldPath := filepath.Join(root, "podcast", "authors", "Le Guin", "feed.rss")
+	newPath := filepath.Join(root, "podcast", "authors", "LE GUIN", "feed.rss")
+	require.NoError(t, os.MkdirAll(filepath.Dir(oldPath), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Dir(newPath), 0o755))
+	require.NoError(t, os.WriteFile(newPath, []byte("feed"), 0o644))
+	if _, err := os.Stat(oldPath); err != nil {
+		require.NoError(t, os.Link(newPath, oldPath))
+	}
+
+	removed, err := sweepStale(root,
+		map[string]bool{"podcast/authors/Le Guin/feed.rss": true},
+		map[string]bool{"podcast/authors/LE GUIN/feed.rss": true},
+		testLogger())
+	require.NoError(t, err)
+
+	assert.Zero(t, removed)
+	assert.FileExists(t, oldPath)
+}
+
+// A case-only rename on a case-sensitive filesystem leaves two distinct files,
+// and the old one is stale.
+func TestSweepRemovesDistinctFileDifferingOnlyInCase(t *testing.T) {
+	root := t.TempDir()
+	oldPath := filepath.Join(root, "Le Guin.rss")
+	newPath := filepath.Join(root, "LE GUIN.rss")
+	require.NoError(t, os.WriteFile(newPath, []byte("new"), 0o644))
+	if _, err := os.Stat(oldPath); err == nil {
+		t.Skip("filesystem is case-insensitive")
+	}
+	require.NoError(t, os.WriteFile(oldPath, []byte("old"), 0o644))
+
+	removed, err := sweepStale(root,
+		map[string]bool{"Le Guin.rss": true},
+		map[string]bool{"LE GUIN.rss": true},
+		testLogger())
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, removed)
+	assert.NoFileExists(t, oldPath)
+	assert.FileExists(t, newPath)
+}
+
 // The manifest is read back from disk, so a hand-edited one must not be able to
 // send the sweep outside the site root.
 func TestBuildIgnoresManifestPathsOutsideRoot(t *testing.T) {
