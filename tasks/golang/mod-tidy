@@ -2,6 +2,6 @@
 #MISE sources=["go.mod", "go.sum"]
 #MISE outputs={auto = true}
 
-set -ex
+set -euxo pipefail
 
 go mod tidy
