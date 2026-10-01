@@ -87,7 +87,9 @@ sections = ["standard", "default", "localmodule"]
 
 [formatters.settings.gofumpt]
 module-path = "github.com/CallumKerson/Athenaeum"
-extra-rules = true
+
+[formatters.settings.gofumpt.extra]
+group-params = true
 
 [formatters.settings.golines]
 max-len = 120

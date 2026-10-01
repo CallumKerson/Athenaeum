@@ -97,7 +97,8 @@ func TestLibraryPicksUpMetadataEditsWithWarmCache(t *testing.T) {
 	tomlPath := filepath.Join(root, "Book.toml")
 	require.NoError(t, copyFile(
 		filepath.Join(mediaRoot, "Ursula K Le Guin", "Earthsea", "1 A Wizard of Earthsea", "A Wizard of Earthsea.m4b"),
-		m4bPath))
+		m4bPath,
+	))
 	require.NoError(t, os.WriteFile(tomlPath, []byte("Title = \"Before\"\n"), 0o644))
 
 	cache := NewCache()

@@ -118,7 +118,8 @@ func TestBuildCommandRejectsUnknownExcludedGenre(t *testing.T) {
 	isolateEnv(t)
 	configPath := filepath.Join(t.TempDir(), configName)
 	require.NoError(t, os.WriteFile(configPath, []byte(
-		"[ExclusionsFromMainFeed]\nGenres = [\"spycraft\"]\n"), 0o600))
+		"[ExclusionsFromMainFeed]\nGenres = [\"spycraft\"]\n",
+	), 0o600))
 
 	cmd := NewRootCommand()
 	cmd.SetOut(&bytes.Buffer{})
