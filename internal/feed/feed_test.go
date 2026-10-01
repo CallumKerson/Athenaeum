@@ -313,7 +313,7 @@ func TestSummaryHTMLIncludesSeriesAndNarrator(t *testing.T) {
 		Title:     "A Wizard of Earthsea",
 		Authors:   []string{"Ursula K. Le Guin"},
 		Narrators: []string{"Kobna Holdbrook-Smith"},
-		Series:    &audiobooks.Series{Title: "Earthsea", Sequence: decimal.NewFromInt(1)},
+		Series:    &audiobooks.Series{Title: "Earthsea", Sequence: audiobooks.Sequence{First: decimal.NewFromInt(1)}},
 	})
 
 	assert.Contains(t, summary, "<h2>By Ursula K. Le Guin</h2>")

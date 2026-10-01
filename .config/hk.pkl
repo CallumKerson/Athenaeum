@@ -1,5 +1,7 @@
-amends "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Config.pkl"
-import "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Builtins.pkl"
+amends "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Builtins.pkl"
+
+min_hk_version = "2.4.0"
 
 local fast_linters = new Mapping<String, Step> {
     ["gomodtidy"] = Builtins.gomod_tidy
@@ -10,7 +12,10 @@ local fast_linters = new Mapping<String, Step> {
         check_list_files = "oxfmt --no-error-on-unmatched-pattern --list-different {{ files }}"
         fix = "oxfmt --no-error-on-unmatched-pattern --write {{ files }}"
     }
-    ["newlines"] = Builtins.newlines
+    // Golden feeds are compared byte for byte with rendered output, which has no trailing newline
+    ["newlines"] = (Builtins.newlines) {
+        exclude = "internal/site/testdata/golden_feed.rss"
+    }
     ["trailing_whitespace"] = Builtins.trailing_whitespace
 }
 
