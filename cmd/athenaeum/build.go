@@ -26,6 +26,8 @@ var (
 	errNoMediaRoot = errors.New("no media root configured: set Media.Root or pass --media-root")
 	errNoSiteRoot  = errors.New("no output directory configured: set Site.Root or pass --out")
 	errOvercast    = errors.New("overcast ping failed")
+	errNoBooks     = errors.New("no audiobooks found in the media root: refusing to empty every feed " +
+		"(pass --allow-empty if that is intended)")
 )
 
 type buildFlags struct {
@@ -36,6 +38,7 @@ type buildFlags struct {
 	cachePath  string
 	noCache    bool
 	noSweep    bool
+	allowEmpty bool
 	verbose    bool
 }
 
@@ -58,6 +61,7 @@ func NewBuildCommand() *cobra.Command {
 	cmd.Flags().StringVar(&flags.cachePath, "cache", "", "path to the m4b duration cache")
 	cmd.Flags().BoolVar(&flags.noCache, "no-cache", false, "re-read every m4b instead of using the cache")
 	cmd.Flags().BoolVar(&flags.noSweep, "no-sweep", false, "keep files from previous builds that are now stale")
+	cmd.Flags().BoolVar(&flags.allowEmpty, "allow-empty", false, "build even when the media root holds no audiobooks")
 	cmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "log every file written")
 
 	return cmd
@@ -158,6 +162,12 @@ func scanLibrary(
 	books, err := scan.Library(cfg.Media.Root, cache, logger)
 	if err != nil {
 		return nil, nil, err
+	}
+	// An unmounted or emptied media root would otherwise publish empty feeds,
+	// sweep every other feed away and prune the whole cache. Checked before the
+	// cache is saved so that the cache survives too.
+	if len(books) == 0 && !flags.allowEmpty {
+		return nil, nil, fmt.Errorf("%w: %s", errNoBooks, cfg.Media.Root)
 	}
 
 	if !flags.noCache {
