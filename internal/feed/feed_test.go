@@ -241,7 +241,7 @@ func TestRenderSetsChannelMetadata(t *testing.T) {
 
 // A Host that url.Parse rejects has to fail the build rather than produce a feed
 // full of broken enclosure URLs, which are also the GUIDs.
-func TestRenderRejectsUnparseableHost(t *testing.T) {
+func TestRenderRejectsUnparsableHost(t *testing.T) {
 	renderer := &Renderer{Host: "http://[::1", MediaPath: "/media/"}
 
 	_, err := renderer.Render(testbooks.Audiobooks, "Audiobooks", "Like movies in your mind!")

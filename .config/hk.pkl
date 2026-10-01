@@ -20,6 +20,7 @@ local fast_linters = new Mapping<String, Step> {
         exclude = "internal/site/testdata/golden_feed.rss"
     }
     ["trailing_whitespace"] = Builtins.trailing_whitespace
+    ["typos"] = Builtins.typos
 }
 
 local slow_linters = new Mapping<String, Step> {
