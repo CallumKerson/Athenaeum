@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -25,6 +26,8 @@ const mediaPath = "/media"
 var (
 	errNoMediaRoot = errors.New("no media root configured: set Media.Root or pass --media-root")
 	errNoSiteRoot  = errors.New("no output directory configured: set Site.Root or pass --out")
+	errNoHost      = errors.New("no host configured: set Host or pass --host")
+	errInvalidHost = errors.New("host must be an absolute http or https URL")
 	errOvercast    = errors.New("overcast ping failed")
 	errNoBooks     = errors.New("no audiobooks found in the media root: refusing to empty every feed " +
 		"(pass --allow-empty if that is intended)")
@@ -106,8 +109,8 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 	return nil
 }
 
-// resolveConfig layers the flags over the config file and checks that the two
-// paths the build cannot invent for itself are present.
+// resolveConfig layers the flags over the config file and checks that the
+// paths and host the build cannot invent for itself are present.
 func resolveConfig(flags *buildFlags, out io.Writer) (*BuildConfig, error) {
 	cfg, err := LoadBuildConfig(flags.configPath, out)
 	if err != nil {
@@ -129,7 +132,25 @@ func resolveConfig(flags *buildFlags, out io.Writer) (*BuildConfig, error) {
 	if cfg.Site.Root == "" {
 		return nil, errNoSiteRoot
 	}
+	if cfg.Host, err = normaliseHost(cfg.Host); err != nil {
+		return nil, err
+	}
 	return cfg, nil
+}
+
+// normaliseHost checks that host can prefix the enclosure URLs, which are also
+// every item's GUID: a default or a relative host would publish GUIDs that
+// subscribers can never fetch. The trailing slash is trimmed once here so that
+// the artwork link and the Overcast prefix cannot gain a double slash.
+func normaliseHost(host string) (string, error) {
+	if host == "" {
+		return "", errNoHost
+	}
+	parsed, err := url.Parse(host)
+	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+		return "", fmt.Errorf("%w: %q", errInvalidHost, host)
+	}
+	return strings.TrimRight(host, "/"), nil
 }
 
 // scanLibrary walks the media root, returning the cache alongside the books so
