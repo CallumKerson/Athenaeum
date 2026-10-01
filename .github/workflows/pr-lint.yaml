@@ -3,6 +3,14 @@ name: PR Lint
 on:
   pull_request:
     branches: ["main"]
+    # edited is what re-runs the check after a title is fixed
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-title:

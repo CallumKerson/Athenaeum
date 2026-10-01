@@ -2,8 +2,6 @@
 
 set -euxo pipefail
 
-REPO_OWNER="${GH_REPO%%/*}"
-
 gh pr list --label "autorelease: pending" --state open --json number --jq '.[].number' | while read -r pr_number; do
     echo "Processing PR #${pr_number}"
     delay=1
@@ -17,7 +15,9 @@ gh pr list --label "autorelease: pending" --state open --json number --jq '.[].n
             sleep "$delay"
             delay=$((delay * 2))
         else
-            echo "Could not rebase PR #${pr_number} after 5 attempts"
+            # A warning rather than a failure: failing this job would also skip the
+            # goreleaser job that depends on it
+            echo "::warning::Could not rebase PR #${pr_number} after 5 attempts"
         fi
     done
 done
