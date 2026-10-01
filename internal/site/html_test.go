@@ -173,12 +173,17 @@ func TestBookSeriesLine(t *testing.T) {
 	}{
 		{"Single book", "1", "Earthsea book 1"},
 		{"Omnibus", "1-3", "Earthsea books 1-3"},
+		{"No sequence", "", "Earthsea"},
 	}
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			sequence, err := audiobooks.ParseSequence(testCase.sequence)
-			require.NoError(t, err)
+			var sequence *audiobooks.Sequence
+			if testCase.sequence != "" {
+				parsed, err := audiobooks.ParseSequence(testCase.sequence)
+				require.NoError(t, err)
+				sequence = &parsed
+			}
 
 			audiobook := book("Earthsea", nil, []string{"Ursula K. Le Guin"}, nil, nil)
 			audiobook.Series = &audiobooks.Series{Title: "Earthsea", Sequence: sequence}

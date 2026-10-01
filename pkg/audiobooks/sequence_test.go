@@ -127,3 +127,15 @@ func TestSequence_JSONOmnibus(t *testing.T) {
 	require.NoError(t, json.Unmarshal(data, &unmarshaled))
 	assert.Equal(t, sequence, unmarshaled)
 }
+
+// A series named without a place in it must stay distinct from a prequel
+// numbered 0.
+func TestSeries_TOMLWithoutSequence(t *testing.T) {
+	var series Series
+	require.NoError(t, toml.Unmarshal([]byte("Title = \"Earthsea\"\n"), &series))
+	assert.Nil(t, series.Sequence)
+
+	require.NoError(t, toml.Unmarshal([]byte("Sequence = \"0\"\nTitle = \"Earthsea\"\n"), &series))
+	require.NotNil(t, series.Sequence)
+	assert.Equal(t, "0", series.Sequence.String())
+}
