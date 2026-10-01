@@ -163,3 +163,44 @@ func TestGetGenresUnknownGenre(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "spycraft")
 }
+
+func TestExpandHome(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+
+	for path, expected := range map[string]string{
+		"~":             home,
+		"~/audiobooks":  filepath.Join(home, "audiobooks"),
+		"/srv/books":    "/srv/books",
+		"books/~/x":     "books/~/x",
+		"~someone/else": "~someone/else",
+		"":              "",
+	} {
+		actual, err := expandHome(path)
+		require.NoError(t, err, path)
+		assert.Equal(t, expected, actual, path)
+	}
+}
+
+// The README's example config uses ~ paths, and TOML values never pass through
+// a shell to have them expanded.
+func TestResolveConfigExpandsHomeInRoots(t *testing.T) {
+	isolateEnv(t)
+	home := os.Getenv("HOME")
+	configPath := filepath.Join(t.TempDir(), configName)
+	require.NoError(t, os.WriteFile(configPath, []byte(`
+Host = "https://books.example.com"
+
+[Media]
+Root = "~/audiobooks"
+
+[Site]
+Root = "~/Sites/athenaeum"
+`), 0o600))
+
+	cfg, err := resolveConfig(&buildFlags{configPath: configPath}, &bytes.Buffer{})
+
+	require.NoError(t, err)
+	assert.Equal(t, filepath.Join(home, "audiobooks"), cfg.Media.Root)
+	assert.Equal(t, filepath.Join(home, "Sites", "athenaeum"), cfg.Site.Root)
+}
