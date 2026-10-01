@@ -50,9 +50,10 @@ func TestWriteIfChanged(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, changed)
 
-	before, err := os.Stat(path)
-	require.NoError(t, err)
-	time.Sleep(10 * time.Millisecond)
+	// Backdating the file means a rewrite would show up as a new mtime even on a
+	// filesystem with coarse timestamps, where a short sleep could hide it.
+	backdated := time.Now().Add(-time.Hour).Truncate(time.Second)
+	require.NoError(t, os.Chtimes(path, backdated, backdated))
 
 	changed, err = WriteIfChanged(path, []byte("first"))
 	require.NoError(t, err)
@@ -60,7 +61,7 @@ func TestWriteIfChanged(t *testing.T) {
 
 	after, err := os.Stat(path)
 	require.NoError(t, err)
-	assert.Equal(t, before.ModTime(), after.ModTime())
+	assert.True(t, backdated.Equal(after.ModTime()), "unchanged file was rewritten")
 
 	changed, err = WriteIfChanged(path, []byte("second"))
 	require.NoError(t, err)

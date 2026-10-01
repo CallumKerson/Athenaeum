@@ -250,6 +250,15 @@ func TestBuildRefusesDirectoryWithoutMarker(t *testing.T) {
 	assert.FileExists(t, filepath.Join(root, "important.txt"))
 }
 
+func TestBuildRejectsRootThatIsAFile(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "site")
+	require.NoError(t, os.WriteFile(root, []byte("not a directory"), 0o644))
+
+	_, err := Build(root, Content{}, testRenderer(), true, testLogger())
+
+	require.Error(t, err)
+}
+
 func TestBuildAcceptsEmptyDirectory(t *testing.T) {
 	_, err := Build(t.TempDir(), Content{}, testRenderer(), true, testLogger())
 	require.NoError(t, err)

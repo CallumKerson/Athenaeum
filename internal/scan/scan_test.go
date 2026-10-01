@@ -97,6 +97,36 @@ func TestLibrarySkipsM4BWithoutDuration(t *testing.T) {
 	assert.Positive(t, books[0].Duration)
 }
 
+// A typo in one book's metadata should cost that book and nothing else.
+func TestLibrarySkipsBooksWithBadMetadata(t *testing.T) {
+	root := t.TempDir()
+	goodM4B := filepath.Join(
+		mediaRoot,
+		"Ursula K Le Guin",
+		"Earthsea",
+		"1 A Wizard of Earthsea",
+		"A Wizard of Earthsea.m4b",
+	)
+
+	require.NoError(t, copyFile(goodM4B, filepath.Join(root, "Good.m4b")))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "Good.toml"), []byte("Title = \"Good\"\n"), 0o644))
+
+	require.NoError(t, copyFile(goodM4B, filepath.Join(root, "Malformed.m4b")))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "Malformed.toml"), []byte("Title = \n"), 0o644))
+
+	require.NoError(t, copyFile(goodM4B, filepath.Join(root, "UnknownGenre.m4b")))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "UnknownGenre.toml"),
+		[]byte("Title = \"Unknown genre\"\nGenres = [\"Spycraft\"]\n"), 0o644))
+
+	cache := NewCache()
+	books, err := Library(root, cache, testLogger())
+
+	require.NoError(t, err)
+	require.Len(t, books, 1)
+	assert.Equal(t, "Good", books[0].Title)
+	assert.Equal(t, 1, cache.Misses, "a book that fails to parse should not be cached")
+}
+
 // An unreadable author directory should cost that author's books, not the
 // whole build.
 func TestLibrarySkipsUnreadableDirectory(t *testing.T) {
@@ -248,4 +278,21 @@ func copyFile(from, to string) error {
 		return err
 	}
 	return os.WriteFile(to, contents, 0o644)
+}
+
+// The build treats a cache that cannot be read as empty, so LoadCache must still
+// hand back a usable cache alongside the error.
+func TestLoadCacheUnreadableFile(t *testing.T) {
+	cache, err := LoadCache(t.TempDir())
+
+	require.Error(t, err)
+	require.NotNil(t, cache)
+	cache.Store("/Book.m4b", 1, time.Now(), time.Minute)
+}
+
+func TestCacheSaveFailure(t *testing.T) {
+	parentIsAFile := filepath.Join(t.TempDir(), "file")
+	require.NoError(t, os.WriteFile(parentIsAFile, nil, 0o644))
+
+	require.Error(t, NewCache().Save(filepath.Join(parentIsAFile, "m4b.json")))
 }

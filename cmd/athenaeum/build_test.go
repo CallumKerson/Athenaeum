@@ -260,6 +260,7 @@ func TestResolveConfigPropagatesLoadError(t *testing.T) {
 	_, err := resolveConfig(&buildFlags{configPath: configPath}, &bytes.Buffer{})
 
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), configPath, "the error should say which file is broken")
 }
 
 func TestScanLibraryUsesCacheOnSecondRun(t *testing.T) {
