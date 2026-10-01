@@ -73,6 +73,30 @@ func TestLibrarySkipsM4BWithoutMetadata(t *testing.T) {
 	assert.Empty(t, books)
 }
 
+// A truncated or half-copied m4b has no movie header. It must be skipped rather
+// than published with no duration, and not cached, so it is picked up once the
+// file is complete.
+func TestLibrarySkipsM4BWithoutDuration(t *testing.T) {
+	root := t.TempDir()
+	m4bPath := filepath.Join(root, "Book.m4b")
+	require.NoError(t, os.WriteFile(m4bPath, []byte("not really an m4b"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "Book.toml"), []byte("Title = \"Book\"\n"), 0o644))
+
+	cache := NewCache()
+	books, err := Library(root, cache, testLogger())
+	require.NoError(t, err)
+	assert.Empty(t, books)
+
+	require.NoError(t, copyFile(
+		filepath.Join(mediaRoot, "Ursula K Le Guin", "Earthsea", "1 A Wizard of Earthsea", "A Wizard of Earthsea.m4b"),
+		m4bPath,
+	))
+	books, err = Library(root, cache, testLogger())
+	require.NoError(t, err)
+	require.Len(t, books, 1)
+	assert.Positive(t, books[0].Duration)
+}
+
 // An unreadable author directory should cost that author's books, not the
 // whole build.
 func TestLibrarySkipsUnreadableDirectory(t *testing.T) {

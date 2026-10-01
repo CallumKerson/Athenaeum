@@ -4,6 +4,7 @@ package scan
 
 import (
 	"cmp"
+	"errors"
 	"io/fs"
 	"log/slog"
 	"os"
@@ -21,6 +22,11 @@ import (
 // Every book in the library is an MPEG-4 audio file, so the type is constant
 // rather than sniffed.
 const mimeType = "audio/mp4a-latm"
+
+// errNoDuration marks an m4b without a movie header, usually a truncated or
+// still-downloading file. Publishing it would hand subscribers a broken episode,
+// and caching it would keep the zero duration even after the file is fixed.
+var errNoDuration = errors.New("m4b has no readable duration")
 
 // coverExtensions are probed in order; the first that exists wins.
 var coverExtensions = []string{".jpg", ".jpeg", ".png"}
@@ -111,7 +117,9 @@ func readAudiobook(m4bPath, tomlPath, relPath string, cache *Cache) (audiobooks.
 	}
 
 	duration, cached := cache.Lookup(relPath, info.Size(), info.ModTime())
-	if !cached {
+	// Caches written before errNoDuration existed can hold a zero for a broken
+	// file, which would otherwise stay published until the file changed.
+	if !cached || duration == 0 {
 		if duration, err = readDuration(m4bPath, info.Size()); err != nil {
 			return book, err
 		}
@@ -145,7 +153,7 @@ func readDuration(m4bPath string, size int64) (time.Duration, error) {
 		return 0, err
 	}
 	if info.Moov == nil || info.Moov.Mvhd == nil || info.Moov.Mvhd.Timescale == 0 {
-		return 0, nil
+		return 0, errNoDuration
 	}
 	return time.Duration(
 		(float32(info.Moov.Mvhd.Duration) / float32(info.Moov.Mvhd.Timescale)) * float32(time.Second),
