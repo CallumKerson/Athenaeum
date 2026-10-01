@@ -137,14 +137,19 @@ Such a book is listed as `Earthsea books 1-3` rather than `Earthsea book 1`.
 Via [Homebrew](https://brew.sh):
 
 ```shell
-brew tap CallumKerson/homebrew-tap/athenaeum
-brew install athenaeum
+brew install --cask CallumKerson/tap/athenaeum
 ```
 
 To upgrade:
 
 ```shell
-brew update && brew upgrade athenaeum
+brew update && brew upgrade --cask athenaeum
+```
+
+Releases before 2.0 were published as a formula, so an install that old has to be swapped for the cask:
+
+```shell
+brew uninstall athenaeum && brew install --cask CallumKerson/tap/athenaeum
 ```
 
 ## DRM-Free M4B Audiobooks
