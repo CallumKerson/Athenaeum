@@ -72,7 +72,7 @@ func TestLoadBuildConfigMissingFileUsesDefaults(t *testing.T) {
 	cfg, err := LoadBuildConfig(path, &out)
 	require.NoError(t, err)
 
-	assert.Equal(t, "http://localhost:8080", cfg.Host)
+	assert.Empty(t, cfg.Host)
 	assert.True(t, cfg.Podcast.Explicit)
 	assert.Contains(t, out.String(), "No config file at")
 }

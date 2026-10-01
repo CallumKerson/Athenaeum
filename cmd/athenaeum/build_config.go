@@ -86,7 +86,6 @@ func (e ExclusionsFromMainFeed) GetGenres() ([]audiobooks.Genre, error) {
 // can also come from a flag.
 func LoadBuildConfig(pathToConfigFile string, out io.Writer) (*BuildConfig, error) {
 	cfg := &BuildConfig{
-		Host: "http://localhost:8080",
 		Podcast: Podcast{
 			Explicit:     true,
 			Language:     "EN",

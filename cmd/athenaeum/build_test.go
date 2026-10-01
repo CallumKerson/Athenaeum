@@ -104,7 +104,7 @@ func TestBuildCommandRejectsForeignOutputDirectory(t *testing.T) {
 	cmd.SetErr(&bytes.Buffer{})
 	cmd.SetArgs([]string{
 		"build", "--media-root", mediaRoot, "--out", out,
-		"--cache", filepath.Join(t.TempDir(), "m4b.json"),
+		"--host", "https://books.example.com", "--cache", filepath.Join(t.TempDir(), "m4b.json"),
 	})
 
 	err := cmd.ExecuteContext(context.Background())
@@ -164,7 +164,7 @@ func TestBuildCommandRejectsUnknownExcludedGenre(t *testing.T) {
 	cmd.SetErr(&bytes.Buffer{})
 	cmd.SetArgs([]string{
 		"build", "--config", configPath,
-		"--media-root", mediaRoot, "--out", t.TempDir(),
+		"--media-root", mediaRoot, "--out", t.TempDir(), "--host", "https://books.example.com",
 	})
 
 	err := cmd.ExecuteContext(context.Background())
@@ -201,6 +201,8 @@ Root = "/from/file/site"
 func TestResolveConfigKeepsFileValuesWhenFlagsAreEmpty(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), configName)
 	require.NoError(t, os.WriteFile(configPath, []byte(`
+Host = "https://from-file.example.com"
+
 [Media]
 Root = "/from/file/media"
 
@@ -213,9 +215,11 @@ Root = "/from/file/site"
 	require.NoError(t, err)
 	assert.Equal(t, "/from/file/media", cfg.Media.Root)
 	assert.Equal(t, "/from/file/site", cfg.Site.Root)
+	assert.Equal(t, "https://from-file.example.com", cfg.Host)
 }
 
-func TestResolveConfigRequiresRoots(t *testing.T) {
+func TestResolveConfigRequiresRootsAndHost(t *testing.T) {
+	isolateEnv(t)
 	absent := filepath.Join(t.TempDir(), "absent.toml")
 
 	_, err := resolveConfig(&buildFlags{configPath: absent}, &bytes.Buffer{})
@@ -223,6 +227,28 @@ func TestResolveConfigRequiresRoots(t *testing.T) {
 
 	_, err = resolveConfig(&buildFlags{configPath: absent, mediaRoot: "/media"}, &bytes.Buffer{})
 	require.ErrorIs(t, err, errNoSiteRoot)
+
+	_, err = resolveConfig(&buildFlags{configPath: absent, mediaRoot: "/media", siteRoot: "/site"}, &bytes.Buffer{})
+	require.ErrorIs(t, err, errNoHost)
+}
+
+func TestNormaliseHost(t *testing.T) {
+	for host, expected := range map[string]string{
+		"https://books.example.com":        "https://books.example.com",
+		"https://books.example.com/":       "https://books.example.com",
+		"http://books.example.com:8080/a/": "http://books.example.com:8080/a",
+	} {
+		actual, err := normaliseHost(host)
+		require.NoError(t, err, host)
+		assert.Equal(t, expected, actual, host)
+	}
+
+	// Each of these would publish enclosure URLs, and so GUIDs, that no client
+	// can fetch.
+	for _, host := range []string{"books.example.com", "/books", "ftp://books.example.com", "https://", "://x"} {
+		_, err := normaliseHost(host)
+		require.ErrorIs(t, err, errInvalidHost, host)
+	}
 }
 
 func TestResolveConfigPropagatesLoadError(t *testing.T) {

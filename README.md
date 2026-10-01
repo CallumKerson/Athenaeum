@@ -27,7 +27,8 @@ Root = "~/audiobooks"
 Root = "~/Sites/athenaeum"
 ```
 
-`Host` is used to build the enclosure URLs, so it must match the address the site is actually served from.
+`Host` is required and must be an absolute `http` or `https` URL.
+It is used to build the enclosure URLs, so it must match the address the site is actually served from.
 Every setting can also be given as a flag; run `athenaeum build --help` for the full list.
 
 That config produces a feed at `https://athenaeum.testserver.net/podcast/feed.rss`, which can be added to your favourite podcast player.
