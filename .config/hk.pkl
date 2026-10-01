@@ -12,7 +12,10 @@ local fast_linters = new Mapping<String, Step> {
         check_list_files = "oxfmt --no-error-on-unmatched-pattern --list-different {{ files }}"
         fix = "oxfmt --no-error-on-unmatched-pattern --write {{ files }}"
     }
-    ["newlines"] = Builtins.newlines
+    // Golden feeds are compared byte for byte with rendered output, which has no trailing newline
+    ["newlines"] = (Builtins.newlines) {
+        exclude = "internal/site/testdata/golden_feed.rss"
+    }
     ["trailing_whitespace"] = Builtins.trailing_whitespace
 }
 
