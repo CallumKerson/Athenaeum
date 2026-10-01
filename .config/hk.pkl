@@ -1,5 +1,7 @@
-amends "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Config.pkl"
-import "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Builtins.pkl"
+amends "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Builtins.pkl"
+
+min_hk_version = "2.4.0"
 
 local fast_linters = new Mapping<String, Step> {
     ["gomodtidy"] = Builtins.gomod_tidy
