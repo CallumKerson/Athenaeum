@@ -5,7 +5,7 @@ lockfile_version = 3
 [[tools.aube]]
 version = "2.3.0"
 backend = "packslip:github.com/aubepkg/aube"
-specifiers = ["latest"]
+specifiers = ["2.3.0"]
 
 [tools.aube."platforms.linux-arm64"]
 checksum = "sha256:79d492a53a053a035d5b7b83b2e351207a75dd149cd8d37ce941dd46b0d555da"
@@ -126,7 +126,7 @@ url = "https://dl.google.com/go/go1.27.1.windows-amd64.zip"
 [[tools.hk]]
 version = "2.4.0"
 backend = "packslip:github.com/jdx/hk"
-specifiers = ["latest"]
+specifiers = ["2.4.0"]
 
 [tools.hk."platforms.linux-arm64"]
 checksum = "sha256:836235bd8aa06f25e7ff28591b32efb5297abe55366e912095636a49ffe4d363"
@@ -168,12 +168,12 @@ repository_ids = { repository = "922514152", owner = "216188" }
 version = "0.70.0"
 aube = { path = "mise/locks/oxfmt/0.70.0", digest = "sha256:6f43444e29a288a4c8eaae0fd4842397419f6bde12beb04d2be2216a275f96e2" }
 backend = "npm:oxfmt"
-specifiers = ["latest"]
+specifiers = ["0.70.0"]
 
 [[tools.rumdl]]
 version = "0.2.77"
 backend = "aqua:rvben/rumdl"
-specifiers = ["latest"]
+specifiers = ["0.2.77"]
 
 [tools.rumdl."platforms.linux-arm64"]
 checksum = "sha256:04569b09b8e7eb31f6a410b0a17e448f220906c5e8e13e8301319c3540fd4d29"
@@ -220,7 +220,7 @@ provenance = "github-attestations"
 [[tools.typos]]
 version = "1.50.3"
 backend = "aqua:crate-ci/typos"
-specifiers = ["latest"]
+specifiers = ["1.50.3"]
 
 [tools.typos."platforms.linux-arm64"]
 checksum = "sha256:456f9fe7aa6e7c1597879f5e951d7de2fab261a9ca05f16f324f896c806c55db"
