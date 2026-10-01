@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-#MISE depends=["golang:mod-tidy"]
-#MISE sources=["go.mod", "go.sum", "**/*.go"]
+#MISE depends=["golang:mod-tidy-check"]
+# Templates, static assets and test data are embedded or read by tests, so a
+# change to any of them has to re-run the tests too
+#MISE sources=["go.mod", "go.sum", "**/*.go", "**/*.gohtml", "static/**", "testdata/**", "**/testdata/**"]
 #MISE outputs={auto = true}
 
-set -ex
+set -euxo pipefail
 
 go test ./...
