@@ -35,3 +35,12 @@ depends = ["*:test"]
 [tasks.ci]
 description = "Runs all CI checks - lint and test"
 depends = ["check-auto", "test"]
+
+[settings]
+# deps is experimental
+experimental = true
+
+# Downloads Go modules before `mise run` whenever go.mod or go.sum change, so
+# parallel tasks such as golangci-lint and go test never race to fetch them
+[deps.go]
+auto = true
