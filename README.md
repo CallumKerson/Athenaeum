@@ -81,6 +81,7 @@ A build that finds no audiobooks at all fails rather than emptying every feed, s
 As a guard against pointing `Site.Root` at the wrong directory, the build refuses to write into a non-empty directory it did not create, which it recognises by the `.athenaeum-site` marker file it leaves there.
 
 If `ThirdParty.NotifyOvercast` is set, a build that changed something pings Overcast to re-fetch the feeds.
+If that ping fails, the next build retries it even when it has nothing new to write.
 
 ### Audiobook Media Layout
 

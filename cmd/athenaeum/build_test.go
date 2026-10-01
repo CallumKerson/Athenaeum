@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"log/slog"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -380,6 +382,72 @@ func TestNotifyOvercastCancelledContext(t *testing.T) {
 
 	require.Error(t, err)
 	assert.ErrorIs(t, err, context.Canceled)
+}
+
+// fakeOvercast points the ping at a local server answering with status, and
+// returns the urlprefix of every ping it receives.
+func fakeOvercast(t *testing.T, status int) *[]string {
+	t.Helper()
+	var pings []string
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		pings = append(pings, request.URL.Query().Get("urlprefix"))
+		writer.WriteHeader(status)
+	}))
+	t.Cleanup(server.Close)
+
+	original := overcastPingURL
+	overcastPingURL = server.URL + "/ping"
+	t.Cleanup(func() { overcastPingURL = original })
+	return &pings
+}
+
+func TestNotifyOvercast(t *testing.T) {
+	pings := fakeOvercast(t, http.StatusOK)
+
+	require.NoError(t, notifyOvercast(context.Background(), "https://books.example.com"))
+	assert.Equal(t, []string{"https://books.example.com"}, *pings)
+}
+
+func TestNotifyOvercastRejected(t *testing.T) {
+	fakeOvercast(t, http.StatusBadRequest)
+
+	err := notifyOvercast(context.Background(), "https://books.example.com")
+
+	require.ErrorIs(t, err, errOvercast)
+	assert.Contains(t, err.Error(), "400")
+}
+
+func TestPingOvercastOnlyWhenSomethingChanged(t *testing.T) {
+	pings := fakeOvercast(t, http.StatusOK)
+	pendingPath := filepath.Join(t.TempDir(), overcastPendingName)
+	logger := slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil))
+
+	pingOvercast(context.Background(), "https://books.example.com", false, pendingPath, logger)
+	assert.Empty(t, *pings)
+
+	pingOvercast(context.Background(), "https://books.example.com", true, pendingPath, logger)
+	assert.Len(t, *pings, 1)
+	assert.NoFileExists(t, pendingPath)
+}
+
+// The build after a failed ping usually has nothing new to write, so the ping
+// it owes has to be remembered rather than inferred from the build's changes.
+func TestPingOvercastRetriesAfterFailure(t *testing.T) {
+	pendingPath := filepath.Join(t.TempDir(), overcastPendingName)
+	logger := slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil))
+
+	failing := fakeOvercast(t, http.StatusServiceUnavailable)
+	pingOvercast(context.Background(), "https://books.example.com", true, pendingPath, logger)
+	assert.Len(t, *failing, 1)
+	assert.FileExists(t, pendingPath)
+
+	working := fakeOvercast(t, http.StatusOK)
+	pingOvercast(context.Background(), "https://books.example.com", false, pendingPath, logger)
+	assert.Len(t, *working, 1)
+	assert.NoFileExists(t, pendingPath)
+
+	pingOvercast(context.Background(), "https://books.example.com", false, pendingPath, logger)
+	assert.Len(t, *working, 1, "a cleared ping should not be retried")
 }
 
 func TestVersionCommand(t *testing.T) {
