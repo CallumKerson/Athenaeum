@@ -66,6 +66,9 @@ func TestLoadBuildConfigKeepsDefaultsForAbsentKeys(t *testing.T) {
 }
 
 func TestLoadBuildConfigMissingFileUsesDefaults(t *testing.T) {
+	// A missing config looks for the legacy one in $HOME, which must not be the
+	// developer's real home.
+	isolateEnv(t)
 	path := filepath.Join(t.TempDir(), "nothing-here.toml")
 
 	var out bytes.Buffer
