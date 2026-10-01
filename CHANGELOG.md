@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.2.0](https://github.com/CallumKerson/Athenaeum/compare/v2.1.0...v2.2.0) (2026-10-01)
+
+
+### Features
+
+* **audiobooks:** support omnibus series sequences ([#247](https://github.com/CallumKerson/Athenaeum/issues/247)) ([2a133d3](https://github.com/CallumKerson/Athenaeum/commit/2a133d351ba31ea2dcddeee3e1bfea1a2b2f8efc))
+
+
+### Bug Fixes
+
+* **cmd:** expand ~ in configured paths ([#264](https://github.com/CallumKerson/Athenaeum/issues/264)) ([033c3de](https://github.com/CallumKerson/Athenaeum/commit/033c3de7c196adf7a22aaeb349da5261b99216c6))
+* **cmd:** refuse to build an empty library ([#262](https://github.com/CallumKerson/Athenaeum/issues/262)) ([2fb1a8e](https://github.com/CallumKerson/Athenaeum/commit/2fb1a8ee5fdfc9b001cab9e40883bdcfb3b47aec))
+* **cmd:** require and validate Host ([#263](https://github.com/CallumKerson/Athenaeum/issues/263)) ([c47266e](https://github.com/CallumKerson/Athenaeum/commit/c47266eaa203aaeb4e328bea71fc7f253bd513d7))
+* **cmd:** retry a failed Overcast ping on the next build ([#267](https://github.com/CallumKerson/Athenaeum/issues/267)) ([2427b92](https://github.com/CallumKerson/Athenaeum/commit/2427b920bd63719df97d531ad044b5f4d5b03cda))
+* **deps:** update github.com/gomarkdown/markdown digest to 13c5cf4 ([#252](https://github.com/CallumKerson/Athenaeum/issues/252)) ([78106cc](https://github.com/CallumKerson/Athenaeum/commit/78106cc9bbc366121d89cae40620f3ab9ef13e24))
+* **deps:** update module github.com/callumkerson/podcasts/v2 to v2.1.0 ([#244](https://github.com/CallumKerson/Athenaeum/issues/244)) ([ccb1fea](https://github.com/CallumKerson/Athenaeum/commit/ccb1feabf0b5870d11aba3c144a943dace89df5e))
+* **deps:** update module github.com/stretchr/testify to v1.12.1 ([#248](https://github.com/CallumKerson/Athenaeum/issues/248)) ([acc97ea](https://github.com/CallumKerson/Athenaeum/commit/acc97ea5c6a643d199e01fd71c0b5aec9c4f7854))
+* **feed:** omit the book number for a series without a sequence ([#266](https://github.com/CallumKerson/Athenaeum/issues/266)) ([5fb6133](https://github.com/CallumKerson/Athenaeum/commit/5fb61339c371c8d5ca7c35093d74b26b9d466dd1))
+* **fsutil:** sync file contents before the atomic rename ([#268](https://github.com/CallumKerson/Athenaeum/issues/268)) ([98ded81](https://github.com/CallumKerson/Athenaeum/commit/98ded811cd132d5532463b546ad294e169121353))
+* **scan:** skip an m4b with no readable duration ([#274](https://github.com/CallumKerson/Athenaeum/issues/274)) ([a84827c](https://github.com/CallumKerson/Athenaeum/commit/a84827cf517fe204b24da6cf683a826d446bd124))
+* **scan:** skip unreadable directories instead of failing the build ([#265](https://github.com/CallumKerson/Athenaeum/issues/265)) ([0e492d6](https://github.com/CallumKerson/Athenaeum/commit/0e492d6b50421c54d904b7a9582dc5c4973b0e0a))
+* **site:** keep a feed whose name changed only in case ([#261](https://github.com/CallumKerson/Athenaeum/issues/261)) ([c387c1b](https://github.com/CallumKerson/Athenaeum/commit/c387c1bb0e50d713d2f08bf44ee436e6764811bf))
+* **site:** only sweep files a previous build wrote ([#260](https://github.com/CallumKerson/Athenaeum/issues/260)) ([a164ab8](https://github.com/CallumKerson/Athenaeum/commit/a164ab8ee3b7e1de1b03252a5a008bd3787f30d0))
+
 ## [2.1.0](https://github.com/CallumKerson/Athenaeum/compare/v2.0.1...v2.1.0) (2026-07-26)
 
 
