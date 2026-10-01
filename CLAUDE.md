@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This project uses [mise](https://mise.jdx.dev/) for task running and tool version management.
 Run `mise tasks` to see all available tasks.
+Go modules are downloaded automatically before `mise run` when `go.mod` or `go.sum` change, through mise's experimental `go` deps provider.
 
 ### Building and Testing
 
