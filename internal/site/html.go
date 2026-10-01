@@ -333,8 +333,10 @@ func (b *htmlBuilder) bookViews(root string, books []audiobooks.Audiobook) []boo
 			Tags:      b.links(root, tagsDir, book.Tags),
 		}
 		if book.Series != nil {
-			view.Series = fmt.Sprintf("%s %s %s",
-				book.Series.Title, strings.ToLower(book.Series.Sequence.Noun()), book.Series.Sequence)
+			view.Series = book.Series.Title
+			if sequence := book.Series.Sequence; sequence != nil {
+				view.Series = fmt.Sprintf("%s %s %s", book.Series.Title, strings.ToLower(sequence.Noun()), sequence)
+			}
 		}
 		view.Search = searchText(book, view.Series, view.Date)
 		views = append(views, view)

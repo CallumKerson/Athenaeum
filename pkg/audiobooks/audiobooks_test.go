@@ -87,7 +87,7 @@ func TestAudiobook_JSONMarshaling(t *testing.T) {
 		MIMEType:  "audio/mp4a-latm",
 		Series: &Series{
 			Title:    "Test Series",
-			Sequence: Sequence{First: decimal.NewFromFloat(1.5)},
+			Sequence: &Sequence{First: decimal.NewFromFloat(1.5)},
 		},
 		Description: &description.Description{
 			Text:   "A test audiobook for unit testing",
@@ -120,7 +120,7 @@ func TestAudiobook_TOMLMarshaling(t *testing.T) {
 		MIMEType:  "audio/mp4a-latm",
 		Series: &Series{
 			Title:    "TOML Test Series",
-			Sequence: Sequence{First: decimal.NewFromInt(2)},
+			Sequence: &Sequence{First: decimal.NewFromInt(2)},
 		},
 		Description: &description.Description{
 			Text:   "A test audiobook for TOML serialisation testing",
@@ -195,7 +195,7 @@ func TestSeries_SequenceJSON(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			sequence, err := ParseSequence(testCase.sequence)
 			require.NoError(t, err)
-			series := Series{Title: "Test Series", Sequence: sequence}
+			series := Series{Title: "Test Series", Sequence: &sequence}
 
 			data, err := json.Marshal(series)
 			require.NoError(t, err)

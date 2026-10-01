@@ -23,7 +23,11 @@ func summaryHTML(book *audiobooks.Audiobook) string {
 	}
 	fmt.Fprintf(&builder, "<h2>By %s</h2>", book.GetAuthor())
 	if book.Series != nil {
-		fmt.Fprintf(&builder, "<h4>%s %s %s</h4>", book.Series.Title, book.Series.Sequence.Noun(), book.Series.Sequence)
+		if sequence := book.Series.Sequence; sequence != nil {
+			fmt.Fprintf(&builder, "<h4>%s %s %s</h4>", book.Series.Title, sequence.Noun(), sequence)
+		} else {
+			fmt.Fprintf(&builder, "<h4>%s</h4>", book.Series.Title)
+		}
 	}
 	if book.GetNarrator() != "" {
 		fmt.Fprintf(&builder, "<h4>Narrated by %s</h4>", book.GetNarrator())

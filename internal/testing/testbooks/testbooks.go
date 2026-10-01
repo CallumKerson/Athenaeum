@@ -55,7 +55,7 @@ var Audiobooks = []audiobooks.Audiobook{
 			Format: description.HTML,
 		},
 		Series: &audiobooks.Series{
-			Sequence: audiobooks.Sequence{First: decimal.NewFromInt(1)},
+			Sequence: &audiobooks.Sequence{First: decimal.NewFromInt(1)},
 			Title:    "Earthsea",
 		},
 	},

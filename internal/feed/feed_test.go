@@ -161,6 +161,7 @@ func TestRenderIsDeterministic(t *testing.T) {
 }
 
 // An omnibus stands in for several books in its series, and its heading says so.
+// A series with no sequence is named without a place in it.
 func TestRenderSeriesHeading(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -168,13 +169,19 @@ func TestRenderSeriesHeading(t *testing.T) {
 		expected string
 	}{
 		{"Single book", "1", "<h4>Earthsea Book 1</h4>"},
+		{"Prequel", "0", "<h4>Earthsea Book 0</h4>"},
 		{"Omnibus", "1-3", "<h4>Earthsea Books 1-3</h4>"},
+		{"No sequence", "", "<h4>Earthsea</h4>"},
 	}
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			sequence, err := audiobooks.ParseSequence(testCase.sequence)
-			require.NoError(t, err)
+			var sequence *audiobooks.Sequence
+			if testCase.sequence != "" {
+				parsed, err := audiobooks.ParseSequence(testCase.sequence)
+				require.NoError(t, err)
+				sequence = &parsed
+			}
 
 			renderer := &Renderer{Host: "https://example.com", MediaPath: "/media"}
 			rendered, err := renderer.Render([]audiobooks.Audiobook{{
@@ -313,7 +320,7 @@ func TestSummaryHTMLIncludesSeriesAndNarrator(t *testing.T) {
 		Title:     "A Wizard of Earthsea",
 		Authors:   []string{"Ursula K. Le Guin"},
 		Narrators: []string{"Kobna Holdbrook-Smith"},
-		Series:    &audiobooks.Series{Title: "Earthsea", Sequence: audiobooks.Sequence{First: decimal.NewFromInt(1)}},
+		Series:    &audiobooks.Series{Title: "Earthsea", Sequence: &audiobooks.Sequence{First: decimal.NewFromInt(1)}},
 	})
 
 	assert.Contains(t, summary, "<h2>By Ursula K. Le Guin</h2>")

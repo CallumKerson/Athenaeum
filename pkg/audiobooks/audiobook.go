@@ -30,8 +30,10 @@ type Audiobook struct {
 
 // Series - representation of a series of books.
 type Series struct {
-	Sequence Sequence `json:"sequence"`
-	Title    string   `json:"title"`
+	// Sequence is nil when the metadata names a series without a place in it,
+	// which is distinct from a prequel numbered 0.
+	Sequence *Sequence `json:"sequence,omitempty" toml:",omitempty"`
+	Title    string    `json:"title"`
 }
 
 func (b *Audiobook) GetAuthor() string {
