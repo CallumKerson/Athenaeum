@@ -13,7 +13,8 @@ Run `mise tasks` to see all available tasks.
 - **Test**: `mise run test` or `go test ./...` - Run all tests
 - **Fix**: `mise run fix-all` - Runs all formatters and auto-fixable linters via [hk](https://hk.jdx.dev/)
 - **Check**: `mise run check-all` - Runs all linters without fixing
-- **CI**: `mise run ci` - Runs `check-pr` and `test` (used in CI pipeline)
+- **CI**: `mise run ci` - Runs `check-auto` and `test` (used in CI pipeline).
+  `check-auto` checks all files on main or when a branch changes mise, hk or linter config, otherwise only the files the branch changed
 
 Run `mise run fix-all` and `mise run test` before committing.
 Linters are also wired to git hooks through `.config/hk.pkl`: fast formatters on pre-commit, golangci-lint as well on pre-push.

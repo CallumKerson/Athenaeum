@@ -34,4 +34,4 @@ depends = ["*:test"]
 
 [tasks.ci]
 description = "Runs all CI checks - lint and test"
-depends = ["check-pr", "test"]
+depends = ["check-auto", "test"]
