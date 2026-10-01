@@ -8,12 +8,15 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/CallumKerson/Athenaeum/internal/feed"
+	"github.com/CallumKerson/Athenaeum/internal/fsutil"
 	"github.com/CallumKerson/Athenaeum/internal/scan"
 	"github.com/CallumKerson/Athenaeum/internal/site"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
@@ -22,6 +25,13 @@ import (
 // mediaPath is the URL prefix the media root is served under. It must keep
 // matching the proxy's configuration: it forms part of every item's GUID.
 const mediaPath = "/media"
+
+// overcastPendingName sits beside the duration cache while an Overcast ping is
+// owed, because the build after a failed ping may have nothing new to write.
+const overcastPendingName = "overcast-ping-pending"
+
+// overcastPingURL is a variable only so that tests can point it at a local server.
+var overcastPingURL = "https://overcast.fm/ping"
 
 var (
 	errNoMediaRoot = errors.New("no media root configured: set Media.Root or pass --media-root")
@@ -98,12 +108,13 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 		"root", cfg.Site.Root, "feeds", result.Feeds, "written", result.Written, "removed", result.Removed,
 		"took", time.Since(start).String())
 
-	if cfg.ThirdParty.NotifyOvercast && (result.Written > 0 || result.Removed > 0) {
-		if err = notifyOvercast(cmd.Context(), cfg.Host); err != nil {
-			logger.Warn("could not notify Overcast", "error", err)
-		} else {
-			logger.Info("notified Overcast", "urlprefix", cfg.Host)
+	if cfg.ThirdParty.NotifyOvercast {
+		cachePath, err := resolveCachePath(flags)
+		if err != nil {
+			return err
 		}
+		pendingPath := filepath.Join(filepath.Dir(cachePath), overcastPendingName)
+		pingOvercast(cmd.Context(), cfg.Host, result.Written > 0 || result.Removed > 0, pendingPath, logger)
 	}
 
 	return nil
@@ -168,14 +179,9 @@ func scanLibrary(
 	flags *buildFlags,
 	logger *slog.Logger,
 ) ([]audiobooks.Audiobook, *scan.Cache, error) {
-	cachePath, err := expandHome(flags.cachePath)
+	cachePath, err := resolveCachePath(flags)
 	if err != nil {
 		return nil, nil, err
-	}
-	if cachePath == "" {
-		if cachePath, err = DefaultCachePath(); err != nil {
-			return nil, nil, err
-		}
 	}
 
 	cache := scan.NewCache()
@@ -207,6 +213,13 @@ func scanLibrary(
 	return books, cache, nil
 }
 
+func resolveCachePath(flags *buildFlags) (string, error) {
+	if flags.cachePath == "" {
+		return DefaultCachePath()
+	}
+	return expandHome(flags.cachePath)
+}
+
 func rendererFor(cfg *BuildConfig) *feed.Renderer {
 	return &feed.Renderer{
 		Host:               cfg.Host,
@@ -228,13 +241,38 @@ func buildLogger(out io.Writer, verbose bool) *slog.Logger {
 	return slog.New(slog.NewTextHandler(out, &slog.HandlerOptions{Level: level}))
 }
 
+// pingOvercast notifies Overcast when the build changed something, or when an
+// earlier build's ping failed. A failure is never fatal: the feeds are already
+// written, and subscribers will see them at their next poll regardless.
+func pingOvercast(ctx context.Context, host string, changed bool, pendingPath string, logger *slog.Logger) {
+	_, statErr := os.Stat(pendingPath)
+	pending := statErr == nil
+	if !changed && !pending {
+		return
+	}
+
+	if err := notifyOvercast(ctx, host); err != nil {
+		logger.Warn("could not notify Overcast, will retry on the next build", "error", err)
+		if writeErr := fsutil.WriteAtomic(pendingPath, nil); writeErr != nil {
+			logger.Warn("could not record the pending Overcast ping", "path", pendingPath, "error", writeErr)
+		}
+		return
+	}
+	logger.Info("notified Overcast", "urlprefix", host)
+	if pending {
+		if err := os.Remove(pendingPath); err != nil {
+			logger.Warn("could not clear the pending Overcast ping", "path", pendingPath, "error", err)
+		}
+	}
+}
+
 // notifyOvercast asks Overcast to re-fetch every feed under the host, so
 // subscribers see new books without waiting for their next poll.
 func notifyOvercast(ctx context.Context, host string) error {
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	endpoint := "https://overcast.fm/ping?urlprefix=" + url.QueryEscape(host)
+	endpoint := overcastPingURL + "?urlprefix=" + url.QueryEscape(host)
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, http.NoBody)
 	if err != nil {
 		return err
