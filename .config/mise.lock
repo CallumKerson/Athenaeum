@@ -165,10 +165,10 @@ signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 repository_ids = { repository = "922514152", owner = "216188" }
 
 [[tools.oxfmt]]
-version = "0.70.0"
-aube = { path = "mise/locks/oxfmt/0.70.0", digest = "sha256:6f43444e29a288a4c8eaae0fd4842397419f6bde12beb04d2be2216a275f96e2" }
+version = "0.71.0"
+aube = { path = "mise/locks/oxfmt/0.71.0", digest = "sha256:2b7bfb8c20b448ab9b5549e2e0a43049a897d50d995103408bbba2b0add2bcf0" }
 backend = "npm:oxfmt"
-specifiers = ["0.70.0"]
+specifiers = ["0.71.0"]
 
 [[tools.rumdl]]
 version = "0.2.77"
