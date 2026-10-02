@@ -23,6 +23,11 @@
       "semanticCommitType": "ci"
     },
     {
+      "description": "Mise tools only affect the build, so updating them must not cut a release",
+      "matchManagers": ["mise"],
+      "semanticCommitType": "build"
+    },
+    {
       "description": "Merge digests faster",
       "matchUpdateTypes": ["digest"],
       "minimumReleaseAge": "1 day"
