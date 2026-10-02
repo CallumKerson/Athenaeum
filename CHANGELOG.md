@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/CallumKerson/Athenaeum/compare/v2.2.0...v2.2.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency oxfmt to v0.71.0 ([#279](https://github.com/CallumKerson/Athenaeum/issues/279)) ([a151739](https://github.com/CallumKerson/Athenaeum/commit/a15173926c8d803ee0ebc097b6e0c21c99786a96))
+
 ## [2.2.0](https://github.com/CallumKerson/Athenaeum/compare/v2.1.0...v2.2.0) (2026-10-01)
 
 
