@@ -3,45 +3,45 @@
 lockfile_version = 3
 
 [[tools.aube]]
-version = "2.4.0"
+version = "2.5.1"
 backend = "packslip:github.com/aubepkg/aube"
-specifiers = ["v2.4.0"]
+specifiers = ["v2.5.1"]
 
 [tools.aube."platforms.linux-arm64"]
-checksum = "sha256:cb21f9acd7240253021662d4f874912ef8614ad2af7847083e7370c518e419aa"
-url = "https://github.com/aubepkg/aube/releases/download/v2.4.0/aube-v2.4.0-aarch64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:f9d03a3b49be9a51275917fe63676330c59d90d77bebe6fc17ec322a3571b7c0"
+url = "https://github.com/aubepkg/aube/releases/download/v2.5.1/aube-v2.5.1-aarch64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release-plz.yml"
-repository_ids = { repository = "1214542327", owner = "324215402" }
+repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.linux-arm64-musl"]
-checksum = "sha256:015e34008dafffda17a3f05ffb7affdeec71c0bea31847c57c95c7d4bdbb59d3"
-url = "https://github.com/aubepkg/aube/releases/download/v2.4.0/aube-v2.4.0-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:343febcb1c4117d485b235a6efa2c3d090115661b1ccdf3cc7adbb0127a4b65a"
+url = "https://github.com/aubepkg/aube/releases/download/v2.5.1/aube-v2.5.1-aarch64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release-plz.yml"
-repository_ids = { repository = "1214542327", owner = "324215402" }
+repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:7896047bcbf2b21bc278c0a766d6d8a200ca1e4a37d261552e7e97788be0d3d5"
-url = "https://github.com/aubepkg/aube/releases/download/v2.4.0/aube-v2.4.0-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:16801e5a48272f3aa62533e626f18688ea97d8ee090fb5faac2e04900d374566"
+url = "https://github.com/aubepkg/aube/releases/download/v2.5.1/aube-v2.5.1-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release-plz.yml"
-repository_ids = { repository = "1214542327", owner = "324215402" }
+repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.linux-x64-musl"]
-checksum = "sha256:69aef2a7cec0f2bcb88504bf06c418c788f47cf11d8830c831bb42cbf6e156c8"
-url = "https://github.com/aubepkg/aube/releases/download/v2.4.0/aube-v2.4.0-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:27c5b0f41dc11b5a8108983ca968cdd36fc3809a14ec841444587d73854d65ce"
+url = "https://github.com/aubepkg/aube/releases/download/v2.5.1/aube-v2.5.1-x86_64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release-plz.yml"
-repository_ids = { repository = "1214542327", owner = "324215402" }
+repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:93c782fa74a5558c8f67d43b15b1db85598b61df84faf19ba8e72698e38ef9b1"
-url = "https://github.com/aubepkg/aube/releases/download/v2.4.0/aube-v2.4.0-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:68ccd6badf7c6c891467680dfdd5545ba44c64dacd98b508dcd5de3a611a49aa"
+url = "https://github.com/aubepkg/aube/releases/download/v2.5.1/aube-v2.5.1-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release-plz.yml"
-repository_ids = { repository = "1214542327", owner = "324215402" }
+repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.windows-x64"]
-checksum = "sha256:8357e02ea6251ad325ccc8c99163a3d0a63ca8eaf2e7e75f0ed8578a81847455"
-url = "https://github.com/aubepkg/aube/releases/download/v2.4.0/aube-v2.4.0-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:aa5ee899ab63ad192de7cd3790fbfb4dd8debfb104f7e57972504b980c05e589"
+url = "https://github.com/aubepkg/aube/releases/download/v2.5.1/aube-v2.5.1-x86_64-pc-windows-msvc.zip"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release-plz.yml"
-repository_ids = { repository = "1214542327", owner = "324215402" }
+repository_ids = { repository = "1214542327" }
 
 [[tools."github:golangci/golangci-lint"]]
 version = "2.14.0"
