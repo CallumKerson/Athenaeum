@@ -4,7 +4,7 @@ go = "1.27.1"
 hk = "2.4.0"
 typos = "1.50.3"
 rumdl = "0.2.77"
-oxfmt = { depends = "aube", "version" = "0.71.0" }
+oxfmt = { depends = "aube", "version" = "0.72.0" }
 aube = "v2.6.1"
 
 [task_config]
