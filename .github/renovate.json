@@ -1,36 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    "schedule:daily",
-    ":automergeStableNonMajor",
-    ":automergeDigest",
-    "customManagers:dockerfileVersions",
-    "customManagers:githubActionsVersions",
-    ":prHourlyLimit4"
-  ],
-  "reviewers": ["CallumKerson"],
-  "lockFileMaintenance": {
-    "enabled": true
-  },
-  "postUpdateOptions": ["gomodTidy"],
-  "internalChecksFilter": "strict",
-  "minimumReleaseAge": "1 week",
-  "packageRules": [
-    {
-      "description": "Use ci semantic type for some deps",
-      "matchFileNames": [".github/workflows/**"],
-      "semanticCommitType": "ci"
-    },
-    {
-      "description": "Mise tools only affect the build, so updating them must not cut a release",
-      "matchManagers": ["mise"],
-      "semanticCommitType": "build"
-    },
-    {
-      "description": "Merge digests faster",
-      "matchUpdateTypes": ["digest"],
-      "minimumReleaseAge": "1 day"
-    }
-  ]
+  "extends": ["github>CallumKerson/renovate-config#v1.1.0"]
 }
