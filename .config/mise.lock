@@ -11,37 +11,31 @@ specifiers = ["v2.6.1"]
 checksum = "sha256:ff945fd7a68d25d87b47e45877228ad269d5a053c04522599b31c130d734f40d"
 url = "https://github.com/aubepkg/aube/releases/download/v2.6.1/aube-v2.6.1-aarch64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release.yml"
-repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.linux-arm64-musl"]
 checksum = "sha256:521b5cb38cf6c07c1a43a6bce2d3c34c603a26b47a05ff8b5f6112cdadf18996"
 url = "https://github.com/aubepkg/aube/releases/download/v2.6.1/aube-v2.6.1-aarch64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release.yml"
-repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.linux-x64"]
 checksum = "sha256:364b4cf201970cd5c943390dd3e736b4256b14a0ac52d304f8fb4acfd6a1fbd3"
 url = "https://github.com/aubepkg/aube/releases/download/v2.6.1/aube-v2.6.1-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release.yml"
-repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.linux-x64-musl"]
 checksum = "sha256:d69ab74a5e21f4dcaf5a41899a623114d6df77c11a170089ade86348bbc2b234"
 url = "https://github.com/aubepkg/aube/releases/download/v2.6.1/aube-v2.6.1-x86_64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release.yml"
-repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.macos-arm64"]
 checksum = "sha256:a36856db187dd8f2c3cbf651de1384a2d0748d7cc5507671e6ec02751f00c032"
 url = "https://github.com/aubepkg/aube/releases/download/v2.6.1/aube-v2.6.1-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release.yml"
-repository_ids = { repository = "1214542327" }
 
 [tools.aube."platforms.windows-x64"]
 checksum = "sha256:f6399466cc0e0c2f52248b56477182d4857a8a02d518936b055a3a67f0f25f87"
 url = "https://github.com/aubepkg/aube/releases/download/v2.6.1/aube-v2.6.1-x86_64-pc-windows-msvc.zip"
 signer = "sigstore-oidc:https://github.com/aubepkg/aube/.github/workflows/release.yml"
-repository_ids = { repository = "1214542327" }
 
 [[tools."github:golangci/golangci-lint"]]
 version = "2.14.0"
