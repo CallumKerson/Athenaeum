@@ -3,7 +3,7 @@
 go = "1.27.1"
 hk = "2.5.0"
 typos = "1.50.3"
-rumdl = "v0.2.78"
+rumdl = "v0.2.79"
 oxfmt = { depends = "aube", "version" = "0.72.0" }
 aube = "v2.6.1"
 
