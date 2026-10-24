@@ -20,6 +20,7 @@ jobs:
   ci:
     name: ci
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -29,13 +30,13 @@ jobs:
       - run: mise run ci
   release-please:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: ci
     permissions:
       contents: write
       pull-requests: write
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       # The app token, unlike GITHUB_TOKEN, lets the release PR it opens trigger CI
       - name: Create release app token
@@ -61,6 +62,7 @@ jobs:
         run: ./.github/scripts/update-release-prs.sh
   goreleaser:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: release-please
     if: ${{ needs.release-please.outputs.releases_created == 'true' }}
     permissions:
