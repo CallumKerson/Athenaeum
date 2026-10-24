@@ -1,7 +1,10 @@
 [tools]
 "github:golangci/golangci-lint" = "v2.14.0"
 go = "1.27.2"
-hk = "2.5.0"
+hk = "2.7.0"
+jactionlint = "2.3.0"
+# jactionlint runs shellcheck over workflow run: scripts
+shellcheck = "0.11.0"
 typos = "1.50.3"
 rumdl = "v0.2.79"
 oxfmt = { depends = "aube", "version" = "0.72.0" }
