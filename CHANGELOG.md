@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/CallumKerson/Athenaeum/compare/v2.2.0...v2.2.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update github.com/gomarkdown/markdown digest to f839536 ([#296](https://github.com/CallumKerson/Athenaeum/issues/296)) ([a8a26fe](https://github.com/CallumKerson/Athenaeum/commit/a8a26fe3d55f47ef3770cfc5c6e03b4ad2aa25d9))
+
 ## [2.2.0](https://github.com/CallumKerson/Athenaeum/compare/v2.1.0...v2.2.0) (2026-10-01)
 
 
