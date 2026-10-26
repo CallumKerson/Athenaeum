@@ -1,5 +1,5 @@
 [tools]
-"github:golangci/golangci-lint" = "v2.14.0"
+"github:golangci/golangci-lint" = "v2.15.0"
 go = "1.27.2"
 hk = "2.7.0"
 jactionlint = "2.3.0"
