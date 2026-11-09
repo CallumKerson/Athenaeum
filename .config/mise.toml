@@ -5,7 +5,7 @@ hk = "2.7.0"
 jactionlint = "v2.4.0"
 # jactionlint runs shellcheck over workflow run: scripts
 shellcheck = "0.11.0"
-typos = "1.50.3"
+typos = "1.51.1"
 rumdl = "v0.3.2"
 oxfmt = { depends = "aube", "version" = "0.75.0" }
 aube = "v2.8.5"
