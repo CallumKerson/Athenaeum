@@ -532,8 +532,7 @@ func describeBook(lib *library, root string, book *audiobooks.Audiobook) bookVie
 // otherwise repeat their whole page.
 const moreByLimit = 12
 
-// bookPageView describes a book's own page. series holds every series in
-// reading order, from seriesInOrder.
+// bookPageView describes a book's own page.
 func bookPageView(lib *library, book *audiobooks.Audiobook) *pageView {
 	root := rootFromSubDir
 	page := &bookPage{

@@ -21,6 +21,9 @@ const (
 // new feed paths.
 type Series struct {
 	Title string
+	// Name is how lists tell the series apart: its title, followed by its
+	// authors when another series has the same title.
+	Name string
 	// Slug is the directory of the series' page under /series/.
 	Slug  string
 	Books []audiobooks.Audiobook
@@ -30,31 +33,36 @@ type Series struct {
 // when they share an author with any book already in it, comparing authors by
 // their slugs so that spelling variants still match. Titles sort by normalised
 // name and groups within a title by their first path, so which series keeps
-// the plain slug is stable between builds.
+// the plain slug is stable between builds. Titles are compared normalised, like
+// every other name, and a series takes the spelling of its first book.
 func seriesGroups(books []audiobooks.Audiobook, authorSlugs map[string]string) []Series {
 	byTitle := map[string][]*audiobooks.Audiobook{}
 	for index := range books {
 		book := &books[index]
 		if book.Series != nil && strings.TrimSpace(book.Series.Title) != "" {
-			byTitle[book.Series.Title] = append(byTitle[book.Series.Title], book)
+			key := normalise(book.Series.Title)
+			byTitle[key] = append(byTitle[key], book)
 		}
 	}
-	titles := make([]string, 0, len(byTitle))
-	for title := range byTitle {
-		titles = append(titles, title)
+	keys := make([]string, 0, len(byTitle))
+	for key := range byTitle {
+		keys = append(keys, key)
 	}
-	slices.SortFunc(titles, func(a, b string) int {
-		return cmp.Or(strings.Compare(normalise(a), normalise(b)), strings.Compare(a, b))
-	})
+	slices.Sort(keys)
 
 	var groups []Series
 	taken := map[string]bool{}
-	for _, title := range titles {
-		for _, members := range byAuthor(byTitle[title], authorSlugs) {
+	for _, key := range keys {
+		split := byAuthor(byTitle[key], authorSlugs)
+		for _, members := range split {
 			sortReadingOrder(members)
-			group := Series{Title: title, Slug: claimSlug(taken, slugify(title))}
+			title := members[0].Series.Title
+			group := Series{Title: title, Name: title, Slug: claimSlug(taken, slugify(title))}
 			for _, member := range members {
 				group.Books = append(group.Books, *member)
+			}
+			if authors := seriesAuthors(&group); len(split) > 1 && len(authors) > 0 {
+				group.Name = title + " (" + strings.Join(authors, ", ") + ")"
 			}
 			groups = append(groups, group)
 		}
@@ -63,7 +71,8 @@ func seriesGroups(books []audiobooks.Audiobook, authorSlugs map[string]string) [
 }
 
 // byAuthor splits books with one series title into groups linked by shared
-// authors, ordered by each group's first path.
+// authors, ordered by each group's first path. Books with no authors group
+// together, rather than each becoming a series of one.
 func byAuthor(books []*audiobooks.Audiobook, authorSlugs map[string]string) [][]*audiobooks.Audiobook {
 	slices.SortFunc(books, func(a, b *audiobooks.Audiobook) int { return strings.Compare(a.Path, b.Path) })
 
@@ -73,7 +82,7 @@ func byAuthor(books []*audiobooks.Audiobook, authorSlugs map[string]string) [][]
 		kept := groups[:0:0]
 		for _, group := range groups {
 			if slices.ContainsFunc(group, func(other *audiobooks.Audiobook) bool {
-				return sameAuthor(authorSlugs, book, other)
+				return sameAuthor(authorSlugs, book, other) || len(book.Authors)+len(other.Authors) == 0
 			}) {
 				joined = append(joined, group...)
 				continue
@@ -165,7 +174,7 @@ func seriesIndexView(lib *library) *pageView {
 	for index := range lib.Series {
 		series := &lib.Series[index]
 		view.Entries = append(view.Entries, entryView{
-			Name:   series.Title,
+			Name:   series.Name,
 			Href:   dirHref(root, seriesDir, series.Slug),
 			Search: strings.ToLower(series.Title + " " + strings.Join(seriesAuthors(series), " ")),
 			Count:  len(series.Books),
@@ -177,17 +186,16 @@ func seriesIndexView(lib *library) *pageView {
 
 func seriesPageView(lib *library, series *Series) *pageView {
 	root := rootFromSubDir
-	blurb := fmt.Sprintf(
-		"%d %s, %s hours.",
-		len(series.Books),
-		plural(len(series.Books), "book"),
-		totalHours(series.Books),
-	)
+	blurb := fmt.Sprintf("%d %s", len(series.Books), plural(len(series.Books), "book"))
+	if hours := totalHours(series.Books); hours != "0" {
+		blurb += ", " + hours + " hours"
+	}
+	blurb += "."
 	if authors := seriesAuthors(series); len(authors) > 0 {
 		blurb = "By " + strings.Join(authors, ", ") + ". " + blurb
 	}
 	return &pageView{
-		Title:   pageTitle(series.Title),
+		Title:   pageTitle(series.Name),
 		Heading: series.Title,
 		Blurb:   blurb,
 		Root:    root,

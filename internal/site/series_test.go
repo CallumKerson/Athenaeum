@@ -54,6 +54,38 @@ func TestPlanSplitsASeriesTitleByAuthor(t *testing.T) {
 	assert.Equal(t, "chronicles", content.Series[0].Slug, "the group with the first path keeps the plain slug")
 	assert.Equal(t, []string{"Theirs One"}, seriesTitles(&content.Series[1]))
 	assert.Equal(t, "chronicles-2", content.Series[1].Slug)
+	assert.Equal(t, "Chronicles (Ursula K. Le Guin, A Friend)", content.Series[0].Name,
+		"lists name the authors when two series share a title")
+	assert.Equal(t, "Chronicles (Someone Else)", content.Series[1].Name)
+
+	root := t.TempDir()
+	_, err := Build(root, content, testRenderer(t), Options{}, testLogger())
+	require.NoError(t, err)
+	page := readPage(t, root, filepath.Join(booksDir, content.BookSlugs[theirs.Path]))
+	assert.Contains(t, page, `<a href="../../series/chronicles-2/">Chronicles book 1</a>`)
+	page = readPage(t, root, filepath.Join(booksDir, content.BookSlugs[mine.Path]))
+	assert.Contains(t, page, `<a href="../../series/chronicles/">The whole series</a>`)
+}
+
+func TestPlanMatchesSeriesTitlesLikeOtherNames(t *testing.T) {
+	first := inSeries("Leviathan Wakes", "The Expanse", 1)
+	second := inSeries("Caliban's War", "the expanse", 2)
+	content := Plan([]audiobooks.Audiobook{second, first}, nil)
+
+	require.Len(t, content.Series, 1)
+	assert.Equal(t, "The Expanse", content.Series[0].Title, "the first book's spelling")
+	assert.Equal(t, "The Expanse", content.Series[0].Name)
+}
+
+func TestPlanGroupsSeriesBooksWithoutAuthors(t *testing.T) {
+	first := inSeries("One", "Anonymous Tales", 1)
+	first.Authors = nil
+	second := inSeries("Two", "Anonymous Tales", 2)
+	second.Authors = nil
+	content := Plan([]audiobooks.Audiobook{first, second}, nil)
+
+	require.Len(t, content.Series, 1)
+	assert.Equal(t, []string{"One", "Two"}, seriesTitles(&content.Series[0]))
 }
 
 func TestBuildWritesSeriesPages(t *testing.T) {
@@ -68,7 +100,7 @@ func TestBuildWritesSeriesPages(t *testing.T) {
 
 	page := readPage(t, root, filepath.Join(seriesDir, "earthsea"))
 	assert.Contains(t, page, "<h1>Earthsea</h1>")
-	assert.Contains(t, page, "By Ursula K. Le Guin. 1 book, 0 hours.")
+	assert.Contains(t, page, "By Ursula K. Le Guin. 1 book.")
 	assert.Contains(t, page, `<span class="seq">Book 1</span>`)
 	assert.Contains(t, page, `href="../../books/a-wizard-of-earthsea/"`)
 }
