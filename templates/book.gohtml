@@ -4,45 +4,52 @@
         {{- if .Cover}}
         <img class="cover" src="{{.Cover}}" alt="Cover of {{.Title}}" width="320" height="320" />
         {{- else}}
-        <span class="cover" aria-hidden="true"></span>
+        <span class="cover blank" aria-hidden="true"><b>{{.Title}}</b></span>
         {{- end}}
         <div class="about">
+          {{- with .Series}}<p class="seq">{{.}}</p>{{end}}
+          <h1>{{.Title}}</h1>
+          {{- with .Subtitle}}<p class="sub">{{.}}</p>{{end}}
           <p class="people">
             {{- if .Authors}}<span>Written by {{template "links" .Authors}}</span>{{end}}
             {{- if .Narrators}}<span>Read by {{template "links" .Narrators}}</span>{{end}}
           </p>
-          <dl class="facts">
-            {{- with .Series}}<div><dt>Series</dt><dd>{{.}}</dd></div>{{end}}
-            {{- with .Date}}<div><dt>Published</dt><dd>{{.}}</dd></div>{{end}}
-            {{- with .Duration}}<div><dt>Length</dt><dd>{{.}}</dd></div>{{end}}
-          </dl>
           {{- if .AudioURL}}
           <audio class="player" controls preload="none">
             <source src="{{.AudioURL}}"{{with .MIMEType}} type="{{.}}"{{end}} />
             <a href="{{.AudioURL}}">Download the audiobook</a>
           </audio>
           {{- end}}
-          {{- range .Feeds}}
-          <p class="feed"><a href="{{.Href}}">Subscribe to {{.Name}}</a><button class="copy" type="button" hidden>copy URL</button></p>
-          {{- end}}
-          {{- range .Paragraphs}}
-          <p class="description">{{.}}</p>
+          <dl class="facts">
+            {{- with .Series}}<div><dt>Series</dt><dd>{{.}}</dd></div>{{end}}
+            {{- with .Date}}<div><dt>Published</dt><dd>{{.}}</dd></div>{{end}}
+            {{- with .Duration}}<div><dt>Length</dt><dd>{{.}}</dd></div>{{end}}
+          </dl>
+          {{- if .Paragraphs}}
+          <div class="description">
+            {{- range .Paragraphs}}
+            <p>{{.}}</p>
+            {{- end}}
+          </div>
           {{- end}}
           {{- if or .Genres .Tags}}
-          <p class="labels">{{template "links" .Genres}}{{if and .Genres .Tags}} · {{end}}{{template "links" .Tags}}</p>
+          <p class="labels">{{range .Genres}}{{if .Href}}<a href="{{.Href}}">{{.Name}}</a>{{else}}<span>{{.Name}}</span>{{end}}{{end}}{{range .Tags}}{{if .Href}}<a href="{{.Href}}">{{.Name}}</a>{{else}}<span>{{.Name}}</span>{{end}}{{end}}</p>
+          {{- end}}
+          {{- range .Feeds}}
+          <p class="subscribe"><a class="feed-link button" href="{{.Href}}">Subscribe to {{.Name}}</a><button class="copy" type="button" hidden>Copy feed URL</button><a class="overcast" hidden>Add to Overcast</a></p>
           {{- end}}
         </div>
       </article>
       {{- if .SeriesBooks}}
       <section>
-        <h2>In the series</h2>
+        <div class="section-head"><h2>{{.SeriesTitle}}</h2><span class="count">{{len .SeriesBooks}} books</span></div>
         <ol class="series">
           {{- range .SeriesBooks}}
           <li{{if .Current}} aria-current="page"{{end}}>
-            <a href="{{.Href}}">
-              {{- if .Cover}}<img class="cover" src="{{.Cover}}" alt="" width="96" height="96" loading="lazy" decoding="async" />{{else}}<span class="cover" aria-hidden="true"></span>{{end}}
-              <span class="position">{{if .Current}}This book{{else if .Position}}Book {{.Position}}{{end}}</span>
-              <span class="title">{{.Title}}</span>
+            <a class="tile" href="{{.Href}}">
+              {{- template "cover" .}}
+              <span class="seq">{{if .Current}}This book{{else if .Position}}Book {{.Position}}{{end}}</span>
+              <span class="t">{{.Title}}</span>
             </a>
           </li>
           {{- end}}
@@ -51,7 +58,7 @@
       {{- end}}
       {{- if $.Books}}
       <section>
-        <h2>More by {{template "links" .Authors}}</h2>
+        <div class="section-head"><h2>More by {{template "links" .Authors}}</h2></div>
         {{- template "booklist" $}}
       </section>
       {{- end}}

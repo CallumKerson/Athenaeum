@@ -63,7 +63,7 @@ func TestBookPageShowsTheBook(t *testing.T) {
 	assert.Contains(
 		t,
 		page,
-		`<p class="description">Ged, the greatest sorcerer in all Earthsea, was called Sparrowhawk in his reckless youth.</p>`,
+		`<p>Ged, the greatest sorcerer in all Earthsea, was called Sparrowhawk in his reckless youth.</p>`,
 	)
 	assert.NotContains(t, page, "&lt;p&gt;", "the description's own markup is dropped, not escaped onto the page")
 	assert.Contains(t, page, `Subscribe to Ursula K. Le Guin</a>`)

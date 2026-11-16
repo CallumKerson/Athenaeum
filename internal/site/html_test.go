@@ -139,8 +139,17 @@ func TestBookListsAreNewestFirst(t *testing.T) {
 	)
 	// Every page that lists books, not just the whole-library one.
 	require.Len(t, content.Authors.Names, 1)
-	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"},
-		titles(nameView(newLibrary(content, nil, nil), &content.Authors.Names[0]).Books))
+	assert.Equal(
+		t,
+		[]string{"Newest", "Middle", "Oldest", "Undated"},
+		titles(
+			nameView(
+				newLibrary(content, nil, nil),
+				shownSection{Section: &content.Authors},
+				&content.Authors.Names[0],
+			).Books,
+		),
+	)
 }
 
 // The feeds are rendered from the same slices the pages list, and their item
