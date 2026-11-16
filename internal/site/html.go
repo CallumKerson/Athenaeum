@@ -384,33 +384,13 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 	if lib.audioURL != nil {
 		page.AudioURL = lib.audioURL(book)
 	}
-	for _, author := range book.Authors {
-		if slug, ok := lib.Authors.Slugs[author]; ok {
-			if name := lib.authorPages[slug]; name != nil && name.Link != "" {
-				page.Feeds = append(page.Feeds, linkView{Name: name.Title, Href: hrefFor(root, name.Link)})
-			}
-		}
-	}
-
-	// Different authors can use the same series title, so only books that share
-	// an author with this one count as its series.
-	var inSeries []*audiobooks.Audiobook
-	if book.Series != nil {
-		for _, entry := range series[book.Series.Title] {
-			if entry.Path == book.Path || sharesAuthor(lib, book, entry) {
-				inSeries = append(inSeries, entry)
-			}
-		}
-	}
+	page.Feeds = authorFeeds(lib, root, book)
+	inSeries := seriesOf(lib, series, book)
 	if len(inSeries) > 1 {
 		for _, entry := range inSeries {
-			position := ""
-			if entry.Series.Sequence != nil {
-				position = entry.Series.Sequence.String()
-			}
 			page.SeriesBooks = append(page.SeriesBooks, seriesEntry{
 				bookView: describeBook(lib, root, entry),
-				Position: position,
+				Position: position(entry),
 				Current:  entry.Path == book.Path,
 			})
 		}
@@ -438,6 +418,43 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 		Book:    page,
 		Books:   moreBy,
 	}
+}
+
+func authorFeeds(lib *library, root string, book *audiobooks.Audiobook) []linkView {
+	var feeds []linkView
+	for _, author := range book.Authors {
+		if name := lib.authorPages[lib.Authors.Slugs[author]]; name != nil && name.Link != "" {
+			feeds = append(feeds, linkView{Name: name.Title, Href: hrefFor(root, name.Link)})
+		}
+	}
+	return feeds
+}
+
+// seriesOf returns the book's series in reading order, from the series that
+// seriesInOrder grouped. Different authors can use the same series title, so
+// only books that share an author with this one count.
+func seriesOf(
+	lib *library,
+	series map[string][]*audiobooks.Audiobook,
+	book *audiobooks.Audiobook,
+) []*audiobooks.Audiobook {
+	if book.Series == nil {
+		return nil
+	}
+	var inSeries []*audiobooks.Audiobook
+	for _, entry := range series[book.Series.Title] {
+		if entry.Path == book.Path || sharesAuthor(lib, book, entry) {
+			inSeries = append(inSeries, entry)
+		}
+	}
+	return inSeries
+}
+
+func position(book *audiobooks.Audiobook) string {
+	if book.Series == nil || book.Series.Sequence == nil {
+		return ""
+	}
+	return book.Series.Sequence.String()
 }
 
 // sharesAuthor compares authors by their page, so spelling variants that the
