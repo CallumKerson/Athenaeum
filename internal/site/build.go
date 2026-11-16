@@ -112,7 +112,7 @@ func Build(root string, content *Content, renderer *feed.Renderer, opts Options,
 	if err != nil {
 		return result, err
 	}
-	if err := writeAssets(content, covers, writeFile); err != nil {
+	if err := writeAssets(newLibrary(content, covers, renderer.AudioURL), writeFile); err != nil {
 		return result, err
 	}
 
@@ -202,11 +202,7 @@ func writeCovers(
 
 // writeAssets publishes the HTML pages, the stylesheet and the embedded iTunes
 // artwork the feeds link to.
-func writeAssets(
-	content *Content,
-	covers map[string]string,
-	writeFile func(relPath string, contents []byte) error,
-) error {
+func writeAssets(lib *library, writeFile func(relPath string, contents []byte) error) error {
 	assets, err := fs.ReadDir(static.Assets, ".")
 	if err != nil {
 		return err
@@ -221,7 +217,7 @@ func writeAssets(
 		}
 	}
 
-	htmlPages, err := buildHTML(content, covers)
+	htmlPages, err := buildHTML(lib)
 	if err != nil {
 		return err
 	}

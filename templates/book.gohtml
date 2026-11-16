@@ -1,0 +1,59 @@
+{{define "content"}}
+{{- with .Book}}
+      <article class="book">
+        {{- if .Cover}}
+        <img class="cover" src="{{.Cover}}" alt="Cover of {{.Title}}" width="320" height="320" />
+        {{- else}}
+        <span class="cover" aria-hidden="true"></span>
+        {{- end}}
+        <div class="about">
+          <p class="people">
+            {{- if .Authors}}<span>Written by {{template "links" .Authors}}</span>{{end}}
+            {{- if .Narrators}}<span>Read by {{template "links" .Narrators}}</span>{{end}}
+          </p>
+          <dl class="facts">
+            {{- with .Series}}<div><dt>Series</dt><dd>{{.}}</dd></div>{{end}}
+            {{- with .Date}}<div><dt>Published</dt><dd>{{.}}</dd></div>{{end}}
+            {{- with .Duration}}<div><dt>Length</dt><dd>{{.}}</dd></div>{{end}}
+          </dl>
+          {{- if .AudioURL}}
+          <audio class="player" controls preload="none">
+            <source src="{{.AudioURL}}"{{with .MIMEType}} type="{{.}}"{{end}} />
+            <a href="{{.AudioURL}}">Download the audiobook</a>
+          </audio>
+          {{- end}}
+          {{- range .Feeds}}
+          <p class="feed"><a href="{{.Href}}">Subscribe to {{.Name}}</a><button class="copy" type="button" hidden>copy URL</button></p>
+          {{- end}}
+          {{- range .Paragraphs}}
+          <p class="description">{{.}}</p>
+          {{- end}}
+          {{- if or .Genres .Tags}}
+          <p class="labels">{{template "links" .Genres}}{{if and .Genres .Tags}} · {{end}}{{template "links" .Tags}}</p>
+          {{- end}}
+        </div>
+      </article>
+      {{- if .SeriesBooks}}
+      <section>
+        <h2>In the series</h2>
+        <ol class="series">
+          {{- range .SeriesBooks}}
+          <li{{if .Current}} aria-current="page"{{end}}>
+            <a href="{{.Href}}">
+              {{- if .Cover}}<img class="cover" src="{{.Cover}}" alt="" width="96" height="96" loading="lazy" decoding="async" />{{else}}<span class="cover" aria-hidden="true"></span>{{end}}
+              <span class="position">{{if .Current}}This book{{else if .Position}}Book {{.Position}}{{end}}</span>
+              <span class="title">{{.Title}}</span>
+            </a>
+          </li>
+          {{- end}}
+        </ol>
+      </section>
+      {{- end}}
+      {{- if $.Books}}
+      <section>
+        <h2>More by {{template "links" .Authors}}</h2>
+        {{- template "booklist" $}}
+      </section>
+      {{- end}}
+{{- end}}
+{{- end}}

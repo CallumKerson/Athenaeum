@@ -100,13 +100,15 @@
       <ul class="books">
         {{- range .Books}}
         <li data-search="{{.Search}}">
+          <a class="cover-link" href="{{.Href}}" tabindex="-1" aria-hidden="true">
           {{- if .Cover}}
           <img class="cover" src="{{.Cover}}" alt="" width="72" height="72" loading="lazy" decoding="async" />
           {{- else}}
-          <span class="cover" aria-hidden="true"></span>
+          <span class="cover"></span>
           {{- end}}
+          </a>
           <div class="about">
-          <span class="title">{{.Title}}</span>
+          <a class="title" href="{{.Href}}">{{.Title}}</a>
           {{- with .Subtitle}}<span class="subtitle">{{.}}</span>{{end}}
           <span class="meta">
             {{- with .Date}}<span class="date">{{.}}</span>{{end}}
