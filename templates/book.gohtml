@@ -7,7 +7,7 @@
         <span class="cover blank" aria-hidden="true"><b>{{.Title}}</b></span>
         {{- end}}
         <div class="about">
-          {{- with .Series}}<p class="seq">{{.}}</p>{{end}}
+          {{- with .Series}}<p class="seq">{{if $.Book.SeriesHref}}<a href="{{$.Book.SeriesHref}}">{{.}}</a>{{else}}{{.}}{{end}}</p>{{end}}
           <h1>{{.Title}}</h1>
           {{- with .Subtitle}}<p class="sub">{{.}}</p>{{end}}
           <p class="people">
@@ -41,7 +41,7 @@
       </article>
       {{- if .SeriesBooks}}
       <section>
-        <div class="section-head"><h2>{{.SeriesTitle}}</h2><span class="count">{{len .SeriesBooks}} books</span></div>
+        <div class="section-head"><h2>{{.SeriesTitle}}</h2>{{with .SeriesHref}}<a href="{{.}}">The whole series</a>{{end}}</div>
         <ol class="series">
           {{- range .SeriesBooks}}
           <li{{if .Current}} aria-current="page"{{end}}>

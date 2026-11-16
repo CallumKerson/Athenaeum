@@ -46,7 +46,7 @@ There is no server process, no database and no request path.
    Each section also maps every spelling a book lists to its page's slug, so pages link books to names without normalising them again
 3. `site.Build` renders each feed with the `feed.Renderer` that `feed.New` built from the config, and writes it to every path in its plan.
    It then writes a thumbnail of each cover to the path the plan gave it (`covers/` plus a hash of the cover's library path); a cover that cannot be decoded is logged and left out
-4. `site.buildHTML` turns the plan into the browsable pages: a home page (library totals, a cover mosaic, the latest releases and genre tiles, all drawn from the main feed's books), `/books/` with a client-side filter, a page per book at `/books/<slug>/` (slugs from the plan, numbered by library path when titles collide), and an index plus a page per name for each section.
+4. `site.buildHTML` turns the plan into the browsable pages: a home page (library totals, a cover mosaic, the latest releases and genre tiles, all drawn from the main feed's books), `/books/` with a client-side filter, a page per book at `/books/<slug>/` (slugs from the plan, numbered by library path when titles collide), an index plus a page per series at `/series/<slug>/` (HTML only, no feed; `Plan` groups books by series title and shared author, so two authors' series with one title get separate pages), and an index plus a page per name for each section.
    Book pages play audio from `feed.Renderer.AudioURL`, the enclosure URL, and show descriptions as plain-text paragraphs from `Description.Paragraphs`, never as the library's own HTML
 5. Stale files from previous builds are swept, and Overcast is optionally notified
 

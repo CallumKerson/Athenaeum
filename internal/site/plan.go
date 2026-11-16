@@ -90,20 +90,24 @@ type Content struct {
 	// BookSlugs maps each book's Path to the directory of its page under
 	// /books/.
 	BookSlugs map[string]string
+	// Series lists the library's series, each with a page under /series/.
+	Series []Series
 }
 
 // Plan works out the complete set of feeds and pages to publish for a library.
 //
 // Books are assumed to be sorted already; every feed preserves that order.
 func Plan(books []audiobooks.Audiobook, excludedFromMainFeed []audiobooks.Genre) *Content {
+	authors := personSection(books, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
+		return b.Authors
+	})
 	return &Content{
 		Books:     books,
 		Covers:    coverPaths(books),
 		BookSlugs: bookSlugs(books),
+		Series:    seriesGroups(books, authors.Slugs),
 		Main:      mainFeed(books, excludedFromMainFeed),
-		Authors: personSection(books, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
-			return b.Authors
-		}),
+		Authors:   authors,
 		Narrators: personSection(books, narratorsDir, readFormat, func(b *audiobooks.Audiobook) []string {
 			return b.Narrators
 		}),
