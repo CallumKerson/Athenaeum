@@ -57,12 +57,18 @@ type Name struct {
 // narrator, genre or tag.
 type Section struct {
 	Dir string
-	// Names is sorted, and so is the order their slugs were assigned in.
+	// Names is sorted, and colliding slugs are suffixed in that order, so which
+	// name keeps the plain slug is stable between builds. Authors, narrators and
+	// tags sort by normalised name (lowercased, whitespace removed), so
+	// "Ann-Leckie" (ann-leckie) keeps ann-leckie and "Ann Leckie" (annleckie)
+	// gets ann-leckie-2; genres keep the Genre enum's order.
 	Names []Name
-	// Listed maps each name exactly as a book lists it to its index in Names. It
+	// Slugs maps each name exactly as a book lists it to the slug of its page. It
 	// is filled in while the books are grouped, so the HTML pages can link a
-	// book to its names without repeating the grouping's normalisation.
-	Listed map[string]int
+	// book to its names without repeating the grouping's normalisation. It holds
+	// the slug itself rather than a position in Names so that it cannot point at
+	// the wrong name if Names changes.
+	Slugs map[string]string
 }
 
 // Content is everything a build publishes: the library the HTML pages list, the
@@ -133,8 +139,10 @@ func mainFeed(books []audiobooks.Audiobook, excluded []audiobooks.Genre) Feed {
 // server returned an empty feed rather than a 404 for a valid but unused genre,
 // and an existing subscription to one must not start 404ing.
 func genreSection(books []audiobooks.Audiobook) Section {
-	section := Section{Dir: genresDir, Listed: map[string]int{}}
-	for _, genre := range audiobooks.AllGenres() {
+	genres := audiobooks.AllGenres()
+	names := make([]Name, 0, len(genres))
+	listed := map[string]int{}
+	for _, genre := range genres {
 		matching := []audiobooks.Audiobook{}
 		for index := range books {
 			if slices.Contains(books[index].Genres, genre) {
@@ -142,8 +150,8 @@ func genreSection(books []audiobooks.Audiobook) Section {
 			}
 		}
 		link, paths := feedPaths(genresDir, genre.String(), genreAliases(genre))
-		section.Listed[genre.String()] = len(section.Names)
-		section.Names = append(section.Names, Name{Feed: Feed{
+		listed[genre.String()] = len(names)
+		names = append(names, Name{Feed: Feed{
 			Paths:       paths,
 			Title:       genre.String(),
 			Description: fmt.Sprintf(plainFormat, genre),
@@ -151,8 +159,7 @@ func genreSection(books []audiobooks.Audiobook) Section {
 			Link:        link,
 		}})
 	}
-	assignSlugs(section.Names)
-	return section
+	return newSection(genresDir, names, listed)
 }
 
 // personSection groups books by the names returned by names, matching the
@@ -202,16 +209,17 @@ func personSection(
 	}
 
 	slices.Sort(order)
-	section := Section{Dir: dir, Names: make([]Name, 0, len(order)), Listed: map[string]int{}}
+	sectionNames := make([]Name, 0, len(order))
+	listed := map[string]int{}
 	for _, key := range order {
 		name := canonical[key]
 		var aliases []string
 		for _, variant := range variants[key] {
 			aliases = append(aliases, nameAliases(variant)...)
-			section.Listed[variant] = len(section.Names)
+			listed[variant] = len(sectionNames)
 		}
 		link, paths := feedPaths(dir, name, dedupe(aliases))
-		section.Names = append(section.Names, Name{Feed: Feed{
+		sectionNames = append(sectionNames, Name{Feed: Feed{
 			Paths:       paths,
 			Title:       name,
 			Description: fmt.Sprintf(descriptionFormat, name),
@@ -219,8 +227,18 @@ func personSection(
 			Link:        link,
 		}})
 	}
-	assignSlugs(section.Names)
-	return section
+	return newSection(dir, sectionNames, listed)
+}
+
+// newSection gives every name its page, then resolves listed, which maps each
+// spelling a book lists to its name's position in names, to that page's slug.
+func newSection(dir string, names []Name, listed map[string]int) Section {
+	assignSlugs(names)
+	slugs := make(map[string]string, len(listed))
+	for spelling, index := range listed {
+		slugs[spelling] = names[index].Slug
+	}
+	return Section{Dir: dir, Names: names, Slugs: slugs}
 }
 
 // assignSlugs gives every name in a section a unique page directory.
@@ -229,8 +247,8 @@ func assignSlugs(names []Name) {
 	for index := range names {
 		slug := slugify(names[index].Title)
 		// Distinct names can slugify identically — "Ann Leckie" and "Ann-Leckie" —
-		// and must not end up sharing a page. Names are sorted, so which one keeps
-		// the unsuffixed slug is stable between builds.
+		// and must not end up sharing a page. Names are sorted (see Section.Names),
+		// so which one keeps the unsuffixed slug is stable between builds.
 		unique := slug
 		for suffix := 2; taken[unique]; suffix++ {
 			unique = fmt.Sprintf("%s-%d", slug, suffix)

@@ -195,6 +195,37 @@ func TestPlanGivesCollidingNamesDistinctSlugsInSortedOrder(t *testing.T) {
 	assert.Equal(t, expected, collide("ann.leckie", "Ann Leckie", "Ann-Leckie"))
 }
 
+// TestEveryFeedHasAPage derives each page's path from these same slugs, so it
+// cannot notice two names sharing one; this checks for that directly.
+func TestPlanGivesEveryNameInASectionADistinctSlug(t *testing.T) {
+	colliding := []string{"Ann Leckie", "Ann-Leckie", "ann.leckie", "ANN LECKIE!", "..", "?"}
+	content := Plan([]audiobooks.Audiobook{
+		book("First", audiobooks.AllGenres(), colliding, colliding, colliding),
+		book("Second", nil, []string{"Ann  Leckie"}, nil, []string{"ann-leckie"}),
+	}, nil)
+
+	for _, section := range sections(content) {
+		seen := map[string]string{}
+		for index := range section.Names {
+			name := &section.Names[index]
+			assert.NotEmpty(t, name.Slug, "%s in %s", name.Title, section.Dir)
+			if other, taken := seen[name.Slug]; taken {
+				assert.Failf(
+					t,
+					"slug shared",
+					"%q and %q in %s both have %q",
+					other,
+					name.Title,
+					section.Dir,
+					name.Slug,
+				)
+			}
+			seen[name.Slug] = name.Title
+		}
+		assert.Len(t, seen, len(section.Names), section.Dir)
+	}
+}
+
 // A book links to a name under whichever spelling it lists, and every spelling
 // of one name leads to the same page.
 func TestPlanResolvesListedNamesToTheirPages(t *testing.T) {
@@ -205,9 +236,9 @@ func TestPlanResolvesListedNamesToTheirPages(t *testing.T) {
 
 	pageOf := func(section *Section, listed string) string {
 		t.Helper()
-		index, ok := section.Listed[listed]
+		slug, ok := section.Slugs[listed]
 		require.True(t, ok, "%q has no page in %s", listed, section.Dir)
-		return section.Names[index].Slug
+		return slug
 	}
 
 	assert.Equal(t, "v-e-schwab", pageOf(&content.Authors, "V.E. Schwab"))
@@ -227,7 +258,7 @@ func TestPlanGivesBlankNamesNoPage(t *testing.T) {
 	}, nil)
 
 	assert.Empty(t, content.Narrators.Names)
-	assert.NotContains(t, content.Narrators.Listed, "  ")
+	assert.NotContains(t, content.Narrators.Slugs, "  ")
 }
 
 // A name with no spelling that is safe as a directory still gets a page, which

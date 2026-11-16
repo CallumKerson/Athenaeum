@@ -81,6 +81,21 @@ func TestEveryFeedHasAPage(t *testing.T) {
 	assert.FileExists(t, filepath.Join(root, genresDir, "horror", indexName))
 }
 
+// Every section the plan publishes feeds for must also be shown, in the same
+// order, with a heading and blurb to introduce it.
+func TestEverySectionIsShown(t *testing.T) {
+	content := Plan(nil, nil)
+	shown := shownSections(content)
+	planned := sections(content)
+
+	require.Len(t, shown, len(planned))
+	for index, section := range shown {
+		assert.Same(t, planned[index], section.Section)
+		assert.NotEmpty(t, section.Title, section.Dir)
+		assert.NotEmpty(t, section.Blurb, section.Dir)
+	}
+}
+
 // The genre exclusion is a rule about the main feed, not about the library, so
 // the browsable list still holds everything.
 func TestAllBooksPageListsBooksExcludedFromTheMainFeed(t *testing.T) {
@@ -117,11 +132,11 @@ func TestBookListsAreNewestFirst(t *testing.T) {
 		return found
 	}
 
-	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"}, titles(allBooksView(content).Books))
+	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"}, titles(allBooksView(content, nil).Books))
 	// Every page that lists books, not just the whole-library one.
 	require.Len(t, content.Authors.Names, 1)
 	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"},
-		titles(nameView(content, &content.Authors.Names[0]).Books))
+		titles(nameView(content, nil, &content.Authors.Names[0]).Books))
 }
 
 // The feeds are rendered from the same slices the pages list, and their item
@@ -150,7 +165,7 @@ func TestBookDateMatchesTheFeed(t *testing.T) {
 		dated("Undated", nil),
 	}, nil)
 
-	books := allBooksView(content).Books
+	books := allBooksView(content, nil).Books
 	require.Len(t, books, 2)
 
 	assert.Equal(t, "1 Nov 1968", books[0].Date)
@@ -183,7 +198,7 @@ func TestBookSeriesLine(t *testing.T) {
 			audiobook.Series = &audiobooks.Series{Title: "Earthsea", Sequence: sequence}
 
 			content := Plan([]audiobooks.Audiobook{audiobook}, nil)
-			books := allBooksView(content).Books
+			books := allBooksView(content, nil).Books
 			require.Len(t, books, 1)
 
 			assert.Equal(t, testCase.expected, books[0].Series)
@@ -202,7 +217,7 @@ func TestBookSearchTextCoversEveryField(t *testing.T) {
 		Tags:      []string{"Hugo Awards"},
 	}}, nil)
 
-	books := allBooksView(content).Books
+	books := allBooksView(content, nil).Books
 	require.Len(t, books, 1)
 
 	for _, term := range []string{"earthsea", "le guin", "holdbrook", "fantasy", "hugo"} {
@@ -221,7 +236,7 @@ func TestBookLinksToTheNamesItLists(t *testing.T) {
 			[]string{"Hugo Awards"}),
 	}, nil)
 
-	books := allBooksView(content).Books
+	books := allBooksView(content, nil).Books
 	require.Len(t, books, 2)
 	second := books[1]
 	require.Equal(t, "Second", second.Title)

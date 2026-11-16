@@ -29,21 +29,25 @@ const (
 	rootFromSubDir = "../../"
 )
 
-// sectionText is how a section introduces itself on the site.
-type sectionText struct {
+// shownSection is a section of the plan together with how the site introduces
+// it. Keeping the text beside the section, rather than in a lookup keyed by
+// directory, means no section can be shown without its heading.
+type shownSection struct {
+	*Section
 	Title string
 	Blurb string
 }
 
-// sectionTexts is keyed by section directory.
-var sectionTexts = map[string]sectionText{
-	authorsDir:   {Title: "Authors", Blurb: "Everyone who wrote something in the library."},
-	narratorsDir: {Title: "Narrators", Blurb: "Everyone who read something in the library."},
-	genresDir: {
-		Title: "Genres",
-		Blurb: "Every genre Athenaeum knows, including those nothing is filed under yet.",
-	},
-	tagsDir: {Title: "Tags", Blurb: "Whatever the library's own metadata tags books with."},
+// shownSections lists the plan's sections in the order the site presents them.
+// TestEverySectionIsShown checks it against sections, so a section added to the
+// plan cannot quietly go without pages.
+func shownSections(content *Content) []shownSection {
+	return []shownSection{
+		{&content.Authors, "Authors", "Everyone who wrote something in the library."},
+		{&content.Narrators, "Narrators", "Everyone who read something in the library."},
+		{&content.Genres, "Genres", "Every genre Athenaeum knows, including those nothing is filed under yet."},
+		{&content.Tags, "Tags", "Whatever the library's own metadata tags books with."},
+	}
 }
 
 // htmlPage is a rendered page and the path it is published at.
@@ -103,6 +107,7 @@ func buildHTML(content *Content) ([]htmlPage, error) {
 	if err != nil {
 		return nil, err
 	}
+	shown := shownSections(content)
 
 	pages := []htmlPage{}
 	add := func(tpl *template.Template, relPath string, view *pageView) error {
@@ -114,15 +119,19 @@ func buildHTML(content *Content) ([]htmlPage, error) {
 		return nil
 	}
 
-	if err := add(tpls.home, indexName, homeView(content)); err != nil {
+	if err := add(tpls.home, indexName, homeView(content, shown)); err != nil {
 		return nil, err
 	}
-	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(content)); err != nil {
+	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(content, shown)); err != nil {
 		return nil, err
 	}
 
-	for _, section := range sections(content) {
-		if err := add(tpls.entries, path.Join(section.Dir, indexName), sectionView(content, section)); err != nil {
+	for _, section := range shown {
+		if err := add(
+			tpls.entries,
+			path.Join(section.Dir, indexName),
+			sectionView(shown, section),
+		); err != nil {
 			return nil, err
 		}
 		for index := range section.Names {
@@ -130,7 +139,7 @@ func buildHTML(content *Content) ([]htmlPage, error) {
 			if err := add(
 				tpls.books,
 				path.Join(section.Dir, name.Slug, indexName),
-				nameView(content, name),
+				nameView(content, shown, name),
 			); err != nil {
 				return nil, err
 			}
@@ -168,14 +177,14 @@ func parseHTMLTemplates() (*htmlTemplates, error) {
 	return &parsed, nil
 }
 
-func homeView(content *Content) *pageView {
+func homeView(content *Content, shown []shownSection) *pageView {
 	view := &pageView{
 		Title:    allTitle,
 		Heading:  allTitle + " 🎧📚",
 		Blurb:    allSummary,
 		Root:     rootFromRoot,
 		FeedHref: feedHref(rootFromRoot, &content.Main),
-		Nav:      navLinks(content, rootFromRoot),
+		Nav:      navLinks(shown, rootFromRoot),
 		Sections: []entryView{{
 			Name:  booksTitle,
 			Href:  dirHref(rootFromRoot, booksDir),
@@ -183,40 +192,39 @@ func homeView(content *Content) *pageView {
 			Count: len(content.Books),
 		}},
 	}
-	for _, section := range sections(content) {
+	for _, section := range shown {
 		view.Sections = append(view.Sections, entryView{
-			Name:  sectionTexts[section.Dir].Title,
+			Name:  section.Title,
 			Href:  dirHref(rootFromRoot, section.Dir),
-			Note:  sectionTexts[section.Dir].Blurb,
+			Note:  section.Blurb,
 			Count: len(section.Names),
 		})
 	}
 	return view
 }
 
-func allBooksView(content *Content) *pageView {
+func allBooksView(content *Content, shown []shownSection) *pageView {
 	return &pageView{
 		Title:       pageTitle(booksTitle),
 		Heading:     booksTitle,
 		Blurb:       fmt.Sprintf("%d books in the library, most recently published first.", len(content.Books)),
 		Root:        rootFromDir,
-		Nav:         navLinks(content, rootFromDir),
+		Nav:         navLinks(shown, rootFromDir),
 		Search:      true,
 		SearchLabel: "Search by title, author, narrator, series, genre or tag",
 		Books:       bookViews(content, rootFromDir, content.Books),
 	}
 }
 
-func sectionView(content *Content, section *Section) *pageView {
-	text := sectionTexts[section.Dir]
+func sectionView(shown []shownSection, section shownSection) *pageView {
 	view := &pageView{
-		Title:       pageTitle(text.Title),
-		Heading:     text.Title,
-		Blurb:       text.Blurb,
+		Title:       pageTitle(section.Title),
+		Heading:     section.Title,
+		Blurb:       section.Blurb,
 		Root:        rootFromDir,
-		Nav:         navLinks(content, rootFromDir),
+		Nav:         navLinks(shown, rootFromDir),
 		Search:      true,
-		SearchLabel: "Search " + strings.ToLower(text.Title),
+		SearchLabel: "Search " + strings.ToLower(section.Title),
 		Entries:     make([]entryView, 0, len(section.Names)),
 	}
 	for index := range section.Names {
@@ -232,24 +240,23 @@ func sectionView(content *Content, section *Section) *pageView {
 	return view
 }
 
-func nameView(content *Content, name *Name) *pageView {
+func nameView(content *Content, shown []shownSection, name *Name) *pageView {
 	return &pageView{
 		Title:    pageTitle(name.Title),
 		Heading:  name.Title,
 		Blurb:    name.Description,
 		Root:     rootFromSubDir,
 		FeedHref: feedHref(rootFromSubDir, &name.Feed),
-		Nav:      navLinks(content, rootFromSubDir),
+		Nav:      navLinks(shown, rootFromSubDir),
 		Books:    bookViews(content, rootFromSubDir, name.Books),
 	}
 }
 
-func navLinks(content *Content, root string) []linkView {
-	all := sections(content)
-	nav := make([]linkView, 0, len(all)+1)
+func navLinks(shown []shownSection, root string) []linkView {
+	nav := make([]linkView, 0, len(shown)+1)
 	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir)})
-	for _, section := range all {
-		nav = append(nav, linkView{Name: sectionTexts[section.Dir].Title, Href: dirHref(root, section.Dir)})
+	for _, section := range shown {
+		nav = append(nav, linkView{Name: section.Title, Href: dirHref(root, section.Dir)})
 	}
 	return nav
 }
@@ -330,8 +337,8 @@ func links(root string, section *Section, names []string) []linkView {
 	links := make([]linkView, 0, len(names))
 	for _, name := range names {
 		link := linkView{Name: name}
-		if index, ok := section.Listed[name]; ok {
-			link.Href = dirHref(root, section.Dir, section.Names[index].Slug)
+		if slug, ok := section.Slugs[name]; ok {
+			link.Href = dirHref(root, section.Dir, slug)
 		}
 		links = append(links, link)
 	}

@@ -40,8 +40,9 @@ There is no server process, no database and no request path.
 
 1. `scan.Library` walks the media root for `.m4b` + `.toml` file pairs
 2. `site.Plan` returns the main feed and a section each for authors, narrators, genres and tags.
-   Every name in a section carries its feed paths, the feed path pages link to, and the slug of its HTML page (colliding slugs get `-2`, `-3` in sorted order).
-   Each section also maps every spelling a book lists to its name, so pages link books to names without normalising them again
+   Every name in a section carries its feed paths, the feed path pages link to, and the slug of its HTML page.
+   Colliding slugs get `-2`, `-3` in the section's sort order: authors, narrators and tags by normalised name (lowercase, whitespace removed), so `Ann-Leckie` keeps `ann-leckie` and `Ann Leckie` gets `ann-leckie-2`; genres in `Genre` enum order.
+   Each section also maps every spelling a book lists to its page's slug, so pages link books to names without normalising them again
 3. `site.Build` renders each feed with the `feed.Renderer` that `feed.New` built from the config, and writes it to every path in its plan
 4. `site.buildHTML` turns the plan into the browsable pages: a home page, `/books/` with a client-side filter, and an index plus a page per name for each section
 5. Stale files from previous builds are swept, and Overcast is optionally notified
