@@ -68,6 +68,7 @@ func TestBookPageShowsTheBook(t *testing.T) {
 	assert.NotContains(t, page, "&lt;p&gt;", "the description's own markup is dropped, not escaped onto the page")
 	assert.Contains(t, page, `Subscribe to Ursula K. Le Guin</a>`)
 	assert.Contains(t, page, `<img class="cover" src="../../covers/`)
+	assert.Contains(t, page, "<dd>Earthsea book 1</dd>")
 }
 
 func TestBookPageEscapesTheDescription(t *testing.T) {
@@ -104,9 +105,9 @@ func TestBookPageListsTheSeriesInReadingOrder(t *testing.T) {
 
 	view := bookPageView(lib, seriesInOrder(content.Books), current)
 
-	order := make([]string, 0, len(view.Book.Series))
-	for index := range view.Book.Series {
-		entry := &view.Book.Series[index]
+	order := make([]string, 0, len(view.Book.SeriesBooks))
+	for index := range view.Book.SeriesBooks {
+		entry := &view.Book.SeriesBooks[index]
 		order = append(order, entry.Title)
 		assert.Equal(t, entry.Title == current.Title, entry.Current, entry.Title)
 	}
@@ -123,7 +124,7 @@ func TestBookPageListsTheSeriesInReadingOrder(t *testing.T) {
 func TestBookPageWithoutASeriesListsNone(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{inSeries("Alone", "Solo", 1)}, nil)
 	view := bookPageView(newLibrary(content, nil, nil), seriesInOrder(content.Books), &content.Books[0])
-	assert.Empty(t, view.Book.Series, "a series of one has nothing else to show")
+	assert.Empty(t, view.Book.SeriesBooks, "a series of one has nothing else to show")
 	assert.Empty(t, view.Book.AudioURL, "no renderer, no player")
 	assert.False(t, strings.Contains(view.Heading, "Solo"))
 }
@@ -134,4 +135,22 @@ func titles(views []bookView) []string {
 		names = append(names, views[index].Title)
 	}
 	return names
+}
+
+// Two authors can name a series the same thing, and neither's books belong on
+// the other's page.
+func TestBookPageSeriesIsTheAuthorsOwn(t *testing.T) {
+	mine := inSeries("Mine One", "Chronicles", 1)
+	mineToo := inSeries("Mine Two", "Chronicles", 2)
+	theirs := inSeries("Theirs One", "Chronicles", 1)
+	theirs.Authors = []string{"Someone Else"}
+	content := Plan([]audiobooks.Audiobook{mine, mineToo, theirs}, nil)
+
+	view := bookPageView(newLibrary(content, nil, nil), seriesInOrder(content.Books), &content.Books[0])
+
+	order := make([]string, 0, len(view.Book.SeriesBooks))
+	for index := range view.Book.SeriesBooks {
+		order = append(order, view.Book.SeriesBooks[index].Title)
+	}
+	assert.Equal(t, []string{"Mine One", "Mine Two"}, order)
 }

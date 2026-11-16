@@ -33,11 +33,11 @@
           {{- end}}
         </div>
       </article>
-      {{- if .Series}}
+      {{- if .SeriesBooks}}
       <section>
         <h2>In the series</h2>
         <ol class="series">
-          {{- range .Series}}
+          {{- range .SeriesBooks}}
           <li{{if .Current}} aria-current="page"{{end}}>
             <a href="{{.Href}}">
               {{- if .Cover}}<img class="cover" src="{{.Cover}}" alt="" width="96" height="96" loading="lazy" decoding="async" />{{else}}<span class="cover" aria-hidden="true"></span>{{end}}

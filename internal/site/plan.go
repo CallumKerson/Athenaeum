@@ -325,9 +325,10 @@ func feedPaths(dir, name string, aliases []string) (link string, all []string) {
 }
 
 // bookSlugs gives every book a page directory named after its title. Books
-// whose titles slugify alike are numbered in order of their path in the library,
-// so a slug only changes when a book with the same title is added or removed
-// ahead of it, never because of a release date or a metadata edit.
+// whose slugs collide are numbered in order of their path in the library, so a
+// slug only changes when a book whose title slugifies the same way, or to the
+// numbered form, is added or removed ahead of it — never because of a release
+// date or another metadata edit.
 func bookSlugs(books []audiobooks.Audiobook) map[string]string {
 	order := make([]*audiobooks.Audiobook, 0, len(books))
 	for index := range books {

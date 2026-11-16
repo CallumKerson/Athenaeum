@@ -113,8 +113,10 @@ type bookPage struct {
 	MIMEType   string
 	// Feeds are the authors' feeds, for subscribing from the book.
 	Feeds []linkView
-	// Series lists the whole series in reading order, this book included.
-	Series []seriesEntry
+	// SeriesBooks lists the whole series in reading order, this book included.
+	// It is not called Series because the embedded bookView already has a Series:
+	// the line naming the series and this book's place in it.
+	SeriesBooks []seriesEntry
 }
 
 type seriesEntry struct {
@@ -132,10 +134,22 @@ type library struct {
 	// audioURL is the public URL a book's audio is played from.
 	audioURL func(*audiobooks.Audiobook) string
 	shown    []shownSection
+	// authorPages finds an author by the slug of their page.
+	authorPages map[string]*Name
 }
 
 func newLibrary(content *Content, covers map[string]string, audioURL func(*audiobooks.Audiobook) string) *library {
-	return &library{Content: content, covers: covers, audioURL: audioURL, shown: shownSections(content)}
+	lib := &library{
+		Content:     content,
+		covers:      covers,
+		audioURL:    audioURL,
+		shown:       shownSections(content),
+		authorPages: make(map[string]*Name, len(content.Authors.Names)),
+	}
+	for index := range content.Authors.Names {
+		lib.authorPages[content.Authors.Names[index].Slug] = &content.Authors.Names[index]
+	}
+	return lib
 }
 
 // buildHTML renders the browsable tree that sits alongside the feeds: a home
@@ -372,15 +386,21 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 	}
 	for _, author := range book.Authors {
 		if slug, ok := lib.Authors.Slugs[author]; ok {
-			if name := nameWithSlug(&lib.Authors, slug); name != nil && name.Link != "" {
+			if name := lib.authorPages[slug]; name != nil && name.Link != "" {
 				page.Feeds = append(page.Feeds, linkView{Name: name.Title, Href: hrefFor(root, name.Link)})
 			}
 		}
 	}
 
+	// Different authors can use the same series title, so only books that share
+	// an author with this one count as its series.
 	var inSeries []*audiobooks.Audiobook
 	if book.Series != nil {
-		inSeries = series[book.Series.Title]
+		for _, entry := range series[book.Series.Title] {
+			if entry.Path == book.Path || sharesAuthor(lib, book, entry) {
+				inSeries = append(inSeries, entry)
+			}
+		}
 	}
 	if len(inSeries) > 1 {
 		for _, entry := range inSeries {
@@ -388,7 +408,7 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 			if entry.Series.Sequence != nil {
 				position = entry.Series.Sequence.String()
 			}
-			page.Series = append(page.Series, seriesEntry{
+			page.SeriesBooks = append(page.SeriesBooks, seriesEntry{
 				bookView: describeBook(lib, root, entry),
 				Position: position,
 				Current:  entry.Path == book.Path,
@@ -418,15 +438,6 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 		Book:    page,
 		Books:   moreBy,
 	}
-}
-
-func nameWithSlug(section *Section, slug string) *Name {
-	for index := range section.Names {
-		if section.Names[index].Slug == slug {
-			return &section.Names[index]
-		}
-	}
-	return nil
 }
 
 // sharesAuthor compares authors by their page, so spelling variants that the

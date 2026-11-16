@@ -35,7 +35,7 @@ const mediaRoot = "../../testdata"
 // Run with -update to regenerate.
 func TestPlanGolden(t *testing.T) {
 	content := testPlan(t)
-	manifest := renderManifest(t, feeds(content))
+	manifest := renderManifest(t, feeds(content)) + bookPageManifest(content)
 	goldenPath := filepath.Join("testdata", "golden_manifest.txt")
 
 	if *update {
@@ -286,6 +286,17 @@ func testOptions() Options {
 
 // renderManifest lists every published path with the hash of its contents, one
 // per line, sorted.
+// bookPageManifest lists where each book's page is published, so a change to
+// book URLs shows up in the golden manifest like a change to feed paths.
+func bookPageManifest(content *Content) string {
+	lines := make([]string, 0, len(content.BookSlugs))
+	for bookPath, slug := range content.BookSlugs {
+		lines = append(lines, fmt.Sprintf("book  %s/%s/  %s", booksDir, slug, bookPath))
+	}
+	slices.Sort(lines)
+	return strings.Join(lines, "\n") + "\n"
+}
+
 func renderManifest(t *testing.T, pages []*Feed) string {
 	t.Helper()
 	var lines []string
