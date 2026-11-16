@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.3.0](https://github.com/CallumKerson/Athenaeum/compare/v2.2.0...v2.3.0) (2026-11-16)
+
+
+### Features
+
+* **site:** add a page for every series ([#326](https://github.com/CallumKerson/Athenaeum/issues/326)) ([6e4f26e](https://github.com/CallumKerson/Athenaeum/commit/6e4f26e6e3609299d2a8f8fea3a3c2ae540e3938))
+* **site:** add a stats page for the library ([#328](https://github.com/CallumKerson/Athenaeum/issues/328)) ([ca3d8dc](https://github.com/CallumKerson/Athenaeum/commit/ca3d8dcf0306304ec3d1709fc49a8e377c07a4ed))
+* **site:** filter and sort the book, series, author and narrator lists ([#327](https://github.com/CallumKerson/Athenaeum/issues/327)) ([06063dc](https://github.com/CallumKerson/Athenaeum/commit/06063dc2ab7f5ad950b239bdccc1763c196a1847))
+* **site:** give every book its own page ([#324](https://github.com/CallumKerson/Athenaeum/issues/324)) ([6dde4ef](https://github.com/CallumKerson/Athenaeum/commit/6dde4ef863449441b511c1e5d7dc4d38b1c0b9ee))
+* **site:** give the site a new look with a cover-led home page ([#325](https://github.com/CallumKerson/Athenaeum/issues/325)) ([f43f62a](https://github.com/CallumKerson/Athenaeum/commit/f43f62a78a8d30a2f6ec35f48af01067d079b9a6))
+* **site:** show book covers on the browsable pages ([#323](https://github.com/CallumKerson/Athenaeum/issues/323)) ([a2eee3c](https://github.com/CallumKerson/Athenaeum/commit/a2eee3cea05d3f8e4c2520c417ae991225b9e177))
+
+
+### Bug Fixes
+
+* **deps:** update github.com/gomarkdown/markdown digest to f839536 ([#296](https://github.com/CallumKerson/Athenaeum/issues/296)) ([a8a26fe](https://github.com/CallumKerson/Athenaeum/commit/a8a26fe3d55f47ef3770cfc5c6e03b4ad2aa25d9))
+
 ## [2.2.0](https://github.com/CallumKerson/Athenaeum/compare/v2.1.0...v2.2.0) (2026-10-01)
 
 
