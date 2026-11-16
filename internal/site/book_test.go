@@ -68,7 +68,7 @@ func TestBookPageShowsTheBook(t *testing.T) {
 	assert.NotContains(t, page, "&lt;p&gt;", "the description's own markup is dropped, not escaped onto the page")
 	assert.Contains(t, page, `Subscribe to Ursula K. Le Guin</a>`)
 	assert.Contains(t, page, `<img class="cover" src="../../covers/`)
-	assert.Contains(t, page, `<p class="seq">Earthsea book 1</p>`)
+	assert.Contains(t, page, `<p class="seq"><a href="../../series/earthsea/">Earthsea book 1</a></p>`)
 }
 
 func TestBookPageEscapesTheDescription(t *testing.T) {
@@ -79,7 +79,7 @@ func TestBookPageEscapesTheDescription(t *testing.T) {
 	}
 	content := Plan([]audiobooks.Audiobook{audiobook}, nil)
 
-	view := bookPageView(newLibrary(content, nil, nil), seriesInOrder(content.Books), &content.Books[0])
+	view := bookPageView(newLibrary(content, nil, nil), &content.Books[0])
 	require.Equal(t, []string{"Fine <script>alert(1)</script>"}, view.Book.Paragraphs)
 
 	root := t.TempDir()
@@ -103,7 +103,7 @@ func TestBookPageListsTheSeriesInReadingOrder(t *testing.T) {
 	lib := newLibrary(content, nil, nil)
 	current := &content.Books[3]
 
-	view := bookPageView(lib, seriesInOrder(content.Books), current)
+	view := bookPageView(lib, current)
 
 	order := make([]string, 0, len(view.Book.SeriesBooks))
 	for index := range view.Book.SeriesBooks {
@@ -123,7 +123,7 @@ func TestBookPageListsTheSeriesInReadingOrder(t *testing.T) {
 
 func TestBookPageWithoutASeriesListsNone(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{inSeries("Alone", "Solo", 1)}, nil)
-	view := bookPageView(newLibrary(content, nil, nil), seriesInOrder(content.Books), &content.Books[0])
+	view := bookPageView(newLibrary(content, nil, nil), &content.Books[0])
 	assert.Empty(t, view.Book.SeriesBooks, "a series of one has nothing else to show")
 	assert.Empty(t, view.Book.AudioURL, "no renderer, no player")
 	assert.False(t, strings.Contains(view.Heading, "Solo"))
@@ -146,7 +146,7 @@ func TestBookPageSeriesIsTheAuthorsOwn(t *testing.T) {
 	theirs.Authors = []string{"Someone Else"}
 	content := Plan([]audiobooks.Audiobook{mine, mineToo, theirs}, nil)
 
-	view := bookPageView(newLibrary(content, nil, nil), seriesInOrder(content.Books), &content.Books[0])
+	view := bookPageView(newLibrary(content, nil, nil), &content.Books[0])
 
 	order := make([]string, 0, len(view.Book.SeriesBooks))
 	for index := range view.Book.SeriesBooks {

@@ -293,6 +293,13 @@ func bookPageManifest(content *Content) string {
 	for bookPath, slug := range content.BookSlugs {
 		lines = append(lines, fmt.Sprintf("book  %s/%s/  %s", booksDir, slug, bookPath))
 	}
+	for index := range content.Series {
+		series := &content.Series[index]
+		lines = append(
+			lines,
+			fmt.Sprintf("series  %s/%s/  %s (%d books)", seriesDir, series.Slug, series.Title, len(series.Books)),
+		)
+	}
 	slices.Sort(lines)
 	return strings.Join(lines, "\n") + "\n"
 }

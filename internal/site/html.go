@@ -85,12 +85,14 @@ type bookView struct {
 	// Href links to the book's own page.
 	Href string
 	// Cover links to the book's thumbnail, or is "" when it has none.
-	Cover     string
-	Search    string
-	Authors   []linkView
-	Narrators []linkView
-	Genres    []linkView
-	Tags      []linkView
+	Cover string
+	// SeriesHref links to the page of the book's series, if it has one.
+	SeriesHref string
+	Search     string
+	Authors    []linkView
+	Narrators  []linkView
+	Genres     []linkView
+	Tags       []linkView
 }
 
 // pageView is the data every template receives.
@@ -109,6 +111,8 @@ type pageView struct {
 	Book *bookPage
 	// Home is set only on the home page.
 	Home *homePage
+	// Series is set only on a series page: its books in reading order.
+	Series []seriesEntry
 }
 
 // bookPage is everything a book's own page shows beyond its list entry.
@@ -143,6 +147,8 @@ type library struct {
 	shown    []shownSection
 	// authorPages finds an author by the slug of their page.
 	authorPages map[string]*Name
+	// seriesOf finds the series a book, by its Path, belongs to.
+	seriesOf map[string]*Series
 }
 
 func newLibrary(content *Content, covers map[string]string, audioURL func(*audiobooks.Audiobook) string) *library {
@@ -155,6 +161,13 @@ func newLibrary(content *Content, covers map[string]string, audioURL func(*audio
 	}
 	for index := range content.Authors.Names {
 		lib.authorPages[content.Authors.Names[index].Slug] = &content.Authors.Names[index]
+	}
+	lib.seriesOf = map[string]*Series{}
+	for index := range content.Series {
+		series := &content.Series[index]
+		for member := range series.Books {
+			lib.seriesOf[series.Books[member].Path] = series
+		}
 	}
 	return lib
 }
@@ -185,11 +198,25 @@ func buildHTML(lib *library) ([]htmlPage, error) {
 	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(lib)); err != nil {
 		return nil, err
 	}
-	series := seriesInOrder(lib.Books)
 	for index := range lib.Books {
 		book := &lib.Books[index]
 		relPath := path.Join(booksDir, lib.BookSlugs[book.Path], indexName)
-		if err := add(tpls.book, relPath, bookPageView(lib, series, book)); err != nil {
+		if err := add(tpls.book, relPath, bookPageView(lib, book)); err != nil {
+			return nil, err
+		}
+	}
+	if len(lib.Series) > 0 {
+		if err := add(tpls.entries, path.Join(seriesDir, indexName), seriesIndexView(lib)); err != nil {
+			return nil, err
+		}
+	}
+	for index := range lib.Series {
+		series := &lib.Series[index]
+		if err := add(
+			tpls.series,
+			path.Join(seriesDir, series.Slug, indexName),
+			seriesPageView(lib, series),
+		); err != nil {
 			return nil, err
 		}
 	}
@@ -225,6 +252,7 @@ type htmlTemplates struct {
 	entries *template.Template
 	book    *template.Template
 	books   *template.Template
+	series  *template.Template
 }
 
 func parseHTMLTemplates() (*htmlTemplates, error) {
@@ -237,6 +265,7 @@ func parseHTMLTemplates() (*htmlTemplates, error) {
 		{&parsed.entries, "entries.gohtml"},
 		{&parsed.book, "book.gohtml"},
 		{&parsed.books, "books.gohtml"},
+		{&parsed.series, "series.gohtml"},
 	} {
 		tpl, err := template.ParseFS(templates.Templates, "layout.gohtml", target.name)
 		if err != nil {
@@ -321,7 +350,7 @@ func homeView(lib *library) *pageView {
 		Blurb:    allSummary,
 		Root:     root,
 		FeedHref: feedHref(root, &lib.Main),
-		Nav:      navLinks(lib.shown, root, ""),
+		Nav:      navLinks(lib, root, ""),
 		Home:     home,
 	}
 }
@@ -389,7 +418,7 @@ func allBooksView(lib *library) *pageView {
 		Heading:     booksTitle,
 		Blurb:       fmt.Sprintf("%d books in the library, most recently published first.", len(lib.Books)),
 		Root:        rootFromDir,
-		Nav:         navLinks(lib.shown, rootFromDir, booksDir),
+		Nav:         navLinks(lib, rootFromDir, booksDir),
 		Search:      true,
 		SearchLabel: "Search by title, author, narrator, series, genre or tag",
 		Books:       bookViews(lib, rootFromDir, lib.Books),
@@ -402,7 +431,7 @@ func sectionView(lib *library, section shownSection) *pageView {
 		Heading:     section.Title,
 		Blurb:       section.Blurb,
 		Root:        rootFromDir,
-		Nav:         navLinks(lib.shown, rootFromDir, section.Dir),
+		Nav:         navLinks(lib, rootFromDir, section.Dir),
 		Search:      true,
 		SearchLabel: "Search " + strings.ToLower(section.Title),
 		Entries:     make([]entryView, 0, len(section.Names)),
@@ -428,7 +457,7 @@ func nameView(lib *library, section shownSection, name *Name) *pageView {
 		Blurb:    name.Description,
 		Root:     rootFromSubDir,
 		FeedHref: feedHref(rootFromSubDir, &name.Feed),
-		Nav:      navLinks(lib.shown, rootFromSubDir, section.Dir),
+		Nav:      navLinks(lib, rootFromSubDir, section.Dir),
 		Books:    bookViews(lib, rootFromSubDir, name.Books),
 	}
 }
@@ -436,10 +465,13 @@ func nameView(lib *library, section shownSection, name *Name) *pageView {
 // navLinks links every top-level section from a page whose prefix back to the
 // site root is root, marking current, the directory of the page's own section,
 // or "" for the home page.
-func navLinks(shown []shownSection, root, current string) []linkView {
-	nav := make([]linkView, 0, len(shown)+1)
+func navLinks(lib *library, root, current string) []linkView {
+	nav := make([]linkView, 0, len(lib.shown)+2)
 	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir), Current: current == booksDir})
-	for _, section := range shown {
+	if len(lib.Series) > 0 {
+		nav = append(nav, linkView{Name: seriesTitle, Href: dirHref(root, seriesDir), Current: current == seriesDir})
+	}
+	for _, section := range lib.shown {
 		nav = append(nav, linkView{
 			Name:    section.Title,
 			Href:    dirHref(root, section.Dir),
@@ -483,6 +515,9 @@ func describeBook(lib *library, root string, book *audiobooks.Audiobook) bookVie
 	if cover, ok := lib.covers[book.ImagePath]; ok {
 		view.Cover = hrefFor(root, cover)
 	}
+	if series := lib.seriesOf[book.Path]; series != nil {
+		view.SeriesHref = dirHref(root, seriesDir, series.Slug)
+	}
 	if book.Series != nil {
 		view.Series = book.Series.Title
 		if sequence := book.Series.Sequence; sequence != nil {
@@ -499,7 +534,7 @@ const moreByLimit = 12
 
 // bookPageView describes a book's own page. series holds every series in
 // reading order, from seriesInOrder.
-func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book *audiobooks.Audiobook) *pageView {
+func bookPageView(lib *library, book *audiobooks.Audiobook) *pageView {
 	root := rootFromSubDir
 	page := &bookPage{
 		bookView:   describeBook(lib, root, book),
@@ -510,22 +545,17 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 		page.AudioURL = lib.audioURL(book)
 	}
 	page.Feeds = authorFeeds(lib, root, book)
-	inSeries := seriesOf(lib, series, book)
-	if len(inSeries) > 1 {
-		page.SeriesTitle = book.Series.Title
-		for _, entry := range inSeries {
-			page.SeriesBooks = append(page.SeriesBooks, seriesEntry{
-				bookView: describeBook(lib, root, entry),
-				Position: position(entry),
-				Current:  entry.Path == book.Path,
-			})
-		}
+	series := lib.seriesOf[book.Path]
+	if series != nil && len(series.Books) > 1 {
+		page.SeriesTitle = series.Title
+		page.SeriesBooks = seriesEntries(lib, root, series, book.Path)
 	}
 
 	var others []audiobooks.Audiobook
 	for index := range lib.Books {
 		other := &lib.Books[index]
-		if other.Path != book.Path && !slices.Contains(inSeries, other) && sharesAuthor(lib, book, other) {
+		inSameSeries := series != nil && lib.seriesOf[other.Path] == series
+		if other.Path != book.Path && !inSameSeries && sameAuthor(lib.Authors.Slugs, book, other) {
 			others = append(others, *other)
 		}
 	}
@@ -539,7 +569,7 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 	return &pageView{
 		Title: pageTitle(book.Title),
 		Root:  root,
-		Nav:   navLinks(lib.shown, root, booksDir),
+		Nav:   navLinks(lib, root, booksDir),
 		Book:  page,
 		Books: moreBy,
 	}
@@ -555,79 +585,11 @@ func authorFeeds(lib *library, root string, book *audiobooks.Audiobook) []linkVi
 	return feeds
 }
 
-// seriesOf returns the book's series in reading order, from the series that
-// seriesInOrder grouped. Different authors can use the same series title, so
-// only books that share an author with this one count.
-func seriesOf(
-	lib *library,
-	series map[string][]*audiobooks.Audiobook,
-	book *audiobooks.Audiobook,
-) []*audiobooks.Audiobook {
-	if book.Series == nil {
-		return nil
-	}
-	var inSeries []*audiobooks.Audiobook
-	for _, entry := range series[book.Series.Title] {
-		if entry.Path == book.Path || sharesAuthor(lib, book, entry) {
-			inSeries = append(inSeries, entry)
-		}
-	}
-	return inSeries
-}
-
 func position(book *audiobooks.Audiobook) string {
 	if book.Series == nil || book.Series.Sequence == nil {
 		return ""
 	}
 	return book.Series.Sequence.String()
-}
-
-// sharesAuthor compares authors by their page, so spelling variants that the
-// plan treats as one author count as the same person.
-func sharesAuthor(lib *library, a, b *audiobooks.Audiobook) bool {
-	for _, first := range a.Authors {
-		for _, second := range b.Authors {
-			slug, ok := lib.Authors.Slugs[first]
-			if ok && slug == lib.Authors.Slugs[second] {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// seriesInOrder groups the books by series title, each series in reading order:
-// by position, with unnumbered books after the numbered ones, and by title
-// where positions tie.
-func seriesInOrder(books []audiobooks.Audiobook) map[string][]*audiobooks.Audiobook {
-	series := map[string][]*audiobooks.Audiobook{}
-	for index := range books {
-		if book := &books[index]; book.Series != nil {
-			series[book.Series.Title] = append(series[book.Series.Title], book)
-		}
-	}
-	for _, entries := range series {
-		slices.SortStableFunc(entries, func(a, b *audiobooks.Audiobook) int {
-			if order := comparePositions(a.Series.Sequence, b.Series.Sequence); order != 0 {
-				return order
-			}
-			return strings.Compare(a.Title, b.Title)
-		})
-	}
-	return series
-}
-
-func comparePositions(first, second *audiobooks.Sequence) int {
-	switch {
-	case first == nil && second == nil:
-		return 0
-	case first == nil:
-		return 1
-	case second == nil:
-		return -1
-	default:
-		return first.First.Cmp(second.First)
-	}
 }
 
 // newestFirst copies the books into reverse publication order, so that a page

@@ -678,3 +678,18 @@ a.tile {
 a.tile:hover .t {
   text-decoration: underline;
 }
+
+ol.series.wide {
+  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.5rem 1rem;
+}
+
+.seq a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.seq a:hover {
+  text-decoration: underline;
+}
