@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
@@ -53,4 +54,17 @@ func TestHomeViewCountsTheLibrary(t *testing.T) {
 		assert.Equal(t, 2, home.Genres[0].Count)
 		assert.Equal(t, "30", home.Genres[0].Hours)
 	}
+}
+
+func TestHomePageRendersTheHero(t *testing.T) {
+	root := t.TempDir()
+	_, err := Build(root, testPlan(t), testRenderer(t), testOptions(), testLogger())
+	require.NoError(t, err)
+
+	page := readPage(t, root, ".")
+	assert.Contains(t, page, `<section class="hero">`)
+	assert.Contains(t, page, `audiobooks, ready for your podcast app</h1>`)
+	assert.Contains(t, page, `<ul class="books shelf">`)
+	assert.Contains(t, page, `<a href="./books/">See every book</a>`)
+	assert.Contains(t, page, `<a href="./genre/">Every genre</a>`)
 }

@@ -1,9 +1,9 @@
-{{define "head"}}
+{{define "content"}}
 {{- with .Home}}
       <section class="hero">
         <div>
-          <h1>{{.Books}} audiobooks, ready for your podcast app</h1>
-          <p class="lede">{{.Hours}} hours of listening. Played end to end, that is {{.Days}} days without a break.</p>
+          <h1>{{.Books}} {{if eq .Books 1}}audiobook{{else}}audiobooks{{end}}, ready for your podcast app</h1>
+          <p class="lede">{{.Hours}} hours of listening.{{if ge .Days 1}} Played end to end, that is {{.Days}} {{if eq .Days 1}}day{{else}}days{{end}} without a break.{{end}}</p>
           {{- with $.FeedHref}}
           <p class="subscribe"><a class="feed-link button" href="{{.}}">Subscribe to every book</a><button class="copy" type="button" hidden>Copy feed URL</button><a class="overcast" hidden>Add to Overcast</a></p>
           {{- end}}
@@ -16,14 +16,9 @@
         </div>
         {{- end}}
       </section>
-{{- end}}
-{{- end}}
-
-{{define "content"}}
-{{- with .Home}}
       {{- if .Latest}}
       <section>
-        <div class="section-head"><h2>Latest releases</h2><a href="books/">See every book</a></div>
+        <div class="section-head"><h2>Latest releases</h2><a href="{{.BooksHref}}">See every book</a></div>
         <ul class="books shelf">
           {{- range .Latest}}
           <li class="tile">
@@ -37,7 +32,7 @@
       {{- end}}
       {{- if .Genres}}
       <section>
-        <div class="section-head"><h2>Genres</h2><a href="genre/">Every genre</a></div>
+        <div class="section-head"><h2>Genres</h2><a href="{{.GenresHref}}">Every genre</a></div>
         <ul class="genres">
           {{- range .Genres}}
           <li>

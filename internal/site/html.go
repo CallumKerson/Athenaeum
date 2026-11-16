@@ -69,7 +69,6 @@ type entryView struct {
 	Name     string
 	Href     string
 	FeedHref string
-	Note     string
 	// Search is the lowercased text the filter script matches against.
 	Search string
 	Count  int
@@ -104,7 +103,6 @@ type pageView struct {
 	SearchLabel string
 	Search      bool
 	Nav         []linkView
-	Sections    []entryView
 	Entries     []entryView
 	Books       []bookView
 	// Book is set only on a book's own page.
@@ -261,6 +259,9 @@ type homePage struct {
 	Books int
 	Hours string
 	Days  int
+	// BooksHref and GenresHref link to the full lists the home page samples.
+	BooksHref  string
+	GenresHref string
 	// Mosaic is a spread of covers from across the library.
 	Mosaic []bookView
 	Latest []bookView
@@ -281,10 +282,12 @@ func homeView(lib *library) *pageView {
 	featured := lib.Main.Books
 	listening := totalDuration(featured)
 	home := &homePage{
-		Books:  len(featured),
-		Hours:  totalHours(featured),
-		Days:   int(math.Round(listening.Hours() / 24)),
-		Mosaic: mosaic(lib, root, featured),
+		Books:      len(featured),
+		Hours:      totalHours(featured),
+		Days:       int(math.Round(listening.Hours() / 24)),
+		Mosaic:     mosaic(lib, root, featured),
+		BooksHref:  dirHref(root, booksDir),
+		GenresHref: dirHref(root, lib.Genres.Dir),
 	}
 	latest := newestFirst(featured)
 	for index := range latest[:min(shelfSize, len(latest))] {
