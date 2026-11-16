@@ -93,7 +93,7 @@ func namesByHours(root string, section *Section, limit int) []statBar {
 		bars = append(bars, statBar{
 			Label: entry.name.Title,
 			Href:  dirHref(root, section.Dir, entry.name.Slug),
-			Value: totalHours(entry.name.Books) + " hours",
+			Value: hoursLabel(totalDuration(entry.name.Books)),
 			Note:  strconv.Itoa(len(entry.name.Books)) + " " + plural(len(entry.name.Books), "book"),
 			Share: share(entry.minutes, names[0].minutes),
 		})
@@ -144,6 +144,17 @@ func longestBook(books []audiobooks.Audiobook) *audiobooks.Audiobook {
 		return nil
 	}
 	return longest
+}
+
+// hoursLabel says how long something is in whole hours, or in minutes when
+// that would round to none.
+func hoursLabel(listening time.Duration) string {
+	hours := int(math.Round(listening.Hours()))
+	if hours == 0 {
+		minutes := int(math.Round(listening.Minutes()))
+		return strconv.Itoa(minutes) + " " + plural(minutes, "minute")
+	}
+	return totalHoursOf(listening) + " " + plural(hours, "hour")
 }
 
 // share is value as a whole percentage of most, at least 1 so that every bar

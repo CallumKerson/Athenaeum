@@ -1,6 +1,7 @@
 package site
 
 import (
+	"strconv"
 	"testing"
 	"time"
 
@@ -63,4 +64,31 @@ func TestBuildWritesTheStatsPage(t *testing.T) {
 	assert.Contains(t, page, "<h2>Hours by genre</h2>")
 	assert.Contains(t, page, `style="--share: 100%"`)
 	assert.Contains(t, page, `href="../genre/fantasy/"`)
+	assert.Contains(t, page, "<h2>The longest listen</h2>")
+	assert.Contains(t, page, `<span class="t">This Is How You Lose the Time War</span>`)
+}
+
+func TestStatsRankOnlyTheTopNarratorsWithBooks(t *testing.T) {
+	books := make([]audiobooks.Audiobook, 0, topNarrators+2)
+	for index := range topNarrators + 2 {
+		books = append(books, released(
+			"Book "+strconv.Itoa(index), 2000, time.Duration(index+1), "Narrator "+strconv.Itoa(index),
+		))
+	}
+	content := Plan(books, nil)
+	content.Narrators.Names = append(content.Narrators.Names, Name{Feed: Feed{Title: "Nobody"}, Slug: "nobody"})
+
+	narrators := statsView(newLibrary(content, nil, nil)).Stats.Narrators
+
+	require.Len(t, narrators, topNarrators)
+	assert.Equal(t, "Narrator 11", narrators[0].Label)
+	assert.Equal(t, "12 hours", narrators[0].Value)
+	assert.Equal(t, "Narrator 2", narrators[topNarrators-1].Label)
+}
+
+func TestHoursLabel(t *testing.T) {
+	assert.Equal(t, "1 hour", hoursLabel(time.Hour))
+	assert.Equal(t, "1,234 hours", hoursLabel(1234*time.Hour))
+	assert.Equal(t, "20 minutes", hoursLabel(20*time.Minute))
+	assert.Equal(t, "1 minute", hoursLabel(time.Minute))
 }

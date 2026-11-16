@@ -830,8 +830,13 @@ ol.bars {
   align-items: center;
 }
 
+/* Each row spans the list's columns through subgrid, rather than display:
+   contents, which some browsers drop from the accessibility tree. */
 ol.bars li {
-  display: contents;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
 }
 
 ol.bars .label {

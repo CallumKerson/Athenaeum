@@ -186,9 +186,9 @@ func newLibrary(content *Content, covers map[string]string, audioURL func(*audio
 }
 
 // buildHTML renders the browsable tree that sits alongside the feeds: a home
-// page, the searchable list of every book, a page per book, an index per
-// section, and a page for each author, narrator, genre and tag linking to its
-// feed.
+// page, the searchable list of every book, a page per book, the stats page, the
+// series index and a page per series, an index per section, and a page for
+// each author, narrator, genre and tag linking to its feed.
 func buildHTML(lib *library) ([]htmlPage, error) {
 	tpls, err := parseHTMLTemplates()
 	if err != nil {
@@ -405,7 +405,13 @@ func totalDuration(books []audiobooks.Audiobook) time.Duration {
 // totalHours renders the listening time of some books in whole hours, with a
 // thousands separator: "11,784".
 func totalHours(books []audiobooks.Audiobook) string {
-	hours := strconv.Itoa(int(math.Round(totalDuration(books).Hours())))
+	return totalHoursOf(totalDuration(books))
+}
+
+// totalHoursOf renders a listening time in whole hours, grouped as totalHours
+// does.
+func totalHoursOf(listening time.Duration) string {
+	hours := strconv.Itoa(int(math.Round(listening.Hours())))
 	var builder strings.Builder
 	for index, digit := range hours {
 		if index > 0 && (len(hours)-index)%3 == 0 {
