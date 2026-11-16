@@ -60,8 +60,9 @@ type Options struct {
 	Sweep bool
 }
 
-// Build renders every page into root, refreshes the static assets, and removes
-// files left over from previous builds.
+// Build renders every feed and page into root, publishes a thumbnail of each
+// cover, refreshes the static assets, and removes files left over from previous
+// builds.
 //
 // Files whose contents are unchanged are left untouched so that their
 // modification times — and therefore the serving proxy's ETags — stay stable

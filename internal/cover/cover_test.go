@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -84,6 +85,15 @@ func TestThumbnailFlattensTransparencyOntoWhite(t *testing.T) {
 	near(t, color.RGBA{R: 255, G: 255, B: 255, A: 255}, decode(t, thumbnail).At(Size/2, Size/2))
 }
 
+func TestThumbnailRefusesAnImageTooLargeToDecode(t *testing.T) {
+	original := maxPixels
+	maxPixels = 300*100 - 1
+	t.Cleanup(func() { maxPixels = original })
+
+	_, err := Thumbnail(stripes(t))
+	assert.ErrorIs(t, err, errTooLarge)
+}
+
 func TestThumbnailRejectsWhatIsNotAnImage(t *testing.T) {
 	_, err := Thumbnail([]byte("not an image"))
 	assert.Error(t, err)
@@ -151,10 +161,12 @@ func TestSourceReportsAMissingCover(t *testing.T) {
 func TestPruneKeepsOnlyTheThumbnailsThisBuildUsed(t *testing.T) {
 	mediaRoot, imagePath := library(t)
 	cacheDir := t.TempDir()
-	stale := filepath.Join(cacheDir, "stale.jpg")
-	unrelated := filepath.Join(cacheDir, "notes.txt")
-	require.NoError(t, os.WriteFile(stale, []byte("old"), 0o644))
-	require.NoError(t, os.WriteFile(unrelated, []byte("keep"), 0o644))
+	stale := filepath.Join(cacheDir, strings.Repeat("ab", 32)+".jpg")
+	notes := filepath.Join(cacheDir, "notes.txt")
+	photo := filepath.Join(cacheDir, "holiday.jpg")
+	for _, file := range []string{stale, notes, photo} {
+		require.NoError(t, os.WriteFile(file, []byte("x"), 0o644))
+	}
 
 	source := NewSource(mediaRoot, cacheDir)
 	_, err := source.Thumbnail(imagePath)
@@ -162,8 +174,9 @@ func TestPruneKeepsOnlyTheThumbnailsThisBuildUsed(t *testing.T) {
 	require.NoError(t, source.Prune())
 
 	assert.NoFileExists(t, stale)
-	assert.FileExists(t, unrelated)
-	assert.Len(t, cached(t, cacheDir), 1)
+	assert.FileExists(t, notes)
+	assert.FileExists(t, photo, "a JPEG the cache did not name is not the cache's to delete")
+	assert.Len(t, cached(t, cacheDir), 2, "the thumbnail just made, and the photo")
 }
 
 func TestPruneToleratesACacheDirThatWasNeverMade(t *testing.T) {

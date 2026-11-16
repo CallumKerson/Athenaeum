@@ -10,10 +10,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/jpeg" // Covers are JPEG or PNG; see scan.coverExtensions.
-	_ "image/png"
+	"image/jpeg"
+	_ "image/png" // Covers are JPEG or PNG; see scan.coverExtensions.
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -23,13 +24,27 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/fsutil"
 )
 
-// Size is the width and height of every thumbnail in pixels: twice the largest
-// size a page shows a cover at, so it stays sharp on high-density screens.
+// Size is the width and height of every thumbnail in pixels. Every page shares
+// the one thumbnail, so it is sized for the largest a page shows a cover, on a
+// high-density screen, rather than for the small squares in a list.
 const Size = 480
 
 const quality = 80
 
-var errEmptyImage = errors.New("image has no pixels")
+var (
+	errEmptyImage = errors.New("image has no pixels")
+	errTooLarge   = errors.New("image is too large to make a thumbnail of")
+)
+
+// maxPixels caps the images Thumbnail will decode. A real cover is a few
+// million pixels; a corrupt header can claim billions, and decoding it would
+// exhaust memory and crash the build instead of skipping the one cover. It is a
+// variable only so that tests can lower it.
+var maxPixels = 100_000_000
+
+// cachedName matches the names cacheName gives thumbnails, so Prune never
+// deletes a file it did not make.
+var cachedName = regexp.MustCompile(`^[0-9a-f]{64}\.jpg$`)
 
 // cacheVersion is part of every cache key. Bump it whenever Thumbnail's output
 // changes, so cached thumbnails made the old way are not reused.
@@ -39,6 +54,13 @@ const cacheVersion = 1
 // Size, returning it as a JPEG. The output depends only on the input bytes, so
 // rebuilding an unchanged cover writes an identical file.
 func Thumbnail(source []byte) ([]byte, error) {
+	config, _, err := image.DecodeConfig(bytes.NewReader(source))
+	if err != nil {
+		return nil, err
+	}
+	if config.Width*config.Height > maxPixels {
+		return nil, fmt.Errorf("%w: %dx%d", errTooLarge, config.Width, config.Height)
+	}
 	src, _, err := image.Decode(bytes.NewReader(source))
 	if err != nil {
 		return nil, err
@@ -114,6 +136,14 @@ func (s *Source) Thumbnail(imagePath string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("making thumbnail of %s: %w", imagePath, err)
 	}
+	// A cover replaced while it was being read would be cached under the old
+	// size and time with the new contents, and served until it next changed.
+	if after, err := os.Stat(
+		fullPath,
+	); err != nil || after.Size() != info.Size() ||
+		!after.ModTime().Equal(info.ModTime()) {
+		cachePath = ""
+	}
 	if cachePath != "" {
 		// A cache that cannot be written only costs time on the next build.
 		if err := os.MkdirAll(s.cacheDir, 0o755); err == nil {
@@ -124,7 +154,8 @@ func (s *Source) Thumbnail(imagePath string) ([]byte, error) {
 }
 
 // Prune deletes every cached thumbnail that no call to Thumbnail asked for, so
-// replaced and removed covers do not pile up in the cache. Only call it once
+// replaced and removed covers do not pile up in the cache. Files in the cache
+// directory that it did not name are left alone. Only call it once
 // every thumbnail the build needs has been made.
 func (s *Source) Prune() error {
 	if s.cacheDir == "" {
@@ -140,7 +171,7 @@ func (s *Source) Prune() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for _, entry := range entries {
-		if entry.IsDir() || s.used[entry.Name()] || !strings.HasSuffix(entry.Name(), ".jpg") {
+		if entry.IsDir() || s.used[entry.Name()] || !cachedName.MatchString(entry.Name()) {
 			continue
 		}
 		if err := os.Remove(filepath.Join(s.cacheDir, entry.Name())); err != nil && !errors.Is(err, os.ErrNotExist) {
