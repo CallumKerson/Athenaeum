@@ -184,10 +184,29 @@ ul.entries li {
   align-items: baseline;
 }
 
+/* Cover on the left, everything about the book beside it. A book without a
+   cover keeps an empty square, so titles still line up down the list. */
 ul.books li {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+ul.books .cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 0.25rem;
+  background: var(--panel);
+}
+
+ul.books .about {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  min-width: 0;
 }
 
 .rss {

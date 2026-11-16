@@ -1,6 +1,8 @@
 package site
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"path"
 	"slices"
@@ -26,6 +28,8 @@ const (
 	narratorsDir = "narrators"
 	genresDir    = "genre"
 	tagsDir      = "tags"
+
+	coversDir = "covers"
 )
 
 // Feed is one rendered feed together with every path it is published at. The
@@ -80,6 +84,9 @@ type Content struct {
 	Narrators Section
 	Genres    Section
 	Tags      Section
+	// Covers maps each book's ImagePath to the path its thumbnail is published
+	// at. Books without a cover are absent.
+	Covers map[string]string
 }
 
 // Plan works out the complete set of feeds and pages to publish for a library.
@@ -87,8 +94,9 @@ type Content struct {
 // Books are assumed to be sorted already; every feed preserves that order.
 func Plan(books []audiobooks.Audiobook, excludedFromMainFeed []audiobooks.Genre) *Content {
 	return &Content{
-		Books: books,
-		Main:  mainFeed(books, excludedFromMainFeed),
+		Books:  books,
+		Covers: coverPaths(books),
+		Main:   mainFeed(books, excludedFromMainFeed),
 		Authors: personSection(books, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
 			return b.Authors
 		}),
@@ -305,6 +313,23 @@ func feedPaths(dir, name string, aliases []string) (link string, all []string) {
 	default:
 		return "", paths
 	}
+}
+
+// coverPaths names a thumbnail for every cover in the library. The name is a
+// hash of the cover's path in the library, so it never needs escaping, stays the
+// same between builds, and changes when a book moves, which lets the sweep
+// remove the old one.
+func coverPaths(books []audiobooks.Audiobook) map[string]string {
+	covers := map[string]string{}
+	for index := range books {
+		imagePath := books[index].ImagePath
+		if imagePath == "" {
+			continue
+		}
+		sum := sha256.Sum256([]byte(imagePath))
+		covers[imagePath] = path.Join(coversDir, hex.EncodeToString(sum[:8])+".jpg")
+	}
+	return covers
 }
 
 func hasAnyGenre(book *audiobooks.Audiobook, genres []audiobooks.Genre) bool {

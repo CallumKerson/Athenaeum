@@ -72,11 +72,13 @@ type entryView struct {
 }
 
 type bookView struct {
-	Title     string
-	Subtitle  string
-	Series    string
-	Date      string
-	Duration  string
+	Title    string
+	Subtitle string
+	Series   string
+	Date     string
+	Duration string
+	// Cover links to the book's thumbnail, or is "" when it has none.
+	Cover     string
 	Search    string
 	Authors   []linkView
 	Narrators []linkView
@@ -102,7 +104,7 @@ type pageView struct {
 // buildHTML renders the browsable tree that sits alongside the feeds: a home
 // page, the searchable list of every book, an index per section, and a page for
 // each author, narrator, genre and tag linking to its feed.
-func buildHTML(content *Content) ([]htmlPage, error) {
+func buildHTML(content *Content, covers map[string]string) ([]htmlPage, error) {
 	tpls, err := parseHTMLTemplates()
 	if err != nil {
 		return nil, err
@@ -122,7 +124,7 @@ func buildHTML(content *Content) ([]htmlPage, error) {
 	if err := add(tpls.home, indexName, homeView(content, shown)); err != nil {
 		return nil, err
 	}
-	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(content, shown)); err != nil {
+	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(content, covers, shown)); err != nil {
 		return nil, err
 	}
 
@@ -139,7 +141,7 @@ func buildHTML(content *Content) ([]htmlPage, error) {
 			if err := add(
 				tpls.books,
 				path.Join(section.Dir, name.Slug, indexName),
-				nameView(content, shown, name),
+				nameView(content, covers, shown, name),
 			); err != nil {
 				return nil, err
 			}
@@ -203,7 +205,7 @@ func homeView(content *Content, shown []shownSection) *pageView {
 	return view
 }
 
-func allBooksView(content *Content, shown []shownSection) *pageView {
+func allBooksView(content *Content, covers map[string]string, shown []shownSection) *pageView {
 	return &pageView{
 		Title:       pageTitle(booksTitle),
 		Heading:     booksTitle,
@@ -212,7 +214,7 @@ func allBooksView(content *Content, shown []shownSection) *pageView {
 		Nav:         navLinks(shown, rootFromDir),
 		Search:      true,
 		SearchLabel: "Search by title, author, narrator, series, genre or tag",
-		Books:       bookViews(content, rootFromDir, content.Books),
+		Books:       bookViews(content, covers, rootFromDir, content.Books),
 	}
 }
 
@@ -240,7 +242,7 @@ func sectionView(shown []shownSection, section shownSection) *pageView {
 	return view
 }
 
-func nameView(content *Content, shown []shownSection, name *Name) *pageView {
+func nameView(content *Content, covers map[string]string, shown []shownSection, name *Name) *pageView {
 	return &pageView{
 		Title:    pageTitle(name.Title),
 		Heading:  name.Title,
@@ -248,7 +250,7 @@ func nameView(content *Content, shown []shownSection, name *Name) *pageView {
 		Root:     rootFromSubDir,
 		FeedHref: feedHref(rootFromSubDir, &name.Feed),
 		Nav:      navLinks(shown, rootFromSubDir),
-		Books:    bookViews(content, rootFromSubDir, name.Books),
+		Books:    bookViews(content, covers, rootFromSubDir, name.Books),
 	}
 }
 
@@ -269,7 +271,9 @@ func feedHref(root string, feed *Feed) string {
 	return hrefFor(root, feed.Link)
 }
 
-func bookViews(content *Content, root string, books []audiobooks.Audiobook) []bookView {
+// bookViews describes books for a page whose prefix back to the site root is
+// root. covers holds the published thumbnail of each ImagePath that has one.
+func bookViews(content *Content, covers map[string]string, root string, books []audiobooks.Audiobook) []bookView {
 	sorted := newestFirst(books)
 	views := make([]bookView, 0, len(sorted))
 	for index := range sorted {
@@ -283,6 +287,9 @@ func bookViews(content *Content, root string, books []audiobooks.Audiobook) []bo
 			Narrators: links(root, &content.Narrators, book.Narrators),
 			Genres:    links(root, &content.Genres, genreNames(book.Genres)),
 			Tags:      links(root, &content.Tags, book.Tags),
+		}
+		if cover, ok := covers[book.ImagePath]; ok {
+			view.Cover = hrefFor(root, cover)
 		}
 		if book.Series != nil {
 			view.Series = book.Series.Title
