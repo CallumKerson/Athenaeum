@@ -449,6 +449,9 @@ func sectionView(lib *library, section shownSection) *pageView {
 		Entries:     make([]entryView, 0, len(section.Names)),
 		Sorts:       entrySorts,
 	}
+	if section.Section == &lib.Genres {
+		view.Sorts = genreSorts
+	}
 	for index := range section.Names {
 		name := &section.Names[index]
 		view.Entries = append(view.Entries, describeEntry(
@@ -522,7 +525,8 @@ func describeBook(lib *library, root string, book *audiobooks.Audiobook) bookVie
 		Narrators: links(root, &lib.Narrators, book.Narrators),
 		Genres:    links(root, &lib.Genres, genreNames(book.Genres)),
 		Tags:      links(root, &lib.Tags, book.Tags),
-		Minutes:   int(math.Round(book.Duration.Minutes())),
+		// Truncated, so a book shown as 9h 59m never counts as ten hours.
+		Minutes: int(book.Duration.Minutes()),
 	}
 	view.GenreSlugs = genreSlugs(lib, book)
 	if cover, ok := lib.covers[book.ImagePath]; ok {

@@ -1,7 +1,6 @@
 package site
 
 import (
-	"math"
 	"slices"
 	"strings"
 
@@ -17,9 +16,17 @@ type sortOption struct {
 
 // bookFilters are the controls on the All books page beyond the search box.
 type bookFilters struct {
-	Genres []linkView
+	Genres []genreChip
 	Sorts  []sortOption
 }
+
+// genreChip filters the books to one genre, matched by its slug.
+type genreChip struct {
+	Name string
+	Slug string
+}
+
+const nameSortLabel = "Name"
 
 var (
 	bookSorts = []sortOption{
@@ -29,10 +36,13 @@ var (
 		{"shortest", "Shortest"},
 	}
 	entrySorts = []sortOption{
-		{"", "Name"},
+		{"", nameSortLabel},
 		{"books", "Most books"},
 		{"hours", "Most hours"},
 	}
+	// genreSorts keep the genres' own order as the default, since that is how
+	// the index lists them, and offer an alphabetical one besides.
+	genreSorts = append([]sortOption{{"", "Usual order"}, {"name", nameSortLabel}}, entrySorts[1:]...)
 	// seriesSorts adds the series with the latest release, to find what has
 	// moved on since you last listened.
 	seriesSorts = append(slices.Clip(entrySorts), sortOption{"newest", "Newest release"})
@@ -45,7 +55,7 @@ func allBooksFilters(lib *library) *bookFilters {
 	for index := range lib.Genres.Names {
 		genre := &lib.Genres.Names[index]
 		if len(genre.Books) > 0 {
-			filters.Genres = append(filters.Genres, linkView{Name: genre.Title, Href: genre.Slug})
+			filters.Genres = append(filters.Genres, genreChip{Name: genre.Title, Slug: genre.Slug})
 		}
 	}
 	return filters
@@ -61,7 +71,7 @@ func describeEntry(name, href, feed string, books []audiobooks.Audiobook) entryV
 		Search:   strings.ToLower(name),
 		Count:    len(books),
 		Hours:    totalHours(books),
-		Minutes:  int(math.Round(totalDuration(books).Minutes())),
+		Minutes:  int(totalDuration(books).Minutes()),
 	}
 	for index := range books {
 		if released := releaseTime(&books[index]); !released.IsZero() {

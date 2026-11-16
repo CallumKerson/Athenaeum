@@ -733,8 +733,8 @@ ol.series.wide {
   border-color: var(--ink);
 }
 
-.chips button[aria-pressed="true"],
-.view button[aria-pressed="true"] {
+.chips button[aria-checked="true"],
+.view button[aria-checked="true"] {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--bg);

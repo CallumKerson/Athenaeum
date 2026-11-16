@@ -22,7 +22,11 @@ func TestAllBooksPageCarriesWhatTheFilterScriptNeeds(t *testing.T) {
 	assert.FileExists(t, filepath.Join(root, "static", "filter.js"))
 	assert.Contains(t, page, `data-title="A Wizard of Earthsea"`)
 	assert.Contains(t, page, `data-genres="children-s fantasy"`)
-	assert.Contains(t, page, `<button type="button" data-genre="fantasy" aria-pressed="false">Fantasy</button>`)
+	assert.Contains(
+		t,
+		page,
+		`<button type="button" role="radio" data-genre="fantasy" aria-checked="false" tabindex="-1">Fantasy</button>`,
+	)
 	assert.Contains(t, page, `<option value="longest">Longest</option>`)
 	assert.Contains(t, page, `<select id="length">`)
 	assert.Contains(t, page, `data-view="list"`)
@@ -39,6 +43,15 @@ func TestIndexPagesOfferTheirSorts(t *testing.T) {
 	assert.NotContains(t, authors, `<select id="length">`, "length and genre filters are for books")
 
 	assert.Contains(t, readPage(t, root, seriesDir), `<option value="newest">Newest release</option>`)
+
+	genres := readPage(t, root, "genre")
+	assert.Contains(
+		t,
+		genres,
+		`<option value="">Usual order</option>`,
+		"genres are listed in their own order, not by name",
+	)
+	assert.Contains(t, genres, `<option value="name">Name</option>`)
 }
 
 func TestDescribeEntryKeepsItsSortKeys(t *testing.T) {

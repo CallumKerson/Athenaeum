@@ -35,10 +35,10 @@
           <span id="filter-count" aria-live="polite"></span>
         </div>
         {{- with .Filters}}
-        <div class="chips" role="group" aria-label="Genre">
-          <button type="button" data-genre="" aria-pressed="true">All genres</button>
+        <div class="chips" role="radiogroup" aria-label="Genre">
+          <button type="button" role="radio" data-genre="" aria-checked="true">All genres</button>
           {{- range .Genres}}
-          <button type="button" data-genre="{{.Href}}" aria-pressed="false">{{.Name}}</button>
+          <button type="button" role="radio" data-genre="{{.Slug}}" aria-checked="false" tabindex="-1">{{.Name}}</button>
           {{- end}}
         </div>
         {{- end}}
@@ -59,9 +59,9 @@
           </select></label>
           {{- end}}
           {{- if .Filters}}
-          <span class="view" role="group" aria-label="View">
-            <button type="button" data-view="" aria-pressed="true">Covers</button>
-            <button type="button" data-view="list" aria-pressed="false">List</button>
+          <span class="view" role="radiogroup" aria-label="View">
+            <button type="button" role="radio" data-view="" aria-checked="true">Covers</button>
+            <button type="button" role="radio" data-view="list" aria-checked="false" tabindex="-1">List</button>
           </span>
           {{- end}}
         </div>
