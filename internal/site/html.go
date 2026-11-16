@@ -74,6 +74,10 @@ type entryView struct {
 	Count  int
 	// Hours is the total listening time of the books, rounded to the hour.
 	Hours string
+	// Minutes and Newest, the latest release date as YYYY-MM-DD, are what the
+	// filter script sorts by.
+	Minutes int
+	Newest  string
 }
 
 type bookView struct {
@@ -88,6 +92,9 @@ type bookView struct {
 	Cover string
 	// SeriesHref links to the page of the book's series, if it has one.
 	SeriesHref string
+	// Minutes and GenreSlugs are what the filter script filters and sorts by.
+	Minutes    int
+	GenreSlugs string
 	Search     string
 	Authors    []linkView
 	Narrators  []linkView
@@ -113,6 +120,10 @@ type pageView struct {
 	Home *homePage
 	// Series is set only on a series page: its books in reading order.
 	Series []seriesEntry
+	// Filters is set only on the All books page.
+	Filters *bookFilters
+	// Sorts are the orders an index of entries can be put in.
+	Sorts []sortOption
 }
 
 // bookPage is everything a book's own page shows beyond its list entry.
@@ -422,6 +433,7 @@ func allBooksView(lib *library) *pageView {
 		Search:      true,
 		SearchLabel: "Search by title, author, narrator, series, genre or tag",
 		Books:       bookViews(lib, rootFromDir, lib.Books),
+		Filters:     allBooksFilters(lib),
 	}
 }
 
@@ -435,17 +447,19 @@ func sectionView(lib *library, section shownSection) *pageView {
 		Search:      true,
 		SearchLabel: "Search " + strings.ToLower(section.Title),
 		Entries:     make([]entryView, 0, len(section.Names)),
+		Sorts:       entrySorts,
+	}
+	if section.Section == &lib.Genres {
+		view.Sorts = genreSorts
 	}
 	for index := range section.Names {
 		name := &section.Names[index]
-		view.Entries = append(view.Entries, entryView{
-			Name:     name.Title,
-			Href:     dirHref(rootFromDir, section.Dir, name.Slug),
-			FeedHref: feedHref(rootFromDir, &name.Feed),
-			Search:   strings.ToLower(name.Title),
-			Count:    len(name.Books),
-			Hours:    totalHours(name.Books),
-		})
+		view.Entries = append(view.Entries, describeEntry(
+			name.Title,
+			dirHref(rootFromDir, section.Dir, name.Slug),
+			feedHref(rootFromDir, &name.Feed),
+			name.Books,
+		))
 	}
 	return view
 }
@@ -511,7 +525,10 @@ func describeBook(lib *library, root string, book *audiobooks.Audiobook) bookVie
 		Narrators: links(root, &lib.Narrators, book.Narrators),
 		Genres:    links(root, &lib.Genres, genreNames(book.Genres)),
 		Tags:      links(root, &lib.Tags, book.Tags),
+		// Truncated, so a book shown as 9h 59m never counts as ten hours.
+		Minutes: int(book.Duration.Minutes()),
 	}
+	view.GenreSlugs = genreSlugs(lib, book)
 	if cover, ok := lib.covers[book.ImagePath]; ok {
 		view.Cover = hrefFor(root, cover)
 	}

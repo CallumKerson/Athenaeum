@@ -170,16 +170,13 @@ func seriesIndexView(lib *library) *pageView {
 		Search:      true,
 		SearchLabel: "Search series",
 		Entries:     make([]entryView, 0, len(lib.Series)),
+		Sorts:       seriesSorts,
 	}
 	for index := range lib.Series {
 		series := &lib.Series[index]
-		view.Entries = append(view.Entries, entryView{
-			Name:   series.Name,
-			Href:   dirHref(root, seriesDir, series.Slug),
-			Search: strings.ToLower(series.Title + " " + strings.Join(seriesAuthors(series), " ")),
-			Count:  len(series.Books),
-			Hours:  totalHours(series.Books),
-		})
+		entry := describeEntry(series.Name, dirHref(root, seriesDir, series.Slug), "", series.Books)
+		entry.Search = strings.ToLower(series.Title + " " + strings.Join(seriesAuthors(series), " "))
+		view.Entries = append(view.Entries, entry)
 	}
 	return view
 }

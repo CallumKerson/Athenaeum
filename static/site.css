@@ -234,10 +234,15 @@ button.copy:hover {
 /* Search */
 
 form.search {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.5rem 0;
+}
+
+form.search .find {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 1.5rem 0;
 }
 
 form.search input {
@@ -692,4 +697,103 @@ ol.series.wide {
 
 .seq a:hover {
   text-decoration: underline;
+}
+
+/* Filters and sorting, shown only once the filter script runs */
+
+.chips,
+.options,
+.view {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.options {
+  gap: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.chips button,
+.view button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.chips button:hover,
+.view button:hover {
+  border-color: var(--ink);
+}
+
+.chips button[aria-checked="true"],
+.view button[aria-checked="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.options select {
+  font: inherit;
+  color: var(--ink);
+  margin-left: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.options .view {
+  margin-left: auto;
+}
+
+/* The list view: one book per row, with a small cover. */
+
+ul.books.list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+ul.books.list .tile {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  grid-template-areas:
+    "cover title length"
+    "cover author length";
+  column-gap: 0.85rem;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+ul.books.list .tile > a {
+  display: contents;
+}
+
+ul.books.list .cover {
+  grid-area: cover;
+}
+
+ul.books.list .cover.blank b {
+  display: none;
+}
+
+ul.books.list .t {
+  grid-area: title;
+  -webkit-line-clamp: 1;
+}
+
+ul.books.list .a {
+  grid-area: author;
+}
+
+ul.books.list .len {
+  grid-area: length;
 }
