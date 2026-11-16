@@ -40,7 +40,7 @@ There is no server process, no database and no request path.
 
 1. `scan.Library` walks the media root for `.m4b` + `.toml` file pairs
 2. `site.Plan` groups the books into feeds — all, by author, narrator, genre and tag — and assigns each a set of paths
-3. `site.Build` renders each feed with `feed.Renderer` and writes it to every path in its plan
+3. `site.Build` renders each feed with the `feed.Renderer` that `feed.New` built from the config, and writes it to every path in its plan
 4. `site.buildHTML` renders the browsable pages: a home page, `/books/` with a client-side filter, and an index plus a page per name for each section
 5. Stale files from previous builds are swept, and Overcast is optionally notified
 
@@ -48,7 +48,8 @@ There is no server process, no database and no request path.
 
 - **A feed item's `<guid>` is its enclosure URL.**
   Changing how either is built makes every subscriber re-download the whole library.
-  `feed.mediaURL` is the only place URLs are constructed, and file paths are assigned to `url.URL.Path` so that `?`, `#` and `%` in filenames are escaped rather than parsed.
+  The feed package owns every published URL: `feed.New` validates the Host and trims its trailing slash once, the media prefix and artwork path are private to it, and `cmd` only passes config in.
+  `feed.mediaURL` is the only place media URLs are constructed, and file paths are assigned to `url.URL.Path` so that `?`, `#` and `%` in filenames are escaped rather than parsed.
 - **Rebuilds must be idempotent.**
   Rendering is deterministic — no timestamps in the output — and `fsutil.WriteIfChanged` skips unchanged files so their mtimes, and therefore the web server's ETags, stay stable.
 - **One book can be reachable under several spellings.**

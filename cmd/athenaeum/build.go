@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -21,10 +20,6 @@ import (
 	"github.com/CallumKerson/Athenaeum/internal/site"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 )
-
-// mediaPath is the URL prefix the media root is served under. It must keep
-// matching the proxy's configuration: it forms part of every item's GUID.
-const mediaPath = "/media"
 
 // overcastPendingName sits beside the duration cache while an Overcast ping is
 // owed, because the build after a failed ping may have nothing new to write.
@@ -37,7 +32,6 @@ var (
 	errNoMediaRoot = errors.New("no media root configured: set Media.Root or pass --media-root")
 	errNoSiteRoot  = errors.New("no output directory configured: set Site.Root or pass --out")
 	errNoHost      = errors.New("no host configured: set Host or pass --host")
-	errInvalidHost = errors.New("host must be an absolute http or https URL")
 	errOvercast    = errors.New("overcast ping failed")
 	errNoBooks     = errors.New("no audiobooks found in the media root: refusing to empty every feed " +
 		"(pass --allow-empty if that is intended)")
@@ -87,6 +81,18 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 	if err != nil {
 		return err
 	}
+	// Built before the scan so that a bad host fails the build straight away.
+	renderer, err := feed.New(cfg.Host, feed.Channel{
+		Explicit:           cfg.Podcast.Explicit,
+		Language:           cfg.Podcast.Language,
+		Author:             cfg.Podcast.Author,
+		Email:              cfg.Podcast.Email,
+		HandlePreUnixEpoch: cfg.Podcast.PreUnixEpoch.Handle,
+		Artwork:            true,
+	})
+	if err != nil {
+		return err
+	}
 	excludedGenres, err := cfg.ExclusionsFromMainFeed.GetGenres()
 	if err != nil {
 		return err
@@ -100,7 +106,7 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 	logger.Info("scanned library",
 		"books", len(books), "cached", cache.Hits, "parsed", cache.Misses, "took", time.Since(start).String())
 
-	result, err := site.Build(cfg.Site.Root, site.Plan(books, excludedGenres), rendererFor(cfg), !flags.noSweep, logger)
+	result, err := site.Build(cfg.Site.Root, site.Plan(books, excludedGenres), renderer, !flags.noSweep, logger)
 	if err != nil {
 		return err
 	}
@@ -114,7 +120,7 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 			return err
 		}
 		pendingPath := filepath.Join(filepath.Dir(cachePath), overcastPendingName)
-		pingOvercast(cmd.Context(), cfg.Host, result.Written > 0 || result.Removed > 0, pendingPath, logger)
+		pingOvercast(cmd.Context(), renderer.Host(), result.Written > 0 || result.Removed > 0, pendingPath, logger)
 	}
 
 	return nil
@@ -149,25 +155,10 @@ func resolveConfig(flags *buildFlags, out io.Writer) (*BuildConfig, error) {
 	if cfg.Site.Root, err = expandHome(cfg.Site.Root); err != nil {
 		return nil, err
 	}
-	if cfg.Host, err = normaliseHost(cfg.Host); err != nil {
-		return nil, err
+	if cfg.Host == "" {
+		return nil, errNoHost
 	}
 	return cfg, nil
-}
-
-// normaliseHost checks that host can prefix the enclosure URLs, which are also
-// every item's GUID: a default or a relative host would publish GUIDs that
-// subscribers can never fetch. The trailing slash is trimmed once here so that
-// the artwork link and the Overcast prefix cannot gain a double slash.
-func normaliseHost(host string) (string, error) {
-	if host == "" {
-		return "", errNoHost
-	}
-	parsed, err := url.Parse(host)
-	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
-		return "", fmt.Errorf("%w: %q", errInvalidHost, host)
-	}
-	return strings.TrimRight(host, "/"), nil
 }
 
 // scanLibrary walks the media root, returning the cache alongside the books so
@@ -218,19 +209,6 @@ func resolveCachePath(flags *buildFlags) (string, error) {
 		return DefaultCachePath()
 	}
 	return expandHome(flags.cachePath)
-}
-
-func rendererFor(cfg *BuildConfig) *feed.Renderer {
-	return &feed.Renderer{
-		Host:               cfg.Host,
-		MediaPath:          mediaPath,
-		ImageLink:          fmt.Sprintf("%s/static/itunes_image.jpg", cfg.Host),
-		Explicit:           cfg.Podcast.Explicit,
-		Language:           cfg.Podcast.Language,
-		Author:             cfg.Podcast.Author,
-		Email:              cfg.Podcast.Email,
-		HandlePreUnixEpoch: cfg.Podcast.PreUnixEpoch.Handle,
-	}
 }
 
 func buildLogger(out io.Writer, verbose bool) *slog.Logger {
