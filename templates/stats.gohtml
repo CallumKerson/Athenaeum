@@ -1,0 +1,49 @@
+{{define "content"}}
+{{- with .Stats}}
+      <ul class="totals">
+        {{- range .Totals}}
+        <li><b>{{.Value}}</b> {{.Label}}</li>
+        {{- end}}
+      </ul>
+      {{- with .Genres}}
+      <section>
+        <div class="section-head"><h2>Hours by genre</h2></div>
+        {{template "bars" .}}
+      </section>
+      {{- end}}
+      {{- with .Narrators}}
+      <section>
+        <div class="section-head"><h2>Most-heard narrators</h2></div>
+        {{template "bars" .}}
+      </section>
+      {{- end}}
+      {{- with .Decades}}
+      <section>
+        <div class="section-head"><h2>Books by decade of publication</h2></div>
+        {{template "bars" .}}
+      </section>
+      {{- end}}
+      {{- with .Longest}}
+      <section>
+        <div class="section-head"><h2>The longest listen</h2></div>
+        <a class="longest" href="{{.Href}}">
+          {{- template "cover" .}}
+          <span><span class="t">{{.Title}}</span>{{if .Authors}}<span class="a">{{range $index, $author := .Authors}}{{if $index}}, {{end}}{{$author.Name}}{{end}}</span>{{end}}{{template "duration" .Duration}}</span>
+        </a>
+      </section>
+      {{- end}}
+{{- end}}
+{{- end}}
+
+{{/* A bar chart as a list: the numbers are text, and the bars only draw them. */}}
+{{define "bars"}}
+        <ol class="bars">
+          {{- range .}}
+          <li>
+            <span class="label">{{if .Href}}<a href="{{.Href}}">{{.Label}}</a>{{else}}{{.Label}}{{end}}</span>
+            <span class="bar" style="--share: {{.Share}}%" aria-hidden="true"></span>
+            <span class="value">{{.Value}}{{with .Note}} <small>{{.}}</small>{{end}}</span>
+          </li>
+          {{- end}}
+        </ol>
+{{- end}}

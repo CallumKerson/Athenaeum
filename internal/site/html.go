@@ -124,6 +124,8 @@ type pageView struct {
 	Filters *bookFilters
 	// Sorts are the orders an index of entries can be put in.
 	Sorts []sortOption
+	// Stats is set only on the stats page.
+	Stats *statsPage
 }
 
 // bookPage is everything a book's own page shows beyond its list entry.
@@ -184,75 +186,64 @@ func newLibrary(content *Content, covers map[string]string, audioURL func(*audio
 }
 
 // buildHTML renders the browsable tree that sits alongside the feeds: a home
-// page, the searchable list of every book, a page per book, an index per
-// section, and a page for each author, narrator, genre and tag linking to its
-// feed.
+// page, the searchable list of every book, a page per book, the stats page, the
+// series index and a page per series, an index per section, and a page for
+// each author, narrator, genre and tag linking to its feed.
 func buildHTML(lib *library) ([]htmlPage, error) {
 	tpls, err := parseHTMLTemplates()
 	if err != nil {
 		return nil, err
 	}
 
-	pages := []htmlPage{}
-	add := func(tpl *template.Template, relPath string, view *pageView) error {
-		var buf bytes.Buffer
-		if err := tpl.ExecuteTemplate(&buf, "layout", view); err != nil {
-			return fmt.Errorf("rendering %s: %w", relPath, err)
-		}
-		pages = append(pages, htmlPage{Path: relPath, Contents: buf.Bytes()})
-		return nil
-	}
-
-	if err := add(tpls.home, indexName, homeView(lib)); err != nil {
-		return nil, err
-	}
-	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(lib)); err != nil {
-		return nil, err
+	planned := []plannedPage{
+		{tpls.home, indexName, homeView(lib)},
+		{tpls.books, path.Join(booksDir, indexName), allBooksView(lib)},
+		{tpls.stats, path.Join(statsDir, indexName), statsView(lib)},
 	}
 	for index := range lib.Books {
 		book := &lib.Books[index]
-		relPath := path.Join(booksDir, lib.BookSlugs[book.Path], indexName)
-		if err := add(tpls.book, relPath, bookPageView(lib, book)); err != nil {
-			return nil, err
-		}
+		planned = append(planned, plannedPage{
+			tpls.book, path.Join(booksDir, lib.BookSlugs[book.Path], indexName), bookPageView(lib, book),
+		})
 	}
 	if len(lib.Series) > 0 {
-		if err := add(tpls.entries, path.Join(seriesDir, indexName), seriesIndexView(lib)); err != nil {
-			return nil, err
-		}
+		planned = append(planned, plannedPage{tpls.entries, path.Join(seriesDir, indexName), seriesIndexView(lib)})
 	}
 	for index := range lib.Series {
 		series := &lib.Series[index]
-		if err := add(
-			tpls.series,
-			path.Join(seriesDir, series.Slug, indexName),
-			seriesPageView(lib, series),
-		); err != nil {
-			return nil, err
-		}
+		planned = append(planned, plannedPage{
+			tpls.series, path.Join(seriesDir, series.Slug, indexName), seriesPageView(lib, series),
+		})
 	}
-
 	for _, section := range lib.shown {
-		if err := add(
-			tpls.entries,
-			path.Join(section.Dir, indexName),
-			sectionView(lib, section),
-		); err != nil {
-			return nil, err
-		}
+		planned = append(
+			planned,
+			plannedPage{tpls.entries, path.Join(section.Dir, indexName), sectionView(lib, section)},
+		)
 		for index := range section.Names {
 			name := &section.Names[index]
-			if err := add(
-				tpls.books,
-				path.Join(section.Dir, name.Slug, indexName),
-				nameView(lib, section, name),
-			); err != nil {
-				return nil, err
-			}
+			planned = append(planned, plannedPage{
+				tpls.books, path.Join(section.Dir, name.Slug, indexName), nameView(lib, section, name),
+			})
 		}
 	}
 
+	pages := make([]htmlPage, 0, len(planned))
+	for _, page := range planned {
+		var buf bytes.Buffer
+		if err := page.tpl.ExecuteTemplate(&buf, "layout", page.view); err != nil {
+			return nil, fmt.Errorf("rendering %s: %w", page.relPath, err)
+		}
+		pages = append(pages, htmlPage{Path: page.relPath, Contents: buf.Bytes()})
+	}
 	return pages, nil
+}
+
+// plannedPage is a page to render: which template, where, and with what.
+type plannedPage struct {
+	tpl     *template.Template
+	relPath string
+	view    *pageView
 }
 
 // htmlTemplates holds one parsed set per page shape. Each page template defines
@@ -264,6 +255,7 @@ type htmlTemplates struct {
 	book    *template.Template
 	books   *template.Template
 	series  *template.Template
+	stats   *template.Template
 }
 
 func parseHTMLTemplates() (*htmlTemplates, error) {
@@ -277,6 +269,7 @@ func parseHTMLTemplates() (*htmlTemplates, error) {
 		{&parsed.book, "book.gohtml"},
 		{&parsed.books, "books.gohtml"},
 		{&parsed.series, "series.gohtml"},
+		{&parsed.stats, "stats.gohtml"},
 	} {
 		tpl, err := template.ParseFS(templates.Templates, "layout.gohtml", target.name)
 		if err != nil {
@@ -412,7 +405,13 @@ func totalDuration(books []audiobooks.Audiobook) time.Duration {
 // totalHours renders the listening time of some books in whole hours, with a
 // thousands separator: "11,784".
 func totalHours(books []audiobooks.Audiobook) string {
-	hours := strconv.Itoa(int(math.Round(totalDuration(books).Hours())))
+	return totalHoursOf(totalDuration(books))
+}
+
+// totalHoursOf renders a listening time in whole hours, grouped as totalHours
+// does.
+func totalHoursOf(listening time.Duration) string {
+	hours := strconv.Itoa(int(math.Round(listening.Hours())))
 	var builder strings.Builder
 	for index, digit := range hours {
 		if index > 0 && (len(hours)-index)%3 == 0 {
@@ -480,7 +479,7 @@ func nameView(lib *library, section shownSection, name *Name) *pageView {
 // site root is root, marking current, the directory of the page's own section,
 // or "" for the home page.
 func navLinks(lib *library, root, current string) []linkView {
-	nav := make([]linkView, 0, len(lib.shown)+2)
+	nav := make([]linkView, 0, len(lib.shown)+3)
 	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir), Current: current == booksDir})
 	if len(lib.Series) > 0 {
 		nav = append(nav, linkView{Name: seriesTitle, Href: dirHref(root, seriesDir), Current: current == seriesDir})
@@ -492,6 +491,7 @@ func navLinks(lib *library, root, current string) []linkView {
 			Current: current == section.Dir,
 		})
 	}
+	nav = append(nav, linkView{Name: statsTitle, Href: dirHref(root, statsDir), Current: current == statsDir})
 	return nav
 }
 
