@@ -22,10 +22,9 @@ import (
 // tested against. Matching them byte for byte is the parity guarantee: an
 // existing subscriber must not be able to tell the generator from the server.
 func TestRenderMatchesServerOutput(t *testing.T) {
-	renderer := &Renderer{
-		Host:      "http://www.example-podcast.com/audiobooks/",
-		MediaPath: "/media/",
-	}
+	renderer := newTestRenderer(t, "http://www.example-podcast.com/audiobooks/", Channel{})
+	// The server was tested without channel artwork, which New always sets.
+	renderer.artwork = ""
 
 	tests := []struct {
 		name        string
@@ -88,7 +87,7 @@ func TestRenderMatchesServerOutput(t *testing.T) {
 // a URL and would otherwise truncate or corrupt the path — and the enclosure URL
 // is also the GUID, so getting one wrong makes a book permanently unreachable.
 func TestMediaURLEscapesCharactersWithURLMeaning(t *testing.T) {
-	renderer := &Renderer{Host: "https://example.com", MediaPath: "/media"}
+	renderer := newTestRenderer(t, "https://example.com", Channel{})
 
 	tests := []struct {
 		name     string
@@ -125,8 +124,7 @@ func TestMediaURLEscapesCharactersWithURLMeaning(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual, err := renderer.mediaURL(testCase.path)
-			require.NoError(t, err)
+			actual := renderer.mediaURL(testCase.path)
 			assert.Equal(t, testCase.expected, actual)
 
 			// The escaped URL must name the file we started from.
@@ -139,18 +137,76 @@ func TestMediaURLEscapesCharactersWithURLMeaning(t *testing.T) {
 	}
 }
 
-// A host carrying a path prefix must keep it.
-func TestMediaURLKeepsHostPathPrefix(t *testing.T) {
-	renderer := &Renderer{Host: "http://www.example-podcast.com/audiobooks/", MediaPath: "/media/"}
+// The GUID is the enclosure URL, so the published URLs must not depend on how
+// the host was written: a trailing slash added to the config must not make
+// every subscriber re-download the library. A path prefix must be kept.
+func TestPublishedURLsAreStableAcrossHostSpellings(t *testing.T) {
+	tests := []struct {
+		name      string
+		hosts     []string
+		published string
+	}{
+		{
+			name: "bare host",
+			hosts: []string{
+				"https://books.example.com",
+				"https://books.example.com/",
+				"https://books.example.com//",
+			},
+			published: "https://books.example.com",
+		},
+		{
+			name: "host with a path prefix",
+			hosts: []string{
+				"http://books.example.com:8080/audiobooks",
+				"http://books.example.com:8080/audiobooks/",
+			},
+			published: "http://books.example.com:8080/audiobooks",
+		},
+	}
 
-	actual, err := renderer.mediaURL("/Author/Book/Book.m4b")
+	book := audiobooks.Audiobook{
+		Title:    "Earthsea",
+		Authors:  []string{"Ursula K. Le Guin"},
+		Path:     "/Ursula K Le Guin/Earthsea/Earthsea.m4b",
+		MIMEType: "audio/mp4a-latm",
+	}
 
-	require.NoError(t, err)
-	assert.Equal(t, "http://www.example-podcast.com/audiobooks/media/Author/Book/Book.m4b", actual)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			for _, host := range testCase.hosts {
+				renderer := newTestRenderer(t, host, Channel{})
+				rendered, err := renderer.Render([]audiobooks.Audiobook{book}, "Audiobooks", "")
+				require.NoError(t, err, host)
+
+				feed := string(rendered)
+				enclosure := testCase.published + "/media/Ursula%20K%20Le%20Guin/Earthsea/Earthsea.m4b"
+				assert.Contains(t, feed, "<guid>"+enclosure+"</guid>", host)
+				assert.Contains(t, feed, `<enclosure url="`+enclosure+`"`, host)
+				assert.Contains(t, feed, "<link>"+testCase.published+"</link>", host)
+				assert.Contains(t, feed, `<itunes:image href="`+testCase.published+`/static/itunes_image.jpg">`, host)
+				assert.Equal(t, testCase.published, renderer.Host(), host)
+			}
+		})
+	}
+}
+
+// Each of these would publish enclosure URLs, and so GUIDs, that no client can
+// fetch, so New refuses them rather than letting the build write the feeds.
+func TestNewRejectsInvalidHosts(t *testing.T) {
+	for _, host := range []string{
+		"", "books.example.com", "/books", "ftp://books.example.com", "https://", "://x", "http://[::1",
+	} {
+		renderer, err := New(host, Channel{})
+
+		require.ErrorIs(t, err, ErrInvalidHost, host)
+		assert.Contains(t, err.Error(), host)
+		assert.Nil(t, renderer)
+	}
 }
 
 func TestRenderIsDeterministic(t *testing.T) {
-	renderer := &Renderer{Host: "https://example.com", MediaPath: "/media"}
+	renderer := newTestRenderer(t, "https://example.com", Channel{})
 
 	first, err := renderer.Render(testbooks.Audiobooks, "Audiobooks", "Like movies in your mind!")
 	require.NoError(t, err)
@@ -183,7 +239,7 @@ func TestRenderSeriesHeading(t *testing.T) {
 				sequence = &parsed
 			}
 
-			renderer := &Renderer{Host: "https://example.com", MediaPath: "/media"}
+			renderer := newTestRenderer(t, "https://example.com", Channel{})
 			rendered, err := renderer.Render([]audiobooks.Audiobook{{
 				Title:    "Earthsea",
 				Authors:  []string{"Ursula K. Le Guin"},
@@ -201,7 +257,7 @@ func TestRenderSeriesHeading(t *testing.T) {
 // A book with no release date must not panic the renderer, even though every
 // book in the real library has one.
 func TestRenderWithoutReleaseDate(t *testing.T) {
-	renderer := &Renderer{Host: "https://example.com", MediaPath: "/media"}
+	renderer := newTestRenderer(t, "https://example.com", Channel{})
 
 	rendered, err := renderer.Render([]audiobooks.Audiobook{{
 		Title:    "Undated",
@@ -217,15 +273,12 @@ func TestRenderWithoutReleaseDate(t *testing.T) {
 // The channel-level iTunes metadata is optional, so the golden feeds above are
 // rendered without any of it. These cover the branches that set it.
 func TestRenderSetsChannelMetadata(t *testing.T) {
-	renderer := &Renderer{
-		Host:      "http://www.example-podcast.com",
-		MediaPath: "/media/",
-		Author:    "Athenaeum",
-		Email:     "books@example.com",
-		Explicit:  true,
-		ImageLink: "http://www.example-podcast.com/static/itunes_image.jpg",
-		Language:  "EN",
-	}
+	renderer := newTestRenderer(t, "http://www.example-podcast.com", Channel{
+		Author:   "Athenaeum",
+		Email:    "books@example.com",
+		Explicit: true,
+		Language: "EN",
+	})
 
 	rendered, err := renderer.Render(testbooks.Audiobooks, "Audiobooks", "Like movies in your mind!")
 
@@ -239,27 +292,24 @@ func TestRenderSetsChannelMetadata(t *testing.T) {
 	assert.Contains(t, feed, "<language>EN</language>")
 }
 
-// A Host that url.Parse rejects has to fail the build rather than produce a feed
-// full of broken enclosure URLs, which are also the GUIDs.
-func TestRenderRejectsUnparsableHost(t *testing.T) {
-	renderer := &Renderer{Host: "http://[::1", MediaPath: "/media/"}
-
-	_, err := renderer.Render(testbooks.Audiobooks, "Audiobooks", "Like movies in your mind!")
-
-	require.Error(t, err)
-}
-
 // Podcast clients disagree about negative timestamps, so a release date before
 // 1970 is clamped up to the epoch — plus the eight hour offset every pubDate gets.
 func TestPubDateClampsPreUnixEpochDates(t *testing.T) {
 	preEpoch := toml.LocalDate{Year: 1968, Month: 11, Day: 1}
 	book := audiobooks.Audiobook{Title: "A Wizard of Earthsea", ReleaseDate: &preEpoch}
 
-	clamping := &Renderer{HandlePreUnixEpoch: true}
+	clamping := newTestRenderer(t, "https://example.com", Channel{HandlePreUnixEpoch: true})
 	assert.Equal(t, unixEpoch.Add(8*time.Hour), clamping.pubDate(&book))
 
-	passingThrough := &Renderer{}
+	passingThrough := newTestRenderer(t, "https://example.com", Channel{})
 	assert.Equal(t, preEpoch.AsTime(time.UTC).Add(8*time.Hour), passingThrough.pubDate(&book))
+}
+
+func newTestRenderer(t *testing.T, host string, channel Channel) *Renderer {
+	t.Helper()
+	renderer, err := New(host, channel)
+	require.NoError(t, err)
+	return renderer
 }
 
 func TestSummaryHTMLRepeatsTitleForSubtitledBook(t *testing.T) {

@@ -295,16 +295,17 @@ func renderManifest(t *testing.T, pages []Page) string {
 }
 
 func testRenderer() *feed.Renderer {
-	return &feed.Renderer{
-		Host:               "http://www.example-podcast.com/audiobooks",
-		MediaPath:          "/media",
-		ImageLink:          "http://www.example-podcast.com/audiobooks/static/itunes_image.jpg",
+	renderer, err := feed.New("http://www.example-podcast.com/audiobooks", feed.Channel{
 		Language:           "EN",
 		Author:             "Athenaeum",
 		Email:              "athenaeum@example.com",
 		Explicit:           true,
 		HandlePreUnixEpoch: true,
+	})
+	if err != nil {
+		panic(err)
 	}
+	return renderer
 }
 
 func testLogger() *slog.Logger {

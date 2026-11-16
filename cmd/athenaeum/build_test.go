@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/CallumKerson/Athenaeum/internal/feed"
 	"github.com/CallumKerson/Athenaeum/internal/site"
 )
 
@@ -52,11 +53,11 @@ func TestBuildCommandWritesSite(t *testing.T) {
 	assert.FileExists(t, filepath.Join(out, "books", "index.html"))
 	assert.FileExists(t, filepath.Join(out, site.MarkerName))
 
-	feed, err := os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
+	rendered, err := os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
 	require.NoError(t, err)
-	assert.Contains(t, string(feed), "A Wizard of Earthsea")
+	assert.Contains(t, string(rendered), "A Wizard of Earthsea")
 	// The host reaches the enclosure URLs, which are also the GUIDs.
-	assert.Contains(t, string(feed), "https://books.example.com/media/")
+	assert.Contains(t, string(rendered), "https://books.example.com/media/")
 
 	assert.Contains(t, stderr.String(), "scanned library")
 }
@@ -133,7 +134,7 @@ func TestBuildCommandRefusesEmptyLibrary(t *testing.T) {
 		return cmd.ExecuteContext(context.Background())
 	}
 	require.NoError(t, run(mediaRoot))
-	feed, err := os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
+	rendered, err := os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
 	require.NoError(t, err)
 	cache, err := os.ReadFile(cachePath)
 	require.NoError(t, err)
@@ -143,7 +144,7 @@ func TestBuildCommandRefusesEmptyLibrary(t *testing.T) {
 	require.ErrorIs(t, err, errNoBooks)
 	after, readErr := os.ReadFile(filepath.Join(out, "podcast", "feed.rss"))
 	require.NoError(t, readErr)
-	assert.Equal(t, string(feed), string(after))
+	assert.Equal(t, string(rendered), string(after))
 	cacheAfter, readErr := os.ReadFile(cachePath)
 	require.NoError(t, readErr)
 	assert.Equal(t, string(cache), string(cacheAfter))
@@ -173,6 +174,28 @@ func TestBuildCommandRejectsUnknownExcludedGenre(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "spycraft")
+}
+
+// The host is checked before the library is scanned or anything is written, so
+// a typo fails fast rather than after a long scan.
+func TestBuildCommandRejectsInvalidHost(t *testing.T) {
+	isolateEnv(t)
+	out := t.TempDir()
+
+	cmd := NewRootCommand()
+	cmd.SetOut(&bytes.Buffer{})
+	cmd.SetErr(&bytes.Buffer{})
+	cmd.SetArgs([]string{
+		"build", "--media-root", mediaRoot, "--out", out, "--host", "books.example.com",
+		"--cache", filepath.Join(t.TempDir(), "m4b.json"),
+	})
+
+	err := cmd.ExecuteContext(context.Background())
+
+	require.ErrorIs(t, err, feed.ErrInvalidHost)
+	entries, readErr := os.ReadDir(out)
+	require.NoError(t, readErr)
+	assert.Empty(t, entries)
 }
 
 func TestResolveConfigFlagsBeatFile(t *testing.T) {
@@ -232,25 +255,6 @@ func TestResolveConfigRequiresRootsAndHost(t *testing.T) {
 
 	_, err = resolveConfig(&buildFlags{configPath: absent, mediaRoot: "/media", siteRoot: "/site"}, &bytes.Buffer{})
 	require.ErrorIs(t, err, errNoHost)
-}
-
-func TestNormaliseHost(t *testing.T) {
-	for host, expected := range map[string]string{
-		"https://books.example.com":        "https://books.example.com",
-		"https://books.example.com/":       "https://books.example.com",
-		"http://books.example.com:8080/a/": "http://books.example.com:8080/a",
-	} {
-		actual, err := normaliseHost(host)
-		require.NoError(t, err, host)
-		assert.Equal(t, expected, actual, host)
-	}
-
-	// Each of these would publish enclosure URLs, and so GUIDs, that no client
-	// can fetch.
-	for _, host := range []string{"books.example.com", "/books", "ftp://books.example.com", "https://", "://x"} {
-		_, err := normaliseHost(host)
-		require.ErrorIs(t, err, errInvalidHost, host)
-	}
 }
 
 func TestResolveConfigPropagatesLoadError(t *testing.T) {
@@ -339,28 +343,6 @@ func TestScanLibraryMissingMediaRoot(t *testing.T) {
 	)
 
 	require.Error(t, err)
-}
-
-func TestRendererForCarriesConfigThrough(t *testing.T) {
-	renderer := rendererFor(&BuildConfig{
-		Host: "https://books.example.com",
-		Podcast: Podcast{
-			Explicit:     true,
-			Language:     "FR",
-			Author:       "Someone",
-			Email:        "someone@example.com",
-			PreUnixEpoch: PreUnixEpoch{Handle: true},
-		},
-	})
-
-	assert.Equal(t, "https://books.example.com", renderer.Host)
-	assert.Equal(t, mediaPath, renderer.MediaPath)
-	assert.Equal(t, "https://books.example.com/static/itunes_image.jpg", renderer.ImageLink)
-	assert.Equal(t, "FR", renderer.Language)
-	assert.Equal(t, "Someone", renderer.Author)
-	assert.Equal(t, "someone@example.com", renderer.Email)
-	assert.True(t, renderer.Explicit)
-	assert.True(t, renderer.HandlePreUnixEpoch)
 }
 
 func TestBuildLoggerLevel(t *testing.T) {
