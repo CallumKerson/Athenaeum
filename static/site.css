@@ -247,3 +247,115 @@ footer {
   color: var(--muted);
   font-size: 0.85rem;
 }
+
+ul.books .cover-link {
+  display: block;
+}
+
+ul.books a.title {
+  color: var(--text);
+  text-decoration: none;
+}
+
+ul.books a.title:hover {
+  text-decoration: underline;
+}
+
+/* A book's own page: cover beside the details, stacking on a phone. */
+article.book {
+  display: grid;
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 2rem;
+}
+
+article.book .cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 0.35rem;
+  background: var(--panel);
+}
+
+article.book .about {
+  min-width: 0;
+}
+
+.people {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 0.75rem;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 0 0 1rem;
+}
+
+.facts dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.player {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  max-width: 40rem;
+}
+
+ol.series {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 1rem;
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+}
+
+ol.series a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+ol.series .cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 0.25rem;
+  background: var(--panel);
+}
+
+ol.series [aria-current] .cover {
+  outline: 3px solid var(--link);
+  outline-offset: 2px;
+}
+
+ol.series .position {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 40rem) {
+  article.book {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  article.book .cover {
+    max-width: 16rem;
+  }
+}

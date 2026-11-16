@@ -87,6 +87,9 @@ type Content struct {
 	// Covers maps each book's ImagePath to the path its thumbnail is published
 	// at. Books without a cover are absent.
 	Covers map[string]string
+	// BookSlugs maps each book's Path to the directory of its page under
+	// /books/.
+	BookSlugs map[string]string
 }
 
 // Plan works out the complete set of feeds and pages to publish for a library.
@@ -94,9 +97,10 @@ type Content struct {
 // Books are assumed to be sorted already; every feed preserves that order.
 func Plan(books []audiobooks.Audiobook, excludedFromMainFeed []audiobooks.Genre) *Content {
 	return &Content{
-		Books:  books,
-		Covers: coverPaths(books),
-		Main:   mainFeed(books, excludedFromMainFeed),
+		Books:     books,
+		Covers:    coverPaths(books),
+		BookSlugs: bookSlugs(books),
+		Main:      mainFeed(books, excludedFromMainFeed),
 		Authors: personSection(books, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
 			return b.Authors
 		}),
@@ -253,17 +257,22 @@ func newSection(dir string, names []Name, listed map[string]int) Section {
 func assignSlugs(names []Name) {
 	taken := map[string]bool{}
 	for index := range names {
-		slug := slugify(names[index].Title)
 		// Distinct names can slugify identically — "Ann Leckie" and "Ann-Leckie" —
 		// and must not end up sharing a page. Names are sorted (see Section.Names),
 		// so which one keeps the unsuffixed slug is stable between builds.
-		unique := slug
-		for suffix := 2; taken[unique]; suffix++ {
-			unique = fmt.Sprintf("%s-%d", slug, suffix)
-		}
-		taken[unique] = true
-		names[index].Slug = unique
+		names[index].Slug = claimSlug(taken, slugify(names[index].Title))
 	}
+}
+
+// claimSlug returns slug, or slug-2, slug-3 and so on if it is taken, and marks
+// whichever it returns as taken.
+func claimSlug(taken map[string]bool, slug string) string {
+	unique := slug
+	for suffix := 2; taken[unique]; suffix++ {
+		unique = fmt.Sprintf("%s-%d", slug, suffix)
+	}
+	taken[unique] = true
+	return unique
 }
 
 // slugify reduces a display name to a lowercase URL segment, replacing every run
@@ -313,6 +322,27 @@ func feedPaths(dir, name string, aliases []string) (link string, all []string) {
 	default:
 		return "", paths
 	}
+}
+
+// bookSlugs gives every book a page directory named after its title. Books
+// whose titles slugify alike are numbered in order of their path in the library,
+// so a slug only changes when a book with the same title is added or removed
+// ahead of it, never because of a release date or a metadata edit.
+func bookSlugs(books []audiobooks.Audiobook) map[string]string {
+	order := make([]*audiobooks.Audiobook, 0, len(books))
+	for index := range books {
+		order = append(order, &books[index])
+	}
+	slices.SortFunc(order, func(a, b *audiobooks.Audiobook) int {
+		return strings.Compare(a.Path, b.Path)
+	})
+
+	slugs := make(map[string]string, len(books))
+	taken := map[string]bool{}
+	for _, book := range order {
+		slugs[book.Path] = claimSlug(taken, slugify(book.Title))
+	}
+	return slugs
 }
 
 // coverPaths names a thumbnail for every cover in the library. The name is a

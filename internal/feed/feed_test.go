@@ -393,3 +393,24 @@ func TestSummaryHTMLIncludesSeriesAndNarrator(t *testing.T) {
 	assert.Contains(t, summary, "<h4>Earthsea Book 1</h4>")
 	assert.Contains(t, summary, "<h4>Narrated by Kobna Holdbrook-Smith</h4>")
 }
+
+// The pages play a book from the same URL a podcast app downloads it from, so
+// the two can never drift apart.
+func TestAudioURLIsTheEnclosureURL(t *testing.T) {
+	renderer := newTestRenderer(t, "https://example.com/books", Channel{})
+	book := audiobooks.Audiobook{
+		Title:    "What If? 2",
+		Path:     "/Randall Munroe/What If?2/What If?2.m4b",
+		MIMEType: "audio/mp4a-latm",
+	}
+
+	rendered, err := renderer.Render([]audiobooks.Audiobook{book}, "Title", "Description")
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		"https://example.com/books/media/Randall%20Munroe/What%20If%3F2/What%20If%3F2.m4b",
+		renderer.AudioURL(&book),
+	)
+	assert.Contains(t, string(rendered), `<enclosure url="`+renderer.AudioURL(&book)+`"`)
+}

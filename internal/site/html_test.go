@@ -132,11 +132,15 @@ func TestBookListsAreNewestFirst(t *testing.T) {
 		return found
 	}
 
-	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"}, titles(allBooksView(content, nil, nil).Books))
+	assert.Equal(
+		t,
+		[]string{"Newest", "Middle", "Oldest", "Undated"},
+		titles(allBooksView(newLibrary(content, nil, nil)).Books),
+	)
 	// Every page that lists books, not just the whole-library one.
 	require.Len(t, content.Authors.Names, 1)
 	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"},
-		titles(nameView(content, nil, nil, &content.Authors.Names[0]).Books))
+		titles(nameView(newLibrary(content, nil, nil), &content.Authors.Names[0]).Books))
 }
 
 // The feeds are rendered from the same slices the pages list, and their item
@@ -150,7 +154,7 @@ func TestBuildingPagesDoesNotReorderFeeds(t *testing.T) {
 	before, err := testRenderer(t).Render(content.Main.Books, "Audiobooks", "")
 	require.NoError(t, err)
 
-	_, err = buildHTML(content, nil)
+	_, err = buildHTML(newLibrary(content, nil, nil))
 	require.NoError(t, err)
 
 	after, err := testRenderer(t).Render(content.Main.Books, "Audiobooks", "")
@@ -165,7 +169,7 @@ func TestBookDateMatchesTheFeed(t *testing.T) {
 		dated("Undated", nil),
 	}, nil)
 
-	books := allBooksView(content, nil, nil).Books
+	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 2)
 
 	assert.Equal(t, "1 Nov 1968", books[0].Date)
@@ -198,7 +202,7 @@ func TestBookSeriesLine(t *testing.T) {
 			audiobook.Series = &audiobooks.Series{Title: "Earthsea", Sequence: sequence}
 
 			content := Plan([]audiobooks.Audiobook{audiobook}, nil)
-			books := allBooksView(content, nil, nil).Books
+			books := allBooksView(newLibrary(content, nil, nil)).Books
 			require.Len(t, books, 1)
 
 			assert.Equal(t, testCase.expected, books[0].Series)
@@ -217,7 +221,7 @@ func TestBookSearchTextCoversEveryField(t *testing.T) {
 		Tags:      []string{"Hugo Awards"},
 	}}, nil)
 
-	books := allBooksView(content, nil, nil).Books
+	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 1)
 
 	for _, term := range []string{"earthsea", "le guin", "holdbrook", "fantasy", "hugo"} {
@@ -236,7 +240,7 @@ func TestBookLinksToTheNamesItLists(t *testing.T) {
 			[]string{"Hugo Awards"}),
 	}, nil)
 
-	books := allBooksView(content, nil, nil).Books
+	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 2)
 	second := books[1]
 	require.Equal(t, "Second", second.Title)

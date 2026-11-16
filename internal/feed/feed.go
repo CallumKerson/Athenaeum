@@ -121,7 +121,7 @@ func (r *Renderer) Render(books []audiobooks.Audiobook, title, description strin
 }
 
 func (r *Renderer) item(book *audiobooks.Audiobook) *podcasts.Item {
-	hostedFile := r.mediaURL(book.Path)
+	hostedFile := r.AudioURL(book)
 
 	item := &podcasts.Item{
 		Title: book.Title,
@@ -167,6 +167,12 @@ func (r *Renderer) publishedURL(path string) string {
 	published := r.base
 	published.Path += path
 	return published.String()
+}
+
+// AudioURL is the public URL of a book's audio file: its enclosure URL, which
+// the browsable pages also play from.
+func (r *Renderer) AudioURL(book *audiobooks.Audiobook) string {
+	return r.mediaURL(book.Path)
 }
 
 // mediaURL builds the public URL of a file inside the media root, which is
