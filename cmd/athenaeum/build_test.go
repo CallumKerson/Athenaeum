@@ -58,6 +58,8 @@ func TestBuildCommandWritesSite(t *testing.T) {
 	assert.Contains(t, string(rendered), "A Wizard of Earthsea")
 	// The host reaches the enclosure URLs, which are also the GUIDs.
 	assert.Contains(t, string(rendered), "https://books.example.com/media/")
+	// Production feeds link the artwork the site serves.
+	assert.Contains(t, string(rendered), `<itunes:image href="https://books.example.com/static/itunes_image.jpg">`)
 
 	assert.Contains(t, stderr.String(), "scanned library")
 }
@@ -181,18 +183,22 @@ func TestBuildCommandRejectsUnknownExcludedGenre(t *testing.T) {
 func TestBuildCommandRejectsInvalidHost(t *testing.T) {
 	isolateEnv(t)
 	out := t.TempDir()
+	cachePath := filepath.Join(t.TempDir(), "m4b.json")
 
 	cmd := NewRootCommand()
 	cmd.SetOut(&bytes.Buffer{})
 	cmd.SetErr(&bytes.Buffer{})
 	cmd.SetArgs([]string{
 		"build", "--media-root", mediaRoot, "--out", out, "--host", "books.example.com",
-		"--cache", filepath.Join(t.TempDir(), "m4b.json"),
+		"--cache", cachePath,
 	})
 
 	err := cmd.ExecuteContext(context.Background())
 
 	require.ErrorIs(t, err, feed.ErrInvalidHost)
+	// The scan writes the duration cache, so its absence shows the host was
+	// refused before the library was scanned, not merely before the write.
+	assert.NoFileExists(t, cachePath)
 	entries, readErr := os.ReadDir(out)
 	require.NoError(t, readErr)
 	assert.Empty(t, entries)

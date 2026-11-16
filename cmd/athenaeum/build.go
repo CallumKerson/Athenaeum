@@ -88,6 +88,7 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 		Author:             cfg.Podcast.Author,
 		Email:              cfg.Podcast.Email,
 		HandlePreUnixEpoch: cfg.Podcast.PreUnixEpoch.Handle,
+		Artwork:            true,
 	})
 	if err != nil {
 		return err

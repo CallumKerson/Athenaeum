@@ -22,9 +22,8 @@ import (
 // tested against. Matching them byte for byte is the parity guarantee: an
 // existing subscriber must not be able to tell the generator from the server.
 func TestRenderMatchesServerOutput(t *testing.T) {
+	// The server was tested without channel artwork, so Artwork is left off.
 	renderer := newTestRenderer(t, "http://www.example-podcast.com/audiobooks/", Channel{})
-	// The server was tested without channel artwork, which New always sets.
-	renderer.artwork = ""
 
 	tests := []struct {
 		name        string
@@ -139,7 +138,8 @@ func TestMediaURLEscapesCharactersWithURLMeaning(t *testing.T) {
 
 // The GUID is the enclosure URL, so the published URLs must not depend on how
 // the host was written: a trailing slash added to the config must not make
-// every subscriber re-download the library. A path prefix must be kept.
+// every subscriber re-download the library. A path prefix must be kept, and
+// the artwork, channel link and enclosures must all share the same prefix.
 func TestPublishedURLsAreStableAcrossHostSpellings(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -152,6 +152,10 @@ func TestPublishedURLsAreStableAcrossHostSpellings(t *testing.T) {
 				"https://books.example.com",
 				"https://books.example.com/",
 				"https://books.example.com//",
+				// The slash is only trimmed if it is trimmed after parsing: in
+				// the raw string it is not the last character.
+				"https://books.example.com/#",
+				"HTTPS://books.example.com/",
 			},
 			published: "https://books.example.com",
 		},
@@ -160,42 +164,53 @@ func TestPublishedURLsAreStableAcrossHostSpellings(t *testing.T) {
 			hosts: []string{
 				"http://books.example.com:8080/audiobooks",
 				"http://books.example.com:8080/audiobooks/",
+				"http://books.example.com:8080/audiobooks/#",
+				"HTTP://books.example.com:8080/audiobooks/",
 			},
 			published: "http://books.example.com:8080/audiobooks",
 		},
 	}
 
 	book := audiobooks.Audiobook{
-		Title:    "Earthsea",
-		Authors:  []string{"Ursula K. Le Guin"},
-		Path:     "/Ursula K Le Guin/Earthsea/Earthsea.m4b",
-		MIMEType: "audio/mp4a-latm",
+		Title:     "Earthsea",
+		Authors:   []string{"Ursula K. Le Guin"},
+		Path:      "/Ursula K Le Guin/Earthsea/Earthsea.m4b",
+		ImagePath: "/Ursula K Le Guin/Earthsea/Earthsea.jpg",
+		MIMEType:  "audio/mp4a-latm",
 	}
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			for _, host := range testCase.hosts {
-				renderer := newTestRenderer(t, host, Channel{})
+				renderer := newTestRenderer(t, host, Channel{Artwork: true})
 				rendered, err := renderer.Render([]audiobooks.Audiobook{book}, "Audiobooks", "")
 				require.NoError(t, err, host)
 
 				feed := string(rendered)
-				enclosure := testCase.published + "/media/Ursula%20K%20Le%20Guin/Earthsea/Earthsea.m4b"
+				media := testCase.published + "/media/Ursula%20K%20Le%20Guin/Earthsea/"
+				enclosure := media + "Earthsea.m4b"
 				assert.Contains(t, feed, "<guid>"+enclosure+"</guid>", host)
 				assert.Contains(t, feed, `<enclosure url="`+enclosure+`"`, host)
+				assert.Contains(t, feed, `<itunes:image href="`+media+`Earthsea.jpg">`, host)
 				assert.Contains(t, feed, "<link>"+testCase.published+"</link>", host)
 				assert.Contains(t, feed, `<itunes:image href="`+testCase.published+`/static/itunes_image.jpg">`, host)
 				assert.Equal(t, testCase.published, renderer.Host(), host)
+				assert.NotContains(t, feed, "//media", host)
+				assert.NotContains(t, feed, "//static", host)
 			}
 		})
 	}
 }
 
 // Each of these would publish enclosure URLs, and so GUIDs, that no client can
-// fetch, so New refuses them rather than letting the build write the feeds.
+// fetch, or that carry a query, fragment or credentials into every GUID, so New
+// refuses them rather than letting the build write the feeds.
 func TestNewRejectsInvalidHosts(t *testing.T) {
 	for _, host := range []string{
 		"", "books.example.com", "/books", "ftp://books.example.com", "https://", "://x", "http://[::1",
+		"https://books.example.com?q=1", "https://books.example.com/?q=1", "https://books.example.com?",
+		"https://books.example.com#f", "https://books.example.com/#f",
+		"https://u:p@books.example.com", "https://u@books.example.com",
 	} {
 		renderer, err := New(host, Channel{})
 
@@ -278,6 +293,7 @@ func TestRenderSetsChannelMetadata(t *testing.T) {
 		Email:    "books@example.com",
 		Explicit: true,
 		Language: "EN",
+		Artwork:  true,
 	})
 
 	rendered, err := renderer.Render(testbooks.Audiobooks, "Audiobooks", "Like movies in your mind!")

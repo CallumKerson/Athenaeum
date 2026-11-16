@@ -30,7 +30,7 @@ func dated(title string, release *toml.LocalDate) audiobooks.Audiobook {
 // path the build did not write is a dead end with no server to notice.
 func TestPagesLinkOnlyToFilesThatExist(t *testing.T) {
 	root := t.TempDir()
-	_, err := Build(root, testPlan(t), testRenderer(), true, testLogger())
+	_, err := Build(root, testPlan(t), testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 
 	var checked int
@@ -64,7 +64,7 @@ func TestPagesLinkOnlyToFilesThatExist(t *testing.T) {
 func TestEveryFeedHasAPage(t *testing.T) {
 	root := t.TempDir()
 	content := testPlan(t)
-	_, err := Build(root, content, testRenderer(), true, testLogger())
+	_, err := Build(root, content, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 
 	builder := newHTMLBuilder(content)
@@ -96,7 +96,7 @@ func TestAllBooksPageListsBooksExcludedFromTheMainFeed(t *testing.T) {
 		book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, nil, nil),
 	}, []audiobooks.Genre{audiobooks.Erotica})
 
-	_, err := Build(root, content, testRenderer(), true, testLogger())
+	_, err := Build(root, content, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 
 	page, err := os.ReadFile(filepath.Join(root, booksDir, indexName))
@@ -138,13 +138,13 @@ func TestBuildingPagesDoesNotReorderFeeds(t *testing.T) {
 		dated("Newest", &toml.LocalDate{Year: 2023, Month: 4, Day: 6}),
 	}, nil)
 
-	before, err := testRenderer().Render(content.Feeds[0].Books, "Audiobooks", "")
+	before, err := testRenderer(t).Render(content.Feeds[0].Books, "Audiobooks", "")
 	require.NoError(t, err)
 
 	_, err = buildHTML(content)
 	require.NoError(t, err)
 
-	after, err := testRenderer().Render(content.Feeds[0].Books, "Audiobooks", "")
+	after, err := testRenderer(t).Render(content.Feeds[0].Books, "Audiobooks", "")
 	require.NoError(t, err)
 	assert.Equal(t, string(before), string(after))
 }
