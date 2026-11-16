@@ -28,9 +28,43 @@
     <main class="wrap">
       {{- if not .Home}}{{template "head" .}}{{end}}
       {{- if .Search}}
+      {{- $sorts := .Sorts}}{{with .Filters}}{{$sorts = .Sorts}}{{end}}
       <form class="search" onsubmit="return false" hidden>
-        <input id="filter" type="search" placeholder="{{.SearchLabel}}" aria-label="{{.SearchLabel}}" autocomplete="off" spellcheck="false" />
-        <span id="filter-count"></span>
+        <div class="find">
+          <input id="filter" type="search" placeholder="{{.SearchLabel}}" aria-label="{{.SearchLabel}}" autocomplete="off" spellcheck="false" />
+          <span id="filter-count" aria-live="polite"></span>
+        </div>
+        {{- with .Filters}}
+        <div class="chips" role="group" aria-label="Genre">
+          <button type="button" data-genre="" aria-pressed="true">All genres</button>
+          {{- range .Genres}}
+          <button type="button" data-genre="{{.Href}}" aria-pressed="false">{{.Name}}</button>
+          {{- end}}
+        </div>
+        {{- end}}
+        <div class="options">
+          {{- if .Filters}}
+          <label>Length <select id="length">
+            <option value="">Any length</option>
+            <option value="short">Under 10 hours</option>
+            <option value="medium">10 to 20 hours</option>
+            <option value="long">20 hours or more</option>
+          </select></label>
+          {{- end}}
+          {{- with $sorts}}
+          <label>Sort by <select id="sort">
+            {{- range .}}
+            <option value="{{.Key}}">{{.Label}}</option>
+            {{- end}}
+          </select></label>
+          {{- end}}
+          {{- if .Filters}}
+          <span class="view" role="group" aria-label="View">
+            <button type="button" data-view="" aria-pressed="true">Covers</button>
+            <button type="button" data-view="list" aria-pressed="false">List</button>
+          </span>
+          {{- end}}
+        </div>
       </form>
       {{- end}}
       {{- template "content" .}}
@@ -71,29 +105,7 @@
       }
     </script>
     {{- if .Search}}
-    <script>
-      const form = document.querySelector("form.search");
-      const input = document.getElementById("filter");
-      const counter = document.getElementById("filter-count");
-      const rows = Array.from(document.querySelectorAll("[data-search]"));
-      form.hidden = false;
-
-      function apply() {
-        const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
-        let shown = 0;
-        for (const row of rows) {
-          const match = terms.every(function (term) { return row.dataset.search.includes(term); });
-          row.hidden = !match;
-          if (match) shown++;
-        }
-        counter.textContent = terms.length ? shown + " of " + rows.length : "";
-      }
-
-      input.addEventListener("input", apply);
-      // Prefill from ?q= so a search can be linked to or bookmarked.
-      input.value = new URLSearchParams(location.search).get("q") || "";
-      apply();
-    </script>
+    <script src="{{.Root}}static/filter.js"></script>
     {{- end}}
   </body>
 </html>
@@ -128,7 +140,7 @@
 {{- if .Books}}
       <ul class="books">
         {{- range .Books}}
-        <li class="tile" data-search="{{.Search}}">
+        <li class="tile" data-search="{{.Search}}" data-title="{{.Title}}" data-minutes="{{.Minutes}}" data-genres="{{.GenreSlugs}}">
           <a href="{{.Href}}">{{template "cover" .}}<span class="t">{{.Title}}</span></a>
           {{- if .Authors}}<span class="a">{{template "links" .Authors}}</span>{{end}}
           {{- template "duration" .Duration}}
