@@ -9,7 +9,6 @@ import (
 	"slices"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
 	"github.com/CallumKerson/Athenaeum/templates"
@@ -30,24 +29,21 @@ const (
 	rootFromSubDir = "../../"
 )
 
-// browseSection is one way of browsing the library. Dir is shared with the feed
-// tree, so that /authors/ and the feeds under /podcast/authors/ are obviously
-// the same set of names.
-type browseSection struct {
-	Dir   string
+// sectionText is how a section introduces itself on the site.
+type sectionText struct {
 	Title string
 	Blurb string
 }
 
-var browseSections = []browseSection{
-	{Dir: authorsDir, Title: "Authors", Blurb: "Everyone who wrote something in the library."},
-	{Dir: narratorsDir, Title: "Narrators", Blurb: "Everyone who read something in the library."},
-	{
-		Dir:   genresDir,
+// sectionTexts is keyed by section directory.
+var sectionTexts = map[string]sectionText{
+	authorsDir:   {Title: "Authors", Blurb: "Everyone who wrote something in the library."},
+	narratorsDir: {Title: "Narrators", Blurb: "Everyone who read something in the library."},
+	genresDir: {
 		Title: "Genres",
 		Blurb: "Every genre Athenaeum knows, including those nothing is filed under yet.",
 	},
-	{Dir: tagsDir, Title: "Tags", Blurb: "Whatever the library's own metadata tags books with."},
+	tagsDir: {Title: "Tags", Blurb: "Whatever the library's own metadata tags books with."},
 }
 
 // htmlPage is a rendered page and the path it is published at.
@@ -102,8 +98,7 @@ type pageView struct {
 // buildHTML renders the browsable tree that sits alongside the feeds: a home
 // page, the searchable list of every book, an index per section, and a page for
 // each author, narrator, genre and tag linking to its feed.
-func buildHTML(content Content) ([]htmlPage, error) {
-	builder := newHTMLBuilder(content)
+func buildHTML(content *Content) ([]htmlPage, error) {
 	tpls, err := parseHTMLTemplates()
 	if err != nil {
 		return nil, err
@@ -119,21 +114,24 @@ func buildHTML(content Content) ([]htmlPage, error) {
 		return nil
 	}
 
-	if err := add(tpls.home, indexName, builder.home()); err != nil {
+	if err := add(tpls.home, indexName, homeView(content)); err != nil {
 		return nil, err
 	}
-	if err := add(tpls.books, path.Join(booksDir, indexName), builder.allBooks()); err != nil {
+	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(content)); err != nil {
 		return nil, err
 	}
 
-	for _, section := range browseSections {
-		if err := add(tpls.entries, path.Join(section.Dir, indexName), builder.sectionIndex(section)); err != nil {
+	for _, section := range sections(content) {
+		if err := add(tpls.entries, path.Join(section.Dir, indexName), sectionView(content, section)); err != nil {
 			return nil, err
 		}
-		for index := range builder.sections[section.Dir] {
-			feedPage := &builder.sections[section.Dir][index]
-			relPath := path.Join(section.Dir, builder.slugOf(section.Dir, feedPage.Title), indexName)
-			if err := add(tpls.books, relPath, builder.feedPage(feedPage)); err != nil {
+		for index := range section.Names {
+			name := &section.Names[index]
+			if err := add(
+				tpls.books,
+				path.Join(section.Dir, name.Slug, indexName),
+				nameView(content, name),
+			); err != nil {
 				return nil, err
 			}
 		}
@@ -170,154 +168,101 @@ func parseHTMLTemplates() (*htmlTemplates, error) {
 	return &parsed, nil
 }
 
-type htmlBuilder struct {
-	books []audiobooks.Audiobook
-	main  *Page
-	// Feed pages by section directory, in plan order — which is sorted by name.
-	sections map[string][]Page
-	// Slug per name, keyed by section directory and normalised name.
-	slugs map[string]string
-}
-
-func newHTMLBuilder(content Content) *htmlBuilder {
-	builder := &htmlBuilder{
-		books:    content.Books,
-		sections: map[string][]Page{},
-		slugs:    map[string]string{},
-	}
-	for index := range content.Feeds {
-		feedPage := content.Feeds[index]
-		if feedPage.Section == "" {
-			builder.main = &content.Feeds[index]
-			continue
-		}
-		builder.sections[feedPage.Section] = append(builder.sections[feedPage.Section], feedPage)
-	}
-	for _, section := range browseSections {
-		builder.assignSlugs(section.Dir)
-	}
-	return builder
-}
-
-// assignSlugs gives every name in a section a unique URL segment.
-//
-// Feed paths keep the library's own spelling, because existing subscriptions
-// point at them. The HTML tree is new, so its directories can be plain
-// lowercase-hyphen names, which need no escaping and cannot fold together on a
-// case-insensitive filesystem.
-func (b *htmlBuilder) assignSlugs(dir string) {
-	taken := map[string]bool{}
-	for _, feedPage := range b.sections[dir] {
-		slug := slugify(feedPage.Title)
-		// Distinct names can slugify identically — "Ann Leckie" and "Ann-Leckie" —
-		// and must not end up sharing a page. Plan order is sorted, so which name
-		// keeps the unsuffixed slug is stable between builds.
-		unique := slug
-		for suffix := 2; taken[unique]; suffix++ {
-			unique = fmt.Sprintf("%s-%d", slug, suffix)
-		}
-		taken[unique] = true
-		b.slugs[slugKey(dir, feedPage.Title)] = unique
-	}
-}
-
-func (b *htmlBuilder) slugOf(dir, name string) string {
-	return b.slugs[slugKey(dir, name)]
-}
-
-func (b *htmlBuilder) home() *pageView {
+func homeView(content *Content) *pageView {
 	view := &pageView{
-		Title:   allTitle,
-		Heading: allTitle + " 🎧📚",
-		Blurb:   allSummary,
-		Root:    rootFromRoot,
-		Nav:     b.nav(rootFromRoot),
+		Title:    allTitle,
+		Heading:  allTitle + " 🎧📚",
+		Blurb:    allSummary,
+		Root:     rootFromRoot,
+		FeedHref: feedHref(rootFromRoot, &content.Main),
+		Nav:      navLinks(content, rootFromRoot),
 		Sections: []entryView{{
 			Name:  booksTitle,
 			Href:  dirHref(rootFromRoot, booksDir),
 			Note:  "Search the whole library.",
-			Count: len(b.books),
+			Count: len(content.Books),
 		}},
 	}
-	if b.main != nil {
-		view.FeedHref = hrefFor(rootFromRoot, b.main.FeedPath)
-	}
-	for _, section := range browseSections {
+	for _, section := range sections(content) {
 		view.Sections = append(view.Sections, entryView{
-			Name:  section.Title,
+			Name:  sectionTexts[section.Dir].Title,
 			Href:  dirHref(rootFromRoot, section.Dir),
-			Note:  section.Blurb,
-			Count: len(b.sections[section.Dir]),
+			Note:  sectionTexts[section.Dir].Blurb,
+			Count: len(section.Names),
 		})
 	}
 	return view
 }
 
-func (b *htmlBuilder) allBooks() *pageView {
+func allBooksView(content *Content) *pageView {
 	return &pageView{
 		Title:       pageTitle(booksTitle),
 		Heading:     booksTitle,
-		Blurb:       fmt.Sprintf("%d books in the library, most recently published first.", len(b.books)),
+		Blurb:       fmt.Sprintf("%d books in the library, most recently published first.", len(content.Books)),
 		Root:        rootFromDir,
-		Nav:         b.nav(rootFromDir),
+		Nav:         navLinks(content, rootFromDir),
 		Search:      true,
 		SearchLabel: "Search by title, author, narrator, series, genre or tag",
-		Books:       b.bookViews(rootFromDir, b.books),
+		Books:       bookViews(content, rootFromDir, content.Books),
 	}
 }
 
-func (b *htmlBuilder) sectionIndex(section browseSection) *pageView {
-	pages := b.sections[section.Dir]
+func sectionView(content *Content, section *Section) *pageView {
+	text := sectionTexts[section.Dir]
 	view := &pageView{
-		Title:       pageTitle(section.Title),
-		Heading:     section.Title,
-		Blurb:       section.Blurb,
+		Title:       pageTitle(text.Title),
+		Heading:     text.Title,
+		Blurb:       text.Blurb,
 		Root:        rootFromDir,
-		Nav:         b.nav(rootFromDir),
+		Nav:         navLinks(content, rootFromDir),
 		Search:      true,
-		SearchLabel: "Search " + strings.ToLower(section.Title),
-		Entries:     make([]entryView, 0, len(pages)),
+		SearchLabel: "Search " + strings.ToLower(text.Title),
+		Entries:     make([]entryView, 0, len(section.Names)),
 	}
-	for index := range pages {
-		entry := entryView{
-			Name:   pages[index].Title,
-			Href:   dirHref(rootFromDir, section.Dir, b.slugOf(section.Dir, pages[index].Title)),
-			Search: strings.ToLower(pages[index].Title),
-			Count:  len(pages[index].Books),
-		}
-		if pages[index].FeedPath != "" {
-			entry.FeedHref = hrefFor(rootFromDir, pages[index].FeedPath)
-		}
-		view.Entries = append(view.Entries, entry)
+	for index := range section.Names {
+		name := &section.Names[index]
+		view.Entries = append(view.Entries, entryView{
+			Name:     name.Title,
+			Href:     dirHref(rootFromDir, section.Dir, name.Slug),
+			FeedHref: feedHref(rootFromDir, &name.Feed),
+			Search:   strings.ToLower(name.Title),
+			Count:    len(name.Books),
+		})
 	}
 	return view
 }
 
-func (b *htmlBuilder) feedPage(feedPage *Page) *pageView {
-	view := &pageView{
-		Title:   pageTitle(feedPage.Title),
-		Heading: feedPage.Title,
-		Blurb:   feedPage.Description,
-		Root:    rootFromSubDir,
-		Nav:     b.nav(rootFromSubDir),
-		Books:   b.bookViews(rootFromSubDir, feedPage.Books),
+func nameView(content *Content, name *Name) *pageView {
+	return &pageView{
+		Title:    pageTitle(name.Title),
+		Heading:  name.Title,
+		Blurb:    name.Description,
+		Root:     rootFromSubDir,
+		FeedHref: feedHref(rootFromSubDir, &name.Feed),
+		Nav:      navLinks(content, rootFromSubDir),
+		Books:    bookViews(content, rootFromSubDir, name.Books),
 	}
-	if feedPage.FeedPath != "" {
-		view.FeedHref = hrefFor(rootFromSubDir, feedPage.FeedPath)
-	}
-	return view
 }
 
-func (b *htmlBuilder) nav(root string) []linkView {
-	nav := make([]linkView, 0, len(browseSections)+1)
+func navLinks(content *Content, root string) []linkView {
+	all := sections(content)
+	nav := make([]linkView, 0, len(all)+1)
 	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir)})
-	for _, section := range browseSections {
-		nav = append(nav, linkView{Name: section.Title, Href: dirHref(root, section.Dir)})
+	for _, section := range all {
+		nav = append(nav, linkView{Name: sectionTexts[section.Dir].Title, Href: dirHref(root, section.Dir)})
 	}
 	return nav
 }
 
-func (b *htmlBuilder) bookViews(root string, books []audiobooks.Audiobook) []bookView {
+// feedHref is empty for a name with no feed, which the templates leave out.
+func feedHref(root string, feed *Feed) string {
+	if feed.Link == "" {
+		return ""
+	}
+	return hrefFor(root, feed.Link)
+}
+
+func bookViews(content *Content, root string, books []audiobooks.Audiobook) []bookView {
 	sorted := newestFirst(books)
 	views := make([]bookView, 0, len(sorted))
 	for index := range sorted {
@@ -327,10 +272,10 @@ func (b *htmlBuilder) bookViews(root string, books []audiobooks.Audiobook) []boo
 			Subtitle:  book.Subtitle,
 			Date:      formatReleaseDate(book),
 			Duration:  formatDuration(book.Duration),
-			Authors:   b.links(root, authorsDir, book.Authors),
-			Narrators: b.links(root, narratorsDir, book.Narrators),
-			Genres:    b.links(root, genresDir, genreNames(book.Genres)),
-			Tags:      b.links(root, tagsDir, book.Tags),
+			Authors:   links(root, &content.Authors, book.Authors),
+			Narrators: links(root, &content.Narrators, book.Narrators),
+			Genres:    links(root, &content.Genres, genreNames(book.Genres)),
+			Tags:      links(root, &content.Tags, book.Tags),
 		}
 		if book.Series != nil {
 			view.Series = book.Series.Title
@@ -378,14 +323,15 @@ func formatReleaseDate(book *audiobooks.Audiobook) string {
 	return releaseTime(book).Format("2 Jan 2006")
 }
 
-// links turns names into links to their pages. A name with no page — only
-// possible if it is not in the plan at all — is still shown, as plain text.
-func (b *htmlBuilder) links(root, dir string, names []string) []linkView {
+// links turns names into links to their pages. A name with no page — one that
+// is blank once whitespace is removed, so the plan gave it no feed — is still
+// shown, as plain text.
+func links(root string, section *Section, names []string) []linkView {
 	links := make([]linkView, 0, len(names))
 	for _, name := range names {
 		link := linkView{Name: name}
-		if slug := b.slugOf(dir, name); slug != "" {
-			link.Href = dirHref(root, dir, slug)
+		if index, ok := section.Listed[name]; ok {
+			link.Href = dirHref(root, section.Dir, section.Names[index].Slug)
 		}
 		links = append(links, link)
 	}
@@ -439,33 +385,6 @@ func formatDuration(duration time.Duration) string {
 		return fmt.Sprintf("%dm", minutes)
 	}
 	return fmt.Sprintf("%dh %02dm", hours, minutes)
-}
-
-func slugKey(dir, name string) string {
-	return dir + "\x00" + normalise(name)
-}
-
-// slugify reduces a display name to a lowercase URL segment, replacing every run
-// of other characters with a single hyphen.
-func slugify(name string) string {
-	var builder strings.Builder
-	separated := false
-	for _, char := range name {
-		switch {
-		case unicode.IsLetter(char) || unicode.IsDigit(char):
-			if separated && builder.Len() > 0 {
-				builder.WriteRune('-')
-			}
-			separated = false
-			builder.WriteRune(unicode.ToLower(char))
-		default:
-			separated = true
-		}
-	}
-	if builder.Len() == 0 {
-		return "unnamed"
-	}
-	return builder.String()
 }
 
 // hrefFor builds a relative link from a page whose prefix back to the root is

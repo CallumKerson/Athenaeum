@@ -48,7 +48,7 @@ type Result struct {
 // Files whose contents are unchanged are left untouched so that their
 // modification times — and therefore the serving proxy's ETags — stay stable
 // across rebuilds.
-func Build(root string, content Content, renderer *feed.Renderer, sweep bool, logger *slog.Logger) (Result, error) {
+func Build(root string, content *Content, renderer *feed.Renderer, sweep bool, logger *slog.Logger) (Result, error) {
 	var result Result
 
 	if err := prepareRoot(root); err != nil {
@@ -76,14 +76,13 @@ func Build(root string, content Content, renderer *feed.Renderer, sweep bool, lo
 		return nil
 	}
 
-	for index := range content.Feeds {
-		feedPage := &content.Feeds[index]
-		contents, err := renderer.Render(feedPage.Books, feedPage.Title, feedPage.Description)
+	for _, planned := range feeds(content) {
+		contents, err := renderer.Render(planned.Books, planned.Title, planned.Description)
 		if err != nil {
-			return result, fmt.Errorf("rendering feed %q: %w", feedPage.Title, err)
+			return result, fmt.Errorf("rendering feed %q: %w", planned.Title, err)
 		}
 		result.Feeds++
-		for _, relPath := range feedPage.Paths {
+		for _, relPath := range planned.Paths {
 			if err := writeFile(relPath, contents); err != nil {
 				return result, err
 			}
@@ -133,7 +132,7 @@ func prepareRoot(root string) error {
 
 // writeAssets publishes the HTML pages, the stylesheet and the embedded iTunes
 // artwork the feeds link to.
-func writeAssets(content Content, writeFile func(relPath string, contents []byte) error) error {
+func writeAssets(content *Content, writeFile func(relPath string, contents []byte) error) error {
 	assets, err := fs.ReadDir(static.Assets, ".")
 	if err != nil {
 		return err
