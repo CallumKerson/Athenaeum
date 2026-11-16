@@ -1,7 +1,7 @@
 [tools]
 "github:golangci/golangci-lint" = "v2.15.0"
 go = "1.27.3"
-hk = "2.7.0"
+hk = "2.12.0"
 jactionlint = "v2.5.0"
 # jactionlint runs shellcheck over workflow run: scripts
 shellcheck = "0.11.0"
