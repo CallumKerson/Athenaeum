@@ -33,7 +33,8 @@ const mediaRoot = "../../testdata"
 //
 // Run with -update to regenerate.
 func TestPlanGolden(t *testing.T) {
-	manifest := renderManifest(t, testPlan(t).Feeds)
+	content := testPlan(t)
+	manifest := renderManifest(t, feeds(content))
 	goldenPath := filepath.Join("testdata", "golden_manifest.txt")
 
 	if *update {
@@ -51,13 +52,10 @@ func TestPlanGolden(t *testing.T) {
 // rendered XML shows up as a readable diff rather than a changed hash. The other
 // feed shapes are covered byte for byte in the feed package.
 func TestMainFeedGolden(t *testing.T) {
-	pages := testPlan(t).Feeds
-	index := slices.IndexFunc(pages, func(page Page) bool {
-		return slices.Contains(page.Paths, "podcast/feed.rss")
-	})
-	require.GreaterOrEqual(t, index, 0)
+	main := testPlan(t).Main
+	require.Equal(t, []string{"podcast/feed.rss"}, main.Paths)
 
-	rendered, err := testRenderer(t).Render(pages[index].Books, pages[index].Title, pages[index].Description)
+	rendered, err := testRenderer(t).Render(main.Books, main.Title, main.Description)
 	require.NoError(t, err)
 
 	goldenPath := filepath.Join("testdata", "golden_feed.rss")
@@ -77,15 +75,14 @@ func TestMainFeedGolden(t *testing.T) {
 func TestBuildPublishesEveryPlannedPath(t *testing.T) {
 	root := t.TempDir()
 	content := testPlan(t)
-	pages := content.Feeds
 
 	_, err := Build(root, content, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 
-	for index := range pages {
-		expected, renderErr := testRenderer(t).Render(pages[index].Books, pages[index].Title, pages[index].Description)
+	for _, planned := range feeds(content) {
+		expected, renderErr := testRenderer(t).Render(planned.Books, planned.Title, planned.Description)
 		require.NoError(t, renderErr)
-		for _, relPath := range pages[index].Paths {
+		for _, relPath := range planned.Paths {
 			actual, readErr := os.ReadFile(filepath.Join(root, filepath.FromSlash(relPath)))
 			require.NoError(t, readErr, relPath)
 			assert.Equal(t, string(expected), string(actual), relPath)
@@ -117,21 +114,24 @@ func TestBuildSkipsUnchangedFiles(t *testing.T) {
 func TestBuildSweepsStaleFiles(t *testing.T) {
 	root := t.TempDir()
 	stale := filepath.Join(root, "podcast", "authors", "Someone Who Left", "feed.rss")
+	stalePage := filepath.Join(root, "authors", "someone-who-left", indexName)
 
 	content := testPlan(t)
-	content.Feeds = append(content.Feeds, Page{
-		Title: "Someone Who Left",
-		Paths: []string{"podcast/authors/Someone Who Left/feed.rss"},
+	content.Authors.Names = append(content.Authors.Names, Name{
+		Feed: Feed{Title: "Someone Who Left", Paths: []string{"podcast/authors/Someone Who Left/feed.rss"}},
+		Slug: "someone-who-left",
 	})
 	_, err := Build(root, content, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 	require.FileExists(t, stale)
+	require.FileExists(t, stalePage)
 
 	result, err := buildTestSite(t, root)
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, result.Removed)
+	assert.Equal(t, 2, result.Removed, "the feed and its page")
 	assert.NoFileExists(t, stale)
+	assert.NoFileExists(t, stalePage)
 	assert.NoDirExists(t, filepath.Dir(stale), "emptied directories should be pruned")
 	assert.DirExists(t, filepath.Join(root, "podcast", "authors"))
 }
@@ -162,13 +162,13 @@ func TestBuildKeepsStaleFilesWhenSweepDisabled(t *testing.T) {
 	_, err := buildTestSite(t, root)
 	require.NoError(t, err)
 
-	_, err = Build(root, Content{}, testRenderer(t), false, testLogger())
+	_, err = Build(root, &Content{}, testRenderer(t), false, testLogger())
 	require.NoError(t, err)
 	assert.FileExists(t, filepath.Join(root, "podcast", "feed.rss"))
 
 	// The skipped files are still remembered as the build's own, so the next
 	// build that does sweep removes them.
-	result, err := Build(root, Content{}, testRenderer(t), true, testLogger())
+	result, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 	assert.Positive(t, result.Removed)
 	assert.NoFileExists(t, filepath.Join(root, "podcast", "feed.rss"))
@@ -229,11 +229,11 @@ func TestBuildIgnoresManifestPathsOutsideRoot(t *testing.T) {
 	outside := filepath.Join(parent, "outside.txt")
 	require.NoError(t, os.WriteFile(outside, []byte("mine"), 0o644))
 
-	_, err := Build(root, Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 	require.NoError(t, os.WriteFile(filepath.Join(root, manifestName), []byte("../outside.txt\n"), 0o644))
 
-	_, err = Build(root, Content{}, testRenderer(t), true, testLogger())
+	_, err = Build(root, &Content{}, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 	assert.FileExists(t, outside)
 }
@@ -244,7 +244,7 @@ func TestBuildRefusesDirectoryWithoutMarker(t *testing.T) {
 	root := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(root, "important.txt"), []byte("mine"), 0o644))
 
-	_, err := Build(root, Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
 
 	require.ErrorIs(t, err, errNotSiteDir)
 	assert.FileExists(t, filepath.Join(root, "important.txt"))
@@ -254,17 +254,17 @@ func TestBuildRejectsRootThatIsAFile(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "site")
 	require.NoError(t, os.WriteFile(root, []byte("not a directory"), 0o644))
 
-	_, err := Build(root, Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
 
 	require.Error(t, err)
 }
 
 func TestBuildAcceptsEmptyDirectory(t *testing.T) {
-	_, err := Build(t.TempDir(), Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(t.TempDir(), &Content{}, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 }
 
-func testPlan(t *testing.T) Content {
+func testPlan(t *testing.T) *Content {
 	t.Helper()
 	books, err := scan.Library(mediaRoot, scan.NewCache(), testLogger())
 	require.NoError(t, err)
@@ -279,7 +279,7 @@ func buildTestSite(t *testing.T, root string) (Result, error) {
 
 // renderManifest lists every published path with the hash of its contents, one
 // per line, sorted.
-func renderManifest(t *testing.T, pages []Page) string {
+func renderManifest(t *testing.T, pages []*Feed) string {
 	t.Helper()
 	var lines []string
 	for index := range pages {

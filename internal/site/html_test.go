@@ -67,24 +67,33 @@ func TestEveryFeedHasAPage(t *testing.T) {
 	_, err := Build(root, content, testRenderer(t), true, testLogger())
 	require.NoError(t, err)
 
-	builder := newHTMLBuilder(content)
-	for index := range content.Feeds {
-		feedPage := &content.Feeds[index]
-		if feedPage.Section == "" {
-			continue
-		}
-		slug := builder.slugOf(feedPage.Section, feedPage.Title)
-		require.NotEmpty(t, slug, feedPage.Title)
-		assert.FileExists(t, filepath.Join(root, feedPage.Section, slug, indexName))
-	}
-
 	assert.FileExists(t, filepath.Join(root, indexName))
 	assert.FileExists(t, filepath.Join(root, booksDir, indexName))
-	for _, section := range browseSections {
+	for _, section := range sections(content) {
 		assert.FileExists(t, filepath.Join(root, section.Dir, indexName))
+		for index := range section.Names {
+			name := &section.Names[index]
+			require.NotEmpty(t, name.Slug, name.Title)
+			assert.FileExists(t, filepath.Join(root, section.Dir, name.Slug, indexName))
+		}
 	}
 	// A genre with nothing filed under it keeps its feed, so it keeps its page.
 	assert.FileExists(t, filepath.Join(root, genresDir, "horror", indexName))
+}
+
+// Every section the plan publishes feeds for must also be shown, in the same
+// order, with a heading and blurb to introduce it.
+func TestEverySectionIsShown(t *testing.T) {
+	content := Plan(nil, nil)
+	shown := shownSections(content)
+	planned := sections(content)
+
+	require.Len(t, shown, len(planned))
+	for index, section := range shown {
+		assert.Same(t, planned[index], section.Section)
+		assert.NotEmpty(t, section.Title, section.Dir)
+		assert.NotEmpty(t, section.Blurb, section.Dir)
+	}
 }
 
 // The genre exclusion is a rule about the main feed, not about the library, so
@@ -115,7 +124,6 @@ func TestBookListsAreNewestFirst(t *testing.T) {
 		dated("Middle", &toml.LocalDate{Year: 2019, Month: 7, Day: 16}),
 	}, nil)
 
-	builder := newHTMLBuilder(content)
 	titles := func(views []bookView) []string {
 		found := make([]string, 0, len(views))
 		for _, view := range views {
@@ -124,10 +132,11 @@ func TestBookListsAreNewestFirst(t *testing.T) {
 		return found
 	}
 
-	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"}, titles(builder.allBooks().Books))
+	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"}, titles(allBooksView(content, nil).Books))
 	// Every page that lists books, not just the whole-library one.
-	page := pageFor(t, content, "podcast/authors/A/feed.rss")
-	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"}, titles(builder.feedPage(&page).Books))
+	require.Len(t, content.Authors.Names, 1)
+	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"},
+		titles(nameView(content, nil, &content.Authors.Names[0]).Books))
 }
 
 // The feeds are rendered from the same slices the pages list, and their item
@@ -138,13 +147,13 @@ func TestBuildingPagesDoesNotReorderFeeds(t *testing.T) {
 		dated("Newest", &toml.LocalDate{Year: 2023, Month: 4, Day: 6}),
 	}, nil)
 
-	before, err := testRenderer(t).Render(content.Feeds[0].Books, "Audiobooks", "")
+	before, err := testRenderer(t).Render(content.Main.Books, "Audiobooks", "")
 	require.NoError(t, err)
 
 	_, err = buildHTML(content)
 	require.NoError(t, err)
 
-	after, err := testRenderer(t).Render(content.Feeds[0].Books, "Audiobooks", "")
+	after, err := testRenderer(t).Render(content.Main.Books, "Audiobooks", "")
 	require.NoError(t, err)
 	assert.Equal(t, string(before), string(after))
 }
@@ -156,7 +165,7 @@ func TestBookDateMatchesTheFeed(t *testing.T) {
 		dated("Undated", nil),
 	}, nil)
 
-	books := newHTMLBuilder(content).allBooks().Books
+	books := allBooksView(content, nil).Books
 	require.Len(t, books, 2)
 
 	assert.Equal(t, "1 Nov 1968", books[0].Date)
@@ -188,7 +197,8 @@ func TestBookSeriesLine(t *testing.T) {
 			audiobook := book("Earthsea", nil, []string{"Ursula K. Le Guin"}, nil, nil)
 			audiobook.Series = &audiobooks.Series{Title: "Earthsea", Sequence: sequence}
 
-			books := newHTMLBuilder(Plan([]audiobooks.Audiobook{audiobook}, nil)).allBooks().Books
+			content := Plan([]audiobooks.Audiobook{audiobook}, nil)
+			books := allBooksView(content, nil).Books
 			require.Len(t, books, 1)
 
 			assert.Equal(t, testCase.expected, books[0].Series)
@@ -207,7 +217,7 @@ func TestBookSearchTextCoversEveryField(t *testing.T) {
 		Tags:      []string{"Hugo Awards"},
 	}}, nil)
 
-	books := newHTMLBuilder(content).allBooks().Books
+	books := allBooksView(content, nil).Books
 	require.Len(t, books, 1)
 
 	for _, term := range []string{"earthsea", "le guin", "holdbrook", "fantasy", "hugo"} {
@@ -217,20 +227,27 @@ func TestBookSearchTextCoversEveryField(t *testing.T) {
 	assert.NotContains(t, books[0].Search, "  ")
 }
 
-// Two names that slugify the same way must not share a page.
-func TestCollidingNamesGetDistinctSlugs(t *testing.T) {
+// A book links each name it lists to that name's page, whichever spelling it
+// uses, and leaves a name with no page as plain text.
+func TestBookLinksToTheNamesItLists(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		book("First", nil, []string{"Ann Leckie"}, nil, nil),
-		book("Second", nil, []string{"Ann-Leckie"}, nil, nil),
+		book("Second", []audiobooks.Genre{audiobooks.SciFi}, []string{"Ann-Leckie", "ann leckie"}, []string{"  "},
+			[]string{"Hugo Awards"}),
 	}, nil)
 
-	builder := newHTMLBuilder(content)
-	first := builder.slugOf(authorsDir, "Ann Leckie")
-	second := builder.slugOf(authorsDir, "Ann-Leckie")
+	books := allBooksView(content, nil).Books
+	require.Len(t, books, 2)
+	second := books[1]
+	require.Equal(t, "Second", second.Title)
 
-	assert.NotEmpty(t, first)
-	assert.NotEmpty(t, second)
-	assert.NotEqual(t, first, second)
+	assert.Equal(t, []linkView{
+		{Name: "Ann-Leckie", Href: "../authors/ann-leckie/"},
+		{Name: "ann leckie", Href: "../authors/ann-leckie-2/"},
+	}, second.Authors)
+	assert.Equal(t, []linkView{{Name: "  "}}, second.Narrators)
+	assert.Equal(t, []linkView{{Name: "Science Fiction", Href: "../genre/science-fiction/"}}, second.Genres)
+	assert.Equal(t, []linkView{{Name: "Hugo Awards", Href: "../tags/hugo-awards/"}}, second.Tags)
 }
 
 func TestSlugify(t *testing.T) {
