@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"math"
 	"net/url"
 	"path"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -59,16 +61,19 @@ type htmlPage struct {
 type linkView struct {
 	Name string
 	Href string
+	// Current marks the navigation link to the section the page is in.
+	Current bool
 }
 
 type entryView struct {
 	Name     string
 	Href     string
 	FeedHref string
-	Note     string
 	// Search is the lowercased text the filter script matches against.
 	Search string
 	Count  int
+	// Hours is the total listening time of the books, rounded to the hour.
+	Hours string
 }
 
 type bookView struct {
@@ -98,11 +103,12 @@ type pageView struct {
 	SearchLabel string
 	Search      bool
 	Nav         []linkView
-	Sections    []entryView
 	Entries     []entryView
 	Books       []bookView
 	// Book is set only on a book's own page.
 	Book *bookPage
+	// Home is set only on the home page.
+	Home *homePage
 }
 
 // bookPage is everything a book's own page shows beyond its list entry.
@@ -117,6 +123,7 @@ type bookPage struct {
 	// It is not called Series because the embedded bookView already has a Series:
 	// the line naming the series and this book's place in it.
 	SeriesBooks []seriesEntry
+	SeriesTitle string
 }
 
 type seriesEntry struct {
@@ -200,7 +207,7 @@ func buildHTML(lib *library) ([]htmlPage, error) {
 			if err := add(
 				tpls.books,
 				path.Join(section.Dir, name.Slug, indexName),
-				nameView(lib, name),
+				nameView(lib, section, name),
 			); err != nil {
 				return nil, err
 			}
@@ -240,30 +247,140 @@ func parseHTMLTemplates() (*htmlTemplates, error) {
 	return &parsed, nil
 }
 
+// How many covers the home page mosaic shows, and how many books its shelf of
+// latest releases holds.
+const (
+	mosaicSize = 15
+	shelfSize  = 16
+)
+
+// homePage is what the home page shows beyond the navigation.
+type homePage struct {
+	Books int
+	Hours string
+	Days  int
+	// BooksHref and GenresHref link to the full lists the home page samples.
+	BooksHref  string
+	GenresHref string
+	// Mosaic is a spread of covers from across the library.
+	Mosaic []bookView
+	Latest []bookView
+	Genres []genreTile
+}
+
+// genreTile is a genre on the home page, shown by a few of its covers.
+type genreTile struct {
+	entryView
+	Covers []string
+}
+
+// homeView describes the home page. It shows the books in the main feed, which
+// its subscribe button is for, so genres kept out of that feed stay off the
+// front page too.
 func homeView(lib *library) *pageView {
-	view := &pageView{
+	root := rootFromRoot
+	featured := lib.Main.Books
+	listening := totalDuration(featured)
+	home := &homePage{
+		Books:      len(featured),
+		Hours:      totalHours(featured),
+		Days:       int(math.Round(listening.Hours() / 24)),
+		Mosaic:     mosaic(lib, root, featured),
+		BooksHref:  dirHref(root, booksDir),
+		GenresHref: dirHref(root, lib.Genres.Dir),
+	}
+	latest := newestFirst(featured)
+	for index := range latest[:min(shelfSize, len(latest))] {
+		home.Latest = append(home.Latest, describeBook(lib, root, &latest[index]))
+	}
+	for index := range lib.Genres.Names {
+		genre := &lib.Genres.Names[index]
+		books := inMainFeed(lib, genre.Books)
+		if len(books) == 0 {
+			continue
+		}
+		tile := genreTile{entryView: entryView{
+			Name:  genre.Title,
+			Href:  dirHref(root, lib.Genres.Dir, genre.Slug),
+			Count: len(books),
+			Hours: totalHours(books),
+		}}
+		newest := newestFirst(books)
+		for index := range newest {
+			if cover, ok := lib.covers[newest[index].ImagePath]; ok && len(tile.Covers) < 3 {
+				tile.Covers = append(tile.Covers, hrefFor(root, cover))
+			}
+		}
+		home.Genres = append(home.Genres, tile)
+	}
+	slices.SortStableFunc(home.Genres, func(a, b genreTile) int { return b.Count - a.Count })
+
+	return &pageView{
 		Title:    allTitle,
-		Heading:  allTitle + " 🎧📚",
+		Heading:  allTitle,
 		Blurb:    allSummary,
-		Root:     rootFromRoot,
-		FeedHref: feedHref(rootFromRoot, &lib.Main),
-		Nav:      navLinks(lib.shown, rootFromRoot),
-		Sections: []entryView{{
-			Name:  booksTitle,
-			Href:  dirHref(rootFromRoot, booksDir),
-			Note:  "Search the whole library.",
-			Count: len(lib.Books),
-		}},
+		Root:     root,
+		FeedHref: feedHref(root, &lib.Main),
+		Nav:      navLinks(lib.shown, root, ""),
+		Home:     home,
 	}
-	for _, section := range lib.shown {
-		view.Sections = append(view.Sections, entryView{
-			Name:  section.Title,
-			Href:  dirHref(rootFromRoot, section.Dir),
-			Note:  section.Blurb,
-			Count: len(section.Names),
-		})
+}
+
+// mosaic picks covers spread evenly across the library in path order, so the
+// home page shows its range rather than only the latest books, and the choice
+// only changes when the library does.
+func mosaic(lib *library, root string, books []audiobooks.Audiobook) []bookView {
+	var withCovers []*audiobooks.Audiobook
+	for index := range books {
+		if _, ok := lib.covers[books[index].ImagePath]; ok {
+			withCovers = append(withCovers, &books[index])
+		}
 	}
-	return view
+	slices.SortFunc(withCovers, func(a, b *audiobooks.Audiobook) int { return strings.Compare(a.Path, b.Path) })
+
+	count := min(mosaicSize, len(withCovers))
+	views := make([]bookView, 0, count)
+	for index := range count {
+		views = append(views, describeBook(lib, root, withCovers[index*len(withCovers)/count]))
+	}
+	return views
+}
+
+// inMainFeed keeps the books that the main feed includes.
+func inMainFeed(lib *library, books []audiobooks.Audiobook) []audiobooks.Audiobook {
+	included := make(map[string]bool, len(lib.Main.Books))
+	for index := range lib.Main.Books {
+		included[lib.Main.Books[index].Path] = true
+	}
+	var kept []audiobooks.Audiobook
+	for index := range books {
+		if included[books[index].Path] {
+			kept = append(kept, books[index])
+		}
+	}
+	return kept
+}
+
+func totalDuration(books []audiobooks.Audiobook) time.Duration {
+	var total time.Duration
+	for index := range books {
+		total += books[index].Duration
+	}
+	return total
+}
+
+// totalHours renders the listening time of some books in whole hours, with a
+// thousands separator: "11,784".
+func totalHours(books []audiobooks.Audiobook) string {
+	hours := strconv.Itoa(int(math.Round(totalDuration(books).Hours())))
+	var builder strings.Builder
+	for index, digit := range hours {
+		if index > 0 && (len(hours)-index)%3 == 0 {
+			builder.WriteRune(',')
+		}
+		builder.WriteRune(digit)
+	}
+	return builder.String()
 }
 
 func allBooksView(lib *library) *pageView {
@@ -272,7 +389,7 @@ func allBooksView(lib *library) *pageView {
 		Heading:     booksTitle,
 		Blurb:       fmt.Sprintf("%d books in the library, most recently published first.", len(lib.Books)),
 		Root:        rootFromDir,
-		Nav:         navLinks(lib.shown, rootFromDir),
+		Nav:         navLinks(lib.shown, rootFromDir, booksDir),
 		Search:      true,
 		SearchLabel: "Search by title, author, narrator, series, genre or tag",
 		Books:       bookViews(lib, rootFromDir, lib.Books),
@@ -285,7 +402,7 @@ func sectionView(lib *library, section shownSection) *pageView {
 		Heading:     section.Title,
 		Blurb:       section.Blurb,
 		Root:        rootFromDir,
-		Nav:         navLinks(lib.shown, rootFromDir),
+		Nav:         navLinks(lib.shown, rootFromDir, section.Dir),
 		Search:      true,
 		SearchLabel: "Search " + strings.ToLower(section.Title),
 		Entries:     make([]entryView, 0, len(section.Names)),
@@ -298,28 +415,36 @@ func sectionView(lib *library, section shownSection) *pageView {
 			FeedHref: feedHref(rootFromDir, &name.Feed),
 			Search:   strings.ToLower(name.Title),
 			Count:    len(name.Books),
+			Hours:    totalHours(name.Books),
 		})
 	}
 	return view
 }
 
-func nameView(lib *library, name *Name) *pageView {
+func nameView(lib *library, section shownSection, name *Name) *pageView {
 	return &pageView{
 		Title:    pageTitle(name.Title),
 		Heading:  name.Title,
 		Blurb:    name.Description,
 		Root:     rootFromSubDir,
 		FeedHref: feedHref(rootFromSubDir, &name.Feed),
-		Nav:      navLinks(lib.shown, rootFromSubDir),
+		Nav:      navLinks(lib.shown, rootFromSubDir, section.Dir),
 		Books:    bookViews(lib, rootFromSubDir, name.Books),
 	}
 }
 
-func navLinks(shown []shownSection, root string) []linkView {
+// navLinks links every top-level section from a page whose prefix back to the
+// site root is root, marking current, the directory of the page's own section,
+// or "" for the home page.
+func navLinks(shown []shownSection, root, current string) []linkView {
 	nav := make([]linkView, 0, len(shown)+1)
-	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir)})
+	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir), Current: current == booksDir})
 	for _, section := range shown {
-		nav = append(nav, linkView{Name: section.Title, Href: dirHref(root, section.Dir)})
+		nav = append(nav, linkView{
+			Name:    section.Title,
+			Href:    dirHref(root, section.Dir),
+			Current: current == section.Dir,
+		})
 	}
 	return nav
 }
@@ -387,6 +512,7 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 	page.Feeds = authorFeeds(lib, root, book)
 	inSeries := seriesOf(lib, series, book)
 	if len(inSeries) > 1 {
+		page.SeriesTitle = book.Series.Title
 		for _, entry := range inSeries {
 			page.SeriesBooks = append(page.SeriesBooks, seriesEntry{
 				bookView: describeBook(lib, root, entry),
@@ -409,14 +535,13 @@ func bookPageView(lib *library, series map[string][]*audiobooks.Audiobook, book 
 		moreBy = moreBy[:moreByLimit]
 	}
 
+	// No Heading: the page puts the title beside the cover, under the series.
 	return &pageView{
-		Title:   pageTitle(book.Title),
-		Heading: book.Title,
-		Blurb:   book.Subtitle,
-		Root:    root,
-		Nav:     navLinks(lib.shown, root),
-		Book:    page,
-		Books:   moreBy,
+		Title: pageTitle(book.Title),
+		Root:  root,
+		Nav:   navLinks(lib.shown, root, booksDir),
+		Book:  page,
+		Books: moreBy,
 	}
 }
 
