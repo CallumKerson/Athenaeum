@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/CallumKerson/Athenaeum/internal/cover"
 	"github.com/CallumKerson/Athenaeum/internal/feed"
 	"github.com/CallumKerson/Athenaeum/internal/scan"
 	"github.com/CallumKerson/Athenaeum/pkg/audiobooks"
@@ -76,7 +77,7 @@ func TestBuildPublishesEveryPlannedPath(t *testing.T) {
 	root := t.TempDir()
 	content := testPlan(t)
 
-	_, err := Build(root, content, testRenderer(t), true, testLogger())
+	_, err := Build(root, content, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 
 	for _, planned := range feeds(content) {
@@ -121,7 +122,7 @@ func TestBuildSweepsStaleFiles(t *testing.T) {
 		Feed: Feed{Title: "Someone Who Left", Paths: []string{"podcast/authors/Someone Who Left/feed.rss"}},
 		Slug: "someone-who-left",
 	})
-	_, err := Build(root, content, testRenderer(t), true, testLogger())
+	_, err := Build(root, content, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 	require.FileExists(t, stale)
 	require.FileExists(t, stalePage)
@@ -162,13 +163,13 @@ func TestBuildKeepsStaleFilesWhenSweepDisabled(t *testing.T) {
 	_, err := buildTestSite(t, root)
 	require.NoError(t, err)
 
-	_, err = Build(root, &Content{}, testRenderer(t), false, testLogger())
+	_, err = Build(root, &Content{}, testRenderer(t), Options{}, testLogger())
 	require.NoError(t, err)
 	assert.FileExists(t, filepath.Join(root, "podcast", "feed.rss"))
 
 	// The skipped files are still remembered as the build's own, so the next
 	// build that does sweep removes them.
-	result, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
+	result, err := Build(root, &Content{}, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 	assert.Positive(t, result.Removed)
 	assert.NoFileExists(t, filepath.Join(root, "podcast", "feed.rss"))
@@ -229,11 +230,11 @@ func TestBuildIgnoresManifestPathsOutsideRoot(t *testing.T) {
 	outside := filepath.Join(parent, "outside.txt")
 	require.NoError(t, os.WriteFile(outside, []byte("mine"), 0o644))
 
-	_, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(root, &Content{}, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 	require.NoError(t, os.WriteFile(filepath.Join(root, manifestName), []byte("../outside.txt\n"), 0o644))
 
-	_, err = Build(root, &Content{}, testRenderer(t), true, testLogger())
+	_, err = Build(root, &Content{}, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 	assert.FileExists(t, outside)
 }
@@ -244,7 +245,7 @@ func TestBuildRefusesDirectoryWithoutMarker(t *testing.T) {
 	root := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(root, "important.txt"), []byte("mine"), 0o644))
 
-	_, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(root, &Content{}, testRenderer(t), Options{Sweep: true}, testLogger())
 
 	require.ErrorIs(t, err, errNotSiteDir)
 	assert.FileExists(t, filepath.Join(root, "important.txt"))
@@ -254,13 +255,13 @@ func TestBuildRejectsRootThatIsAFile(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "site")
 	require.NoError(t, os.WriteFile(root, []byte("not a directory"), 0o644))
 
-	_, err := Build(root, &Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(root, &Content{}, testRenderer(t), Options{Sweep: true}, testLogger())
 
 	require.Error(t, err)
 }
 
 func TestBuildAcceptsEmptyDirectory(t *testing.T) {
-	_, err := Build(t.TempDir(), &Content{}, testRenderer(t), true, testLogger())
+	_, err := Build(t.TempDir(), &Content{}, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 }
 
@@ -274,7 +275,13 @@ func testPlan(t *testing.T) *Content {
 
 func buildTestSite(t *testing.T, root string) (Result, error) {
 	t.Helper()
-	return Build(root, testPlan(t), testRenderer(t), true, testLogger())
+	return Build(root, testPlan(t), testRenderer(t), testOptions(), testLogger())
+}
+
+// testOptions builds the way the command does, with real thumbnails of the
+// test library's covers, so idempotency and link checks cover them too.
+func testOptions() Options {
+	return Options{Covers: cover.NewSource(mediaRoot, ""), Sweep: true}
 }
 
 // renderManifest lists every published path with the hash of its contents, one

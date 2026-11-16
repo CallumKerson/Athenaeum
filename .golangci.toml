@@ -64,6 +64,8 @@ line-length = 140
 
 [linters.settings.misspell]
 locale = "UK"
+# Go's image/color package and its color.Color type cannot be respelled.
+ignore-rules = ["color"]
 
 [linters.settings.nolintlint]
 require-explanation = false

@@ -30,6 +30,7 @@ There is no server process, no database and no request path.
 
 - `pkg/audiobooks` - The `Audiobook` entity, the `Genre` enum and description formatting
 - `internal/scan` - Walks the media root, reads `.toml` metadata and `.m4b` durations, with a duration cache
+- `internal/cover` - Makes the square JPEG thumbnails the HTML pages show, with a cache of thumbnails keyed by each cover's path, size and mtime
 - `internal/feed` - Renders a list of audiobooks as an iTunes-compatible RSS 2.0 feed
 - `internal/site` - Decides which feeds and pages exist at which paths (`plan.go`), builds the browsable HTML pages from that plan (`html.go`) and writes the tree (`build.go`)
 - `internal/fsutil` - Atomic and write-if-changed file helpers
@@ -43,7 +44,8 @@ There is no server process, no database and no request path.
    Every name in a section carries its feed paths, the feed path pages link to, and the slug of its HTML page.
    Colliding slugs get `-2`, `-3` in the section's sort order: authors, narrators and tags by normalised name (lowercase, whitespace removed), so `Ann-Leckie` keeps `ann-leckie` and `Ann Leckie` gets `ann-leckie-2`; genres in `Genre` enum order.
    Each section also maps every spelling a book lists to its page's slug, so pages link books to names without normalising them again
-3. `site.Build` renders each feed with the `feed.Renderer` that `feed.New` built from the config, and writes it to every path in its plan
+3. `site.Build` renders each feed with the `feed.Renderer` that `feed.New` built from the config, and writes it to every path in its plan.
+   It then writes a thumbnail of each cover to the path the plan gave it (`covers/` plus a hash of the cover's library path); a cover that cannot be decoded is logged and left out
 4. `site.buildHTML` turns the plan into the browsable pages: a home page, `/books/` with a client-side filter, and an index plus a page per name for each section
 5. Stale files from previous builds are swept, and Overcast is optionally notified
 
@@ -64,7 +66,7 @@ There is no server process, no database and no request path.
 
 - TOML config at `~/.config/athenaeum/athenaeum.toml` (XDG paths resolved by hand — `os.UserConfigDir()` returns
   `~/Library/...` on macOS and ignores `XDG_CONFIG_HOME`)
-- Duration cache at `~/.cache/athenaeum/m4b.json`
+- Duration cache at `~/.cache/athenaeum/m4b.json`, and cover thumbnails beside it in `~/.cache/athenaeum/covers/`; `--no-cache` skips both
 - Required: `Host` (external URL), `Media.Root` (library path) and `Site.Root` (output path)
 - Audiobook layout: `$MEDIA_ROOT/Author/Audiobook/Audiobook.m4b` + `Audiobook.toml`
 

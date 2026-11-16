@@ -100,6 +100,12 @@
       <ul class="books">
         {{- range .Books}}
         <li data-search="{{.Search}}">
+          {{- if .Cover}}
+          <img class="cover" src="{{.Cover}}" alt="" width="72" height="72" loading="lazy" decoding="async" />
+          {{- else}}
+          <span class="cover" aria-hidden="true"></span>
+          {{- end}}
+          <div class="about">
           <span class="title">{{.Title}}</span>
           {{- with .Subtitle}}<span class="subtitle">{{.}}</span>{{end}}
           <span class="meta">
@@ -112,6 +118,7 @@
           {{- if or .Genres .Tags}}
           <span class="labels">{{template "links" .Genres}}{{if and .Genres .Tags}} · {{end}}{{template "links" .Tags}}</span>
           {{- end}}
+          </div>
         </li>
         {{- end}}
       </ul>
