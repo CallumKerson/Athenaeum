@@ -79,7 +79,7 @@ func Library(mediaRoot string, cache *Cache, logger *slog.Logger) ([]audiobooks.
 		relPath = "/" + filepath.ToSlash(relPath)
 		seen[relPath] = true
 
-		book, bookErr := readAudiobook(path, tomlPath, relPath, cache)
+		book, bookErr := readAudiobook(path, tomlPath, relPath, cache, logger)
 		if bookErr != nil {
 			logger.Warn("could not read audiobook, skipping", "m4b", path, "error", bookErr)
 			return nil
@@ -99,17 +99,24 @@ func Library(mediaRoot string, cache *Cache, logger *slog.Logger) ([]audiobooks.
 // readAudiobook fills an audiobook from its metadata file, then overwrites the
 // fields derived from the media file itself. The TOML is parsed first so that
 // hand-written values can never shadow the real duration or file size.
-func readAudiobook(m4bPath, tomlPath, relPath string, cache *Cache) (audiobooks.Audiobook, error) {
-	var book audiobooks.Audiobook
+func readAudiobook(m4bPath, tomlPath, relPath string, cache *Cache, logger *slog.Logger) (audiobooks.Audiobook, error) {
+	// Added shadows the book's own field so that any TOML value decodes, and
+	// addedTime decides what it means: a bad Added must cost only the date,
+	// never the whole book.
+	var metadata struct {
+		audiobooks.Audiobook
+		Added any
+	}
 
 	tomlFile, err := os.Open(tomlPath)
 	if err != nil {
-		return book, err
+		return metadata.Audiobook, err
 	}
 	defer tomlFile.Close()
-	if err := toml.NewDecoder(tomlFile).Decode(&book); err != nil {
-		return book, err
+	if err := toml.NewDecoder(tomlFile).Decode(&metadata); err != nil {
+		return metadata.Audiobook, err
 	}
+	book := metadata.Audiobook
 
 	info, err := os.Stat(m4bPath)
 	if err != nil {
@@ -131,12 +138,17 @@ func readAudiobook(m4bPath, tomlPath, relPath string, cache *Cache) (audiobooks.
 	book.Duration = duration
 	book.MIMEType = mimeType
 	// The metadata's Added is the record to trust: re-imports and retags reset
-	// the file's mtime. The mtime is only a fallback for books without it, so
-	// that every scanned book has an added time.
-	if book.Added == nil {
-		modTime := info.ModTime().UTC()
-		book.Added = &modTime
+	// the file's mtime. The mtime is only a fallback for books without a usable
+	// Added, so that every scanned book has an added time.
+	added, ok := addedTime(metadata.Added)
+	if !ok {
+		if metadata.Added != nil {
+			logger.Warn("audiobook has an unusable Added, using the file's modification time",
+				"toml", tomlPath, "added", metadata.Added)
+		}
+		added = info.ModTime().UTC()
 	}
+	book.Added = added
 	// The cover sits beside the book, so its path is the book's with the
 	// extension swapped — derived from relPath so it cannot disagree with it.
 	if coverPath := findCover(m4bPath); coverPath != "" {
@@ -144,6 +156,23 @@ func readAudiobook(m4bPath, tomlPath, relPath string, cache *Cache) (audiobooks.
 	}
 
 	return book, nil
+}
+
+// addedTime reads a decoded Added value as an instant in UTC. Local datetimes
+// and dates are taken as UTC rather than the host's zone, so the same file
+// gives the same instant on every machine. A bare time of day, a string or
+// anything else names no date, so it reports false.
+func addedTime(value any) (time.Time, bool) {
+	switch added := value.(type) {
+	case time.Time:
+		return added.UTC(), true
+	case toml.LocalDateTime:
+		return added.AsTime(time.UTC), true
+	case toml.LocalDate:
+		return added.AsTime(time.UTC), true
+	default:
+		return time.Time{}, false
+	}
 }
 
 // readDuration parses the file's moov box. This is the only expensive part of

@@ -30,7 +30,7 @@ There is no server process, no database and no request path.
 
 - `pkg/audiobooks` - The `Audiobook` entity, the `Genre` enum and description formatting
 - `internal/scan` - Walks the media root, reads `.toml` metadata and `.m4b` durations, with a duration cache.
-  A book's `Added` time comes from its `.toml`, falling back to the `.m4b`'s mtime when the key is missing; nothing renders it yet, so it does not affect feed or HTML output
+  A book's `Added` time comes from its `.toml`, normalised to UTC (local datetimes and dates are read as UTC), falling back to the `.m4b`'s mtime when the key is missing or names no date, which is logged rather than skipping the book; nothing renders it yet, so it does not affect feed or HTML output
 - `internal/cover` - Makes the square JPEG thumbnails the HTML pages show, with a cache of thumbnails keyed by each cover's path, size and mtime
 - `internal/feed` - Renders a list of audiobooks as an iTunes-compatible RSS 2.0 feed
 - `internal/site` - Decides which feeds and pages exist at which paths (`plan.go`), builds the browsable HTML pages from that plan (`html.go`) and writes the tree (`build.go`)

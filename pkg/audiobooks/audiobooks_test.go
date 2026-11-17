@@ -85,6 +85,7 @@ func TestAudiobook_JSONMarshaling(t *testing.T) {
 		Duration:  2 * time.Hour,
 		FileSize:  1024 * 1024 * 100, // 100MB
 		MIMEType:  "audio/mp4a-latm",
+		Added:     time.Date(2020, time.September, 10, 7, 27, 46, 0, time.UTC),
 		Series: &Series{
 			Title:    "Test Series",
 			Sequence: &Sequence{First: decimal.NewFromFloat(1.5)},
@@ -118,6 +119,7 @@ func TestAudiobook_TOMLMarshaling(t *testing.T) {
 		Duration:  3*time.Hour + 30*time.Minute,
 		FileSize:  1024 * 1024 * 200, // 200MB
 		MIMEType:  "audio/mp4a-latm",
+		Added:     time.Date(2020, time.September, 10, 7, 27, 46, 0, time.UTC),
 		Series: &Series{
 			Title:    "TOML Test Series",
 			Sequence: &Sequence{First: decimal.NewFromInt(2)},
@@ -131,6 +133,9 @@ func TestAudiobook_TOMLMarshaling(t *testing.T) {
 	// Marshal to TOML
 	data, err := toml.Marshal(book)
 	require.NoError(t, err)
+	// A TOML datetime, not a quoted string, so that hand-edited files and
+	// written ones agree.
+	assert.Contains(t, string(data), "\nAdded = 2020-09-10T07:27:46Z\n")
 
 	// Unmarshal back
 	var unmarshaled Audiobook
