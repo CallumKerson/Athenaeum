@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/CallumKerson/Athenaeum/compare/v2.4.0...v2.4.1) (2026-11-17)
+
+
+### Continuous Integration
+
+* sign release archives with packslip so mise can install them ([#343](https://github.com/CallumKerson/Athenaeum/issues/343)) ([a207d97](https://github.com/CallumKerson/Athenaeum/commit/a207d97c85f679466eb92211d449e30fa966c7ee))
+
 ## [2.4.0](https://github.com/CallumKerson/Athenaeum/compare/v2.3.1...v2.4.0) (2026-11-17)
 
 
