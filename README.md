@@ -119,6 +119,7 @@ The following an example of the format for a `.toml` metadata file:
 Title = "A Wizard of Earthsea"
 Authors = ["Ursula K. Le Guin"]
 ReleaseDate = 1968-11-01
+Added = 2020-09-10T07:27:46+00:00
 Genres = ["Children's", "Fantasy"]
 Narrators = ["Kobna Holdbrook-Smith"]
 
@@ -137,6 +138,9 @@ Title = "Earthsea"
 ```
 
 The only required fields are `Title`, `Authors` and `ReleaseDate`.
+
+`Added` is when the book joined the library, as a TOML offset datetime (`2020-09-10T07:27:46+00:00`, or with a space in place of the `T`).
+A book without it is treated as added at the `.m4b` file's modification time, which re-imports and retags reset, so recording `Added` is more reliable.
 
 `Series.Sequence` is a book's place in its series.
 It is usually a single number, and a decimal such as `"1.5"` covers a novella that sits between two books.

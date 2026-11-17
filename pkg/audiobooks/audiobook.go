@@ -11,6 +11,9 @@ import (
 )
 
 // Audiobook - representation of a book.
+//
+// Added is when the book joined the library. A scan fills it from the .m4b's
+// modification time when the metadata leaves it out.
 type Audiobook struct {
 	Path        string                   `json:"path"                  toml:",omitempty"`
 	Title       string                   `json:"title"`
@@ -18,6 +21,7 @@ type Audiobook struct {
 	Authors     []string                 `json:"authors"`
 	Description *description.Description `json:"description,omitempty" toml:",omitempty"`
 	ReleaseDate *toml.LocalDate          `json:"releaseDate,omitempty" toml:",omitempty"`
+	Added       *time.Time               `json:"added,omitempty"       toml:",omitempty"`
 	Genres      []Genre                  `json:"genres,omitempty"      toml:",omitempty"`
 	Series      *Series                  `json:"series,omitempty"      toml:",omitempty"`
 	Narrators   []string                 `json:"narrators"             toml:",omitempty"`

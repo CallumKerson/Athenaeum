@@ -130,6 +130,13 @@ func readAudiobook(m4bPath, tomlPath, relPath string, cache *Cache) (audiobooks.
 	book.FileSize = uint64(info.Size()) //nolint:gosec // file sizes are never negative
 	book.Duration = duration
 	book.MIMEType = mimeType
+	// The metadata's Added is the record to trust: re-imports and retags reset
+	// the file's mtime. The mtime is only a fallback for books without it, so
+	// that every scanned book has an added time.
+	if book.Added == nil {
+		modTime := info.ModTime().UTC()
+		book.Added = &modTime
+	}
 	// The cover sits beside the book, so its path is the book's with the
 	// extension swapped — derived from relPath so it cannot disagree with it.
 	if coverPath := findCover(m4bPath); coverPath != "" {
