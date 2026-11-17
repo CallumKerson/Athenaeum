@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/CallumKerson/Athenaeum/compare/v2.3.1...v2.4.0) (2026-11-17)
+
+
+### Features
+
+* **site:** add ExclusionsFromSite to hide genres from the HTML pages ([#341](https://github.com/CallumKerson/Athenaeum/issues/341)) ([49137f7](https://github.com/CallumKerson/Athenaeum/commit/49137f716485fe2abc6c013471944ed8283d5d05))
+
 ## [2.3.1](https://github.com/CallumKerson/Athenaeum/compare/v2.3.0...v2.3.1) (2026-11-16)
 
 
