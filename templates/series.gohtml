@@ -1,0 +1,14 @@
+{{define "content"}}
+      <ol class="series wide">
+        {{- range .Series}}
+        <li>
+          <a class="tile" href="{{.Href}}">
+            {{- template "cover" .}}
+            {{- with .Position}}<span class="seq">Book {{.}}</span>{{end}}
+            <span class="t">{{.Title}}</span>
+          </a>
+          {{- template "duration" .Duration}}
+        </li>
+        {{- end}}
+      </ol>
+{{- end}}

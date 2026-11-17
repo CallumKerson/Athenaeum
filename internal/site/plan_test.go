@@ -57,14 +57,14 @@ func TestPlanHidesGenresExcludedFromTheSiteButKeepsTheirFeeds(t *testing.T) {
 
 	content := Plan(books, Exclusions{Site: []audiobooks.Genre{audiobooks.Erotica}})
 
-	assert.Equal(t, []string{"Clean"}, titles(content.Books))
+	assert.Equal(t, []string{"Clean"}, bookTitles(content.Books))
 	// Only the pages filter: every feed keeps every book.
 	assert.Len(t, feedAt(t, content, "podcast/feed.rss").Books, 3)
 	assert.Len(t, feedAt(t, content, "podcast/genre/Erotica/feed.rss").Books, 2)
 	assert.Len(t, feedAt(t, content, "podcast/authors/B/feed.rss").Books, 1)
 
-	assert.Equal(t, []string{"Clean"}, titles(nameTitled(t, &content.Authors, "A").Listed))
-	assert.Equal(t, []string{"Clean"}, titles(nameTitled(t, &content.Narrators, "N").Listed))
+	assert.Equal(t, []string{"Clean"}, bookTitles(nameTitled(t, &content.Authors, "A").Listed))
+	assert.Equal(t, []string{"Clean"}, bookTitles(nameTitled(t, &content.Narrators, "N").Listed))
 	assert.True(t, nameTitled(t, &content.Authors, "B").Hidden)
 	assert.True(t, nameTitled(t, &content.Tags, "T").Hidden)
 	assert.True(t, nameTitled(t, &content.Genres, "Erotica").Hidden)
@@ -73,7 +73,7 @@ func TestPlanHidesGenresExcludedFromTheSiteButKeepsTheirFeeds(t *testing.T) {
 	assert.Empty(t, nameTitled(t, &content.Genres, "Romance").Listed)
 }
 
-func titles(books []audiobooks.Audiobook) []string {
+func bookTitles(books []audiobooks.Audiobook) []string {
 	found := make([]string, 0, len(books))
 	for index := range books {
 		found = append(found, books[index].Title)

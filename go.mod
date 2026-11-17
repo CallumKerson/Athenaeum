@@ -1,17 +1,18 @@
 module github.com/CallumKerson/Athenaeum
 
-go 1.25
+go 1.26.0
 
 toolchain go1.27.4
 
 require (
 	github.com/CallumKerson/podcasts/v2 v2.1.0
 	github.com/alfg/mp4 v0.0.0-20210728035756-55ea58c08aeb
-	github.com/gomarkdown/markdown v0.0.0-20261011113952-f83953680332
+	github.com/gomarkdown/markdown v0.0.0-20261109103609-13f93121d67a
 	github.com/pelletier/go-toml/v2 v2.4.3
-	github.com/shopspring/decimal v1.4.0
+	github.com/shopspring/decimal v1.6.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
+	golang.org/x/image v0.48.0
 )
 
 require (

@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/CallumKerson/Athenaeum/internal/cover"
 	"github.com/CallumKerson/Athenaeum/internal/feed"
 	"github.com/CallumKerson/Athenaeum/internal/fsutil"
 	"github.com/CallumKerson/Athenaeum/internal/scan"
@@ -24,6 +25,10 @@ import (
 // overcastPendingName sits beside the duration cache while an Overcast ping is
 // owed, because the build after a failed ping may have nothing new to write.
 const overcastPendingName = "overcast-ping-pending"
+
+// coverCacheName is the directory beside the duration cache that holds cover
+// thumbnails, so a rebuild only decodes covers that are new or changed.
+const coverCacheName = "covers"
 
 // overcastPingURL is a variable only so that tests can point it at a local server.
 var overcastPingURL = "https://overcast.fm/ping"
@@ -111,9 +116,17 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 	logger.Info("scanned library",
 		"books", len(books), "cached", cache.Hits, "parsed", cache.Misses, "took", time.Since(start).String())
 
-	result, err := site.Build(cfg.Site.Root, site.Plan(books, exclusions), renderer, !flags.noSweep, logger)
+	covers, err := coverSource(cfg, flags)
 	if err != nil {
 		return err
+	}
+	result, err := site.Build(cfg.Site.Root, site.Plan(books, exclusions), renderer,
+		site.Options{Covers: covers, Sweep: !flags.noSweep}, logger)
+	if err != nil {
+		return err
+	}
+	if err := covers.Prune(); err != nil {
+		logger.Warn("could not prune the cover cache", "error", err)
 	}
 	logger.Info("built site",
 		"root", cfg.Site.Root, "feeds", result.Feeds, "written", result.Written, "removed", result.Removed,
@@ -129,6 +142,19 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 	}
 
 	return nil
+}
+
+// coverSource reads covers from the media library, caching their thumbnails
+// beside the duration cache unless --no-cache asks for everything afresh.
+func coverSource(cfg *BuildConfig, flags *buildFlags) (*cover.Source, error) {
+	if flags.noCache {
+		return cover.NewSource(cfg.Media.Root, ""), nil
+	}
+	cachePath, err := resolveCachePath(flags)
+	if err != nil {
+		return nil, err
+	}
+	return cover.NewSource(cfg.Media.Root, filepath.Join(filepath.Dir(cachePath), coverCacheName)), nil
 }
 
 // resolveConfig layers the flags over the config file and checks that the

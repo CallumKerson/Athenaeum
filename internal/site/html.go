@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"math"
 	"net/url"
 	"path"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -59,29 +61,45 @@ type htmlPage struct {
 type linkView struct {
 	Name string
 	Href string
+	// Current marks the navigation link to the section the page is in.
+	Current bool
 }
 
 type entryView struct {
 	Name     string
 	Href     string
 	FeedHref string
-	Note     string
 	// Search is the lowercased text the filter script matches against.
 	Search string
 	Count  int
+	// Hours is the total listening time of the books, rounded to the hour.
+	Hours string
+	// Minutes and Newest, the latest release date as YYYY-MM-DD, are what the
+	// filter script sorts by.
+	Minutes int
+	Newest  string
 }
 
 type bookView struct {
-	Title     string
-	Subtitle  string
-	Series    string
-	Date      string
-	Duration  string
-	Search    string
-	Authors   []linkView
-	Narrators []linkView
-	Genres    []linkView
-	Tags      []linkView
+	Title    string
+	Subtitle string
+	Series   string
+	Date     string
+	Duration string
+	// Href links to the book's own page.
+	Href string
+	// Cover links to the book's thumbnail, or is "" when it has none.
+	Cover string
+	// SeriesHref links to the page of the book's series, if it has one.
+	SeriesHref string
+	// Minutes and GenreSlugs are what the filter script filters and sorts by.
+	Minutes    int
+	GenreSlugs string
+	Search     string
+	Authors    []linkView
+	Narrators  []linkView
+	Genres     []linkView
+	Tags       []linkView
 }
 
 // pageView is the data every template receives.
@@ -94,58 +112,137 @@ type pageView struct {
 	SearchLabel string
 	Search      bool
 	Nav         []linkView
-	Sections    []entryView
 	Entries     []entryView
 	Books       []bookView
+	// Book is set only on a book's own page.
+	Book *bookPage
+	// Home is set only on the home page.
+	Home *homePage
+	// Series is set only on a series page: its books in reading order.
+	Series []seriesEntry
+	// Filters is set only on the All books page.
+	Filters *bookFilters
+	// Sorts are the orders an index of entries can be put in.
+	Sorts []sortOption
+	// Stats is set only on the stats page.
+	Stats *statsPage
+}
+
+// bookPage is everything a book's own page shows beyond its list entry.
+type bookPage struct {
+	bookView
+	Paragraphs []string
+	AudioURL   string
+	MIMEType   string
+	// Feeds are the authors' feeds, for subscribing from the book.
+	Feeds []linkView
+	// SeriesBooks lists the whole series in reading order, this book included.
+	// It is not called Series because the embedded bookView already has a Series:
+	// the line naming the series and this book's place in it.
+	SeriesBooks []seriesEntry
+	SeriesTitle string
+}
+
+type seriesEntry struct {
+	bookView
+	Position string
+	Current  bool
+}
+
+// library is what every page is built from: the plan, and what the build
+// learned while publishing it.
+type library struct {
+	*Content
+	// covers holds the published thumbnail of each ImagePath that has one.
+	covers map[string]string
+	// audioURL is the public URL a book's audio is played from.
+	audioURL func(*audiobooks.Audiobook) string
+	shown    []shownSection
+	// authorPages finds an author by the slug of their page.
+	authorPages map[string]*Name
+	// seriesOf finds the series a book, by its Path, belongs to.
+	seriesOf map[string]*Series
+}
+
+func newLibrary(content *Content, covers map[string]string, audioURL func(*audiobooks.Audiobook) string) *library {
+	lib := &library{
+		Content:     content,
+		covers:      covers,
+		audioURL:    audioURL,
+		shown:       shownSections(content),
+		authorPages: make(map[string]*Name, len(content.Authors.Names)),
+	}
+	for index := range content.Authors.Names {
+		lib.authorPages[content.Authors.Names[index].Slug] = &content.Authors.Names[index]
+	}
+	lib.seriesOf = map[string]*Series{}
+	for index := range content.Series {
+		series := &content.Series[index]
+		for member := range series.Books {
+			lib.seriesOf[series.Books[member].Path] = series
+		}
+	}
+	return lib
 }
 
 // buildHTML renders the browsable tree that sits alongside the feeds: a home
-// page, the searchable list of every book, an index per section, and a page for
+// page, the searchable list of every book, a page per book, the stats page, the
+// series index and a page per series, an index per section, and a page for
 // each author, narrator, genre and tag linking to its feed.
-func buildHTML(content *Content) ([]htmlPage, error) {
+func buildHTML(lib *library) ([]htmlPage, error) {
 	tpls, err := parseHTMLTemplates()
 	if err != nil {
 		return nil, err
 	}
-	shown := shownSections(content)
 
-	pages := []htmlPage{}
-	add := func(tpl *template.Template, relPath string, view *pageView) error {
-		var buf bytes.Buffer
-		if err := tpl.ExecuteTemplate(&buf, "layout", view); err != nil {
-			return fmt.Errorf("rendering %s: %w", relPath, err)
-		}
-		pages = append(pages, htmlPage{Path: relPath, Contents: buf.Bytes()})
-		return nil
+	planned := []plannedPage{
+		{tpls.home, indexName, homeView(lib)},
+		{tpls.books, path.Join(booksDir, indexName), allBooksView(lib)},
+		{tpls.stats, path.Join(statsDir, indexName), statsView(lib)},
 	}
-
-	if err := add(tpls.home, indexName, homeView(content, shown)); err != nil {
-		return nil, err
+	for index := range lib.Books {
+		book := &lib.Books[index]
+		planned = append(planned, plannedPage{
+			tpls.book, path.Join(booksDir, lib.BookSlugs[book.Path], indexName), bookPageView(lib, book),
+		})
 	}
-	if err := add(tpls.books, path.Join(booksDir, indexName), allBooksView(content, shown)); err != nil {
-		return nil, err
+	if len(lib.Series) > 0 {
+		planned = append(planned, plannedPage{tpls.entries, path.Join(seriesDir, indexName), seriesIndexView(lib)})
 	}
-
-	for _, section := range shown {
-		if err := add(
-			tpls.entries,
-			path.Join(section.Dir, indexName),
-			sectionView(shown, section),
-		); err != nil {
-			return nil, err
-		}
+	for index := range lib.Series {
+		series := &lib.Series[index]
+		planned = append(planned, plannedPage{
+			tpls.series, path.Join(seriesDir, series.Slug, indexName), seriesPageView(lib, series),
+		})
+	}
+	for _, section := range lib.shown {
+		planned = append(
+			planned,
+			plannedPage{tpls.entries, path.Join(section.Dir, indexName), sectionView(lib, section)},
+		)
 		for _, name := range pagedNames(section.Section) {
-			if err := add(
-				tpls.books,
-				path.Join(section.Dir, name.Slug, indexName),
-				nameView(content, shown, name),
-			); err != nil {
-				return nil, err
-			}
+			planned = append(planned, plannedPage{
+				tpls.books, path.Join(section.Dir, name.Slug, indexName), nameView(lib, section, name),
+			})
 		}
 	}
 
+	pages := make([]htmlPage, 0, len(planned))
+	for _, page := range planned {
+		var buf bytes.Buffer
+		if err := page.tpl.ExecuteTemplate(&buf, "layout", page.view); err != nil {
+			return nil, fmt.Errorf("rendering %s: %w", page.relPath, err)
+		}
+		pages = append(pages, htmlPage{Path: page.relPath, Contents: buf.Bytes()})
+	}
 	return pages, nil
+}
+
+// plannedPage is a page to render: which template, where, and with what.
+type plannedPage struct {
+	tpl     *template.Template
+	relPath string
+	view    *pageView
 }
 
 // htmlTemplates holds one parsed set per page shape. Each page template defines
@@ -154,7 +251,10 @@ func buildHTML(content *Content) ([]htmlPage, error) {
 type htmlTemplates struct {
 	home    *template.Template
 	entries *template.Template
+	book    *template.Template
 	books   *template.Template
+	series  *template.Template
+	stats   *template.Template
 }
 
 func parseHTMLTemplates() (*htmlTemplates, error) {
@@ -165,7 +265,10 @@ func parseHTMLTemplates() (*htmlTemplates, error) {
 	}{
 		{&parsed.home, "home.gohtml"},
 		{&parsed.entries, "entries.gohtml"},
+		{&parsed.book, "book.gohtml"},
 		{&parsed.books, "books.gohtml"},
+		{&parsed.series, "series.gohtml"},
+		{&parsed.stats, "stats.gohtml"},
 	} {
 		tpl, err := template.ParseFS(templates.Templates, "layout.gohtml", target.name)
 		if err != nil {
@@ -176,76 +279,201 @@ func parseHTMLTemplates() (*htmlTemplates, error) {
 	return &parsed, nil
 }
 
-func homeView(content *Content, shown []shownSection) *pageView {
-	view := &pageView{
-		Title:    allTitle,
-		Heading:  allTitle + " 🎧📚",
-		Blurb:    allSummary,
-		Root:     rootFromRoot,
-		FeedHref: feedHref(rootFromRoot, &content.Main),
-		Nav:      navLinks(shown, rootFromRoot),
-		Sections: []entryView{{
-			Name:  booksTitle,
-			Href:  dirHref(rootFromRoot, booksDir),
-			Note:  "Search the whole library.",
-			Count: len(content.Books),
-		}},
-	}
-	for _, section := range shown {
-		view.Sections = append(view.Sections, entryView{
-			Name:  section.Title,
-			Href:  dirHref(rootFromRoot, section.Dir),
-			Note:  section.Blurb,
-			Count: len(pagedNames(section.Section)),
-		})
-	}
-	return view
+// How many covers the home page mosaic shows, and how many books its shelf of
+// latest releases holds.
+const (
+	mosaicSize = 15
+	shelfSize  = 16
+)
+
+// homePage is what the home page shows beyond the navigation.
+type homePage struct {
+	Books int
+	Hours string
+	Days  int
+	// BooksHref and GenresHref link to the full lists the home page samples.
+	BooksHref  string
+	GenresHref string
+	// Mosaic is a spread of covers from across the library.
+	Mosaic []bookView
+	Latest []bookView
+	Genres []genreTile
 }
 
-func allBooksView(content *Content, shown []shownSection) *pageView {
+// genreTile is a genre on the home page, shown by a few of its covers.
+type genreTile struct {
+	entryView
+	Covers []string
+}
+
+// homeView describes the home page. It shows the books in the main feed, which
+// its subscribe button is for, so genres kept out of that feed stay off the
+// front page too, as do genres kept off the site.
+func homeView(lib *library) *pageView {
+	root := rootFromRoot
+	featured := onHomePage(lib, lib.Main.Books)
+	listening := totalDuration(featured)
+	home := &homePage{
+		Books:      len(featured),
+		Hours:      totalHours(featured),
+		Days:       int(math.Round(listening.Hours() / 24)),
+		Mosaic:     mosaic(lib, root, featured),
+		BooksHref:  dirHref(root, booksDir),
+		GenresHref: dirHref(root, lib.Genres.Dir),
+	}
+	latest := newestFirst(featured)
+	for index := range latest[:min(shelfSize, len(latest))] {
+		home.Latest = append(home.Latest, describeBook(lib, root, &latest[index]))
+	}
+	for index := range lib.Genres.Names {
+		genre := &lib.Genres.Names[index]
+		books := onHomePage(lib, genre.Books)
+		if len(books) == 0 {
+			continue
+		}
+		tile := genreTile{entryView: entryView{
+			Name:  genre.Title,
+			Href:  dirHref(root, lib.Genres.Dir, genre.Slug),
+			Count: len(books),
+			Hours: totalHours(books),
+		}}
+		newest := newestFirst(books)
+		for index := range newest {
+			if cover, ok := lib.covers[newest[index].ImagePath]; ok && len(tile.Covers) < 3 {
+				tile.Covers = append(tile.Covers, hrefFor(root, cover))
+			}
+		}
+		home.Genres = append(home.Genres, tile)
+	}
+	slices.SortStableFunc(home.Genres, func(a, b genreTile) int { return b.Count - a.Count })
+
+	return &pageView{
+		Title:    allTitle,
+		Heading:  allTitle,
+		Blurb:    allSummary,
+		Root:     root,
+		FeedHref: feedHref(root, &lib.Main),
+		Nav:      navLinks(lib, root, ""),
+		Home:     home,
+	}
+}
+
+// mosaic picks covers spread evenly across the library in path order, so the
+// home page shows its range rather than only the latest books, and the choice
+// only changes when the library does.
+func mosaic(lib *library, root string, books []audiobooks.Audiobook) []bookView {
+	var withCovers []*audiobooks.Audiobook
+	for index := range books {
+		if _, ok := lib.covers[books[index].ImagePath]; ok {
+			withCovers = append(withCovers, &books[index])
+		}
+	}
+	slices.SortFunc(withCovers, func(a, b *audiobooks.Audiobook) int { return strings.Compare(a.Path, b.Path) })
+
+	count := min(mosaicSize, len(withCovers))
+	views := make([]bookView, 0, count)
+	for index := range count {
+		views = append(views, describeBook(lib, root, withCovers[index*len(withCovers)/count]))
+	}
+	return views
+}
+
+// onHomePage keeps the books that are both in the main feed and on the site.
+func onHomePage(lib *library, books []audiobooks.Audiobook) []audiobooks.Audiobook {
+	inMainFeed := make(map[string]bool, len(lib.Main.Books))
+	for index := range lib.Main.Books {
+		inMainFeed[lib.Main.Books[index].Path] = true
+	}
+	onSite := make(map[string]bool, len(lib.Books))
+	for index := range lib.Books {
+		onSite[lib.Books[index].Path] = true
+	}
+	var kept []audiobooks.Audiobook
+	for index := range books {
+		if inMainFeed[books[index].Path] && onSite[books[index].Path] {
+			kept = append(kept, books[index])
+		}
+	}
+	return kept
+}
+
+func totalDuration(books []audiobooks.Audiobook) time.Duration {
+	var total time.Duration
+	for index := range books {
+		total += books[index].Duration
+	}
+	return total
+}
+
+// totalHours renders the listening time of some books in whole hours, with a
+// thousands separator: "11,784".
+func totalHours(books []audiobooks.Audiobook) string {
+	return totalHoursOf(totalDuration(books))
+}
+
+// totalHoursOf renders a listening time in whole hours, grouped as totalHours
+// does.
+func totalHoursOf(listening time.Duration) string {
+	hours := strconv.Itoa(int(math.Round(listening.Hours())))
+	var builder strings.Builder
+	for index, digit := range hours {
+		if index > 0 && (len(hours)-index)%3 == 0 {
+			builder.WriteRune(',')
+		}
+		builder.WriteRune(digit)
+	}
+	return builder.String()
+}
+
+func allBooksView(lib *library) *pageView {
 	return &pageView{
 		Title:       pageTitle(booksTitle),
 		Heading:     booksTitle,
-		Blurb:       fmt.Sprintf("%d books in the library, most recently published first.", len(content.Books)),
+		Blurb:       fmt.Sprintf("%d books in the library, most recently published first.", len(lib.Books)),
 		Root:        rootFromDir,
-		Nav:         navLinks(shown, rootFromDir),
+		Nav:         navLinks(lib, rootFromDir, booksDir),
 		Search:      true,
 		SearchLabel: "Search by title, author, narrator, series, genre or tag",
-		Books:       bookViews(content, rootFromDir, content.Books),
+		Books:       bookViews(lib, rootFromDir, lib.Books),
+		Filters:     allBooksFilters(lib),
 	}
 }
 
-func sectionView(shown []shownSection, section shownSection) *pageView {
+func sectionView(lib *library, section shownSection) *pageView {
 	view := &pageView{
 		Title:       pageTitle(section.Title),
 		Heading:     section.Title,
 		Blurb:       section.Blurb,
 		Root:        rootFromDir,
-		Nav:         navLinks(shown, rootFromDir),
+		Nav:         navLinks(lib, rootFromDir, section.Dir),
 		Search:      true,
 		SearchLabel: "Search " + strings.ToLower(section.Title),
+		Entries:     make([]entryView, 0, len(section.Names)),
+		Sorts:       entrySorts,
+	}
+	if section.Section == &lib.Genres {
+		view.Sorts = genreSorts
 	}
 	for _, name := range pagedNames(section.Section) {
-		view.Entries = append(view.Entries, entryView{
-			Name:     name.Title,
-			Href:     dirHref(rootFromDir, section.Dir, name.Slug),
-			FeedHref: feedHref(rootFromDir, &name.Feed),
-			Search:   strings.ToLower(name.Title),
-			Count:    len(name.Listed),
-		})
+		view.Entries = append(view.Entries, describeEntry(
+			name.Title,
+			dirHref(rootFromDir, section.Dir, name.Slug),
+			feedHref(rootFromDir, &name.Feed),
+			name.Listed,
+		))
 	}
 	return view
 }
 
-func nameView(content *Content, shown []shownSection, name *Name) *pageView {
+func nameView(lib *library, section shownSection, name *Name) *pageView {
 	return &pageView{
 		Title:    pageTitle(name.Title),
 		Heading:  name.Title,
 		Blurb:    name.Description,
 		Root:     rootFromSubDir,
 		FeedHref: feedHref(rootFromSubDir, &name.Feed),
-		Nav:      navLinks(shown, rootFromSubDir),
-		Books:    bookViews(content, rootFromSubDir, name.Listed),
+		Nav:      navLinks(lib, rootFromSubDir, section.Dir),
+		Books:    bookViews(lib, rootFromSubDir, name.Listed),
 	}
 }
 
@@ -260,12 +488,23 @@ func pagedNames(section *Section) []*Name {
 	return paged
 }
 
-func navLinks(shown []shownSection, root string) []linkView {
-	nav := make([]linkView, 0, len(shown)+1)
-	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir)})
-	for _, section := range shown {
-		nav = append(nav, linkView{Name: section.Title, Href: dirHref(root, section.Dir)})
+// navLinks links every top-level section from a page whose prefix back to the
+// site root is root, marking current, the directory of the page's own section,
+// or "" for the home page.
+func navLinks(lib *library, root, current string) []linkView {
+	nav := make([]linkView, 0, len(lib.shown)+3)
+	nav = append(nav, linkView{Name: booksTitle, Href: dirHref(root, booksDir), Current: current == booksDir})
+	if len(lib.Series) > 0 {
+		nav = append(nav, linkView{Name: seriesTitle, Href: dirHref(root, seriesDir), Current: current == seriesDir})
 	}
+	for _, section := range lib.shown {
+		nav = append(nav, linkView{
+			Name:    section.Title,
+			Href:    dirHref(root, section.Dir),
+			Current: current == section.Dir,
+		})
+	}
+	nav = append(nav, linkView{Name: statsTitle, Href: dirHref(root, statsDir), Current: current == statsDir})
 	return nav
 }
 
@@ -277,31 +516,109 @@ func feedHref(root string, feed *Feed) string {
 	return hrefFor(root, feed.Link)
 }
 
-func bookViews(content *Content, root string, books []audiobooks.Audiobook) []bookView {
+// bookViews describes books for a page whose prefix back to the site root is
+// root.
+func bookViews(lib *library, root string, books []audiobooks.Audiobook) []bookView {
 	sorted := newestFirst(books)
 	views := make([]bookView, 0, len(sorted))
 	for index := range sorted {
-		book := &sorted[index]
-		view := bookView{
-			Title:     book.Title,
-			Subtitle:  book.Subtitle,
-			Date:      formatReleaseDate(book),
-			Duration:  formatDuration(book.Duration),
-			Authors:   links(root, &content.Authors, book.Authors),
-			Narrators: links(root, &content.Narrators, book.Narrators),
-			Genres:    links(root, &content.Genres, genreNames(book.Genres)),
-			Tags:      links(root, &content.Tags, book.Tags),
-		}
-		if book.Series != nil {
-			view.Series = book.Series.Title
-			if sequence := book.Series.Sequence; sequence != nil {
-				view.Series = fmt.Sprintf("%s %s %s", book.Series.Title, strings.ToLower(sequence.Noun()), sequence)
-			}
-		}
-		view.Search = searchText(book, view.Series, view.Date)
-		views = append(views, view)
+		views = append(views, describeBook(lib, root, &sorted[index]))
 	}
 	return views
+}
+
+func describeBook(lib *library, root string, book *audiobooks.Audiobook) bookView {
+	view := bookView{
+		Title:     book.Title,
+		Subtitle:  book.Subtitle,
+		Date:      formatReleaseDate(book),
+		Duration:  formatDuration(book.Duration),
+		Href:      dirHref(root, booksDir, lib.BookSlugs[book.Path]),
+		Authors:   links(root, &lib.Authors, book.Authors),
+		Narrators: links(root, &lib.Narrators, book.Narrators),
+		Genres:    links(root, &lib.Genres, genreNames(book.Genres)),
+		Tags:      links(root, &lib.Tags, book.Tags),
+		// Truncated, so a book shown as 9h 59m never counts as ten hours.
+		Minutes: int(book.Duration.Minutes()),
+	}
+	view.GenreSlugs = genreSlugs(lib, book)
+	if cover, ok := lib.covers[book.ImagePath]; ok {
+		view.Cover = hrefFor(root, cover)
+	}
+	if series := lib.seriesOf[book.Path]; series != nil {
+		view.SeriesHref = dirHref(root, seriesDir, series.Slug)
+	}
+	if book.Series != nil {
+		view.Series = book.Series.Title
+		if sequence := book.Series.Sequence; sequence != nil {
+			view.Series = fmt.Sprintf("%s %s %s", book.Series.Title, strings.ToLower(sequence.Noun()), sequence)
+		}
+	}
+	view.Search = searchText(book, view.Series, view.Date)
+	return view
+}
+
+// moreByLimit caps the "more by" list, which for a prolific author would
+// otherwise repeat their whole page.
+const moreByLimit = 12
+
+// bookPageView describes a book's own page.
+func bookPageView(lib *library, book *audiobooks.Audiobook) *pageView {
+	root := rootFromSubDir
+	page := &bookPage{
+		bookView:   describeBook(lib, root, book),
+		Paragraphs: book.Description.Paragraphs(),
+		MIMEType:   book.MIMEType,
+	}
+	if lib.audioURL != nil {
+		page.AudioURL = lib.audioURL(book)
+	}
+	page.Feeds = authorFeeds(lib, root, book)
+	series := lib.seriesOf[book.Path]
+	if series != nil && len(series.Books) > 1 {
+		page.SeriesTitle = series.Title
+		page.SeriesBooks = seriesEntries(lib, root, series, book.Path)
+	}
+
+	var others []audiobooks.Audiobook
+	for index := range lib.Books {
+		other := &lib.Books[index]
+		inSameSeries := series != nil && lib.seriesOf[other.Path] == series
+		if other.Path != book.Path && !inSameSeries && sameAuthor(lib.Authors.Slugs, book, other) {
+			others = append(others, *other)
+		}
+	}
+	// The authors' other books outside this series fill the page's book list.
+	moreBy := bookViews(lib, root, others)
+	if len(moreBy) > moreByLimit {
+		moreBy = moreBy[:moreByLimit]
+	}
+
+	// No Heading: the page puts the title beside the cover, under the series.
+	return &pageView{
+		Title: pageTitle(book.Title),
+		Root:  root,
+		Nav:   navLinks(lib, root, booksDir),
+		Book:  page,
+		Books: moreBy,
+	}
+}
+
+func authorFeeds(lib *library, root string, book *audiobooks.Audiobook) []linkView {
+	var feeds []linkView
+	for _, author := range book.Authors {
+		if name := lib.authorPages[lib.Authors.Slugs[author]]; name != nil && name.Link != "" {
+			feeds = append(feeds, linkView{Name: name.Title, Href: hrefFor(root, name.Link)})
+		}
+	}
+	return feeds
+}
+
+func position(book *audiobooks.Audiobook) string {
+	if book.Series == nil || book.Series.Sequence == nil {
+		return ""
+	}
+	return book.Series.Sequence.String()
 }
 
 // newestFirst copies the books into reverse publication order, so that a page

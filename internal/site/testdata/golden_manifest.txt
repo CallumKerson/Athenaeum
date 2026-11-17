@@ -61,3 +61,6 @@ f63864ebd146b37c30c14b76c5232ecae9f4b411bfde5670b692456583af05d6  podcast/genre/
 f63864ebd146b37c30c14b76c5232ecae9f4b411bfde5670b692456583af05d6  podcast/genre/children's/feed.rss
 f63864ebd146b37c30c14b76c5232ecae9f4b411bfde5670b692456583af05d6  podcast/genre/children/feed.rss
 f63864ebd146b37c30c14b76c5232ecae9f4b411bfde5670b692456583af05d6  podcast/genre/childrens/feed.rss
+book  books/a-wizard-of-earthsea/  /Ursula K Le Guin/Earthsea/1 A Wizard of Earthsea/A Wizard of Earthsea.m4b
+book  books/this-is-how-you-lose-the-time-war/  /Amal El-Mohtar and Max Gladstone/This Is How You Lose the Time War/This Is How You Lose the Time War.m4b
+series  series/earthsea/  Earthsea (1 books)

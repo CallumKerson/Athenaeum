@@ -1,11 +1,11 @@
 {{define "content"}}
       <ul class="entries">
         {{- range .Entries}}
-        <li data-search="{{.Search}}">
-          <a href="{{.Href}}">{{.Name}}</a>
-          <span class="count">{{.Count}}</span>
+        <li data-search="{{.Search}}" data-name="{{.Name}}" data-count="{{.Count}}" data-minutes="{{.Minutes}}"{{with .Newest}} data-newest="{{.}}"{{end}}>
+          <a class="name" href="{{.Href}}">{{.Name}}</a>
+          <span class="count">{{.Count}} {{if eq .Count 1}}book{{else}}books{{end}}{{with .Hours}}, {{.}}h{{end}}</span>
           {{- with .FeedHref}}
-          <a class="rss" href="{{.}}">rss</a><button class="copy" type="button" hidden>copy URL</button>
+          <span class="feed"><a class="feed-link" href="{{.}}">RSS</a><button class="copy" type="button" hidden>Copy</button></span>
           {{- end}}
         </li>
         {{- end}}

@@ -1,6 +1,8 @@
 package site
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"path"
 	"slices"
@@ -26,6 +28,8 @@ const (
 	narratorsDir = "narrators"
 	genresDir    = "genre"
 	tagsDir      = "tags"
+
+	coversDir = "covers"
 )
 
 // Feed is one rendered feed together with every path it is published at. The
@@ -79,14 +83,6 @@ type Section struct {
 	Slugs map[string]string
 }
 
-// Exclusions are the genres whose books are left out of the main feed, and out
-// of the HTML pages. They are separate lists because a genre can be unwanted in
-// the main feed yet still worth browsing, or the other way round.
-type Exclusions struct {
-	MainFeed []audiobooks.Genre
-	Site     []audiobooks.Genre
-}
-
 // Content is everything a build publishes: the library the HTML pages list
 // (less any books excluded from the site), the main feed, and a section for
 // each way of browsing it.
@@ -97,27 +93,50 @@ type Content struct {
 	Narrators Section
 	Genres    Section
 	Tags      Section
+	// Covers maps each book's ImagePath to the path its thumbnail is published
+	// at. Books without a cover are absent.
+	Covers map[string]string
+	// BookSlugs maps each book's Path to the directory of its page under
+	// /books/.
+	BookSlugs map[string]string
+	// Series lists the library's series, each with a page under /series/.
+	Series []Series
+}
+
+// Exclusions are the genres whose books are left out of the main feed, and out
+// of the HTML pages. They are separate lists because a genre can be unwanted in
+// the main feed yet still worth browsing, or the other way round.
+type Exclusions struct {
+	MainFeed []audiobooks.Genre
+	Site     []audiobooks.Genre
 }
 
 // Plan works out the complete set of feeds and pages to publish for a library.
 //
 // Books are assumed to be sorted already; every feed preserves that order.
+//
+// Books in a genre excluded from the site get no page, cover, or place in a
+// series, but every feed still carries them. Book slugs are still worked out
+// from the whole library, so excluding a genre never moves another book's page.
 func Plan(books []audiobooks.Audiobook, exclusions Exclusions) *Content {
 	excludedFromSite := exclusions.Site
+	shown := without(books, excludedFromSite)
+	authors := personSection(books, excludedFromSite, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
+		return b.Authors
+	})
 	return &Content{
-		Books: without(books, excludedFromSite),
-		Main:  mainFeed(books, exclusions.MainFeed),
-		Authors: personSection(books, excludedFromSite, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
-			return b.Authors
-		}),
+		Books:     shown,
+		Covers:    coverPaths(shown),
+		BookSlugs: bookSlugs(books),
+		Series:    seriesGroups(shown, authors.Slugs),
+		Main:      mainFeed(books, exclusions.MainFeed),
+		Authors:   authors,
 		Narrators: personSection(
 			books,
 			excludedFromSite,
 			narratorsDir,
 			readFormat,
-			func(b *audiobooks.Audiobook) []string {
-				return b.Narrators
-			},
+			func(b *audiobooks.Audiobook) []string { return b.Narrators },
 		),
 		Genres: genreSection(books, excludedFromSite),
 		Tags: personSection(books, excludedFromSite, tagsDir, plainFormat, func(b *audiobooks.Audiobook) []string {
@@ -280,17 +299,22 @@ func newSection(dir string, names []Name, listed map[string]int) Section {
 func assignSlugs(names []Name) {
 	taken := map[string]bool{}
 	for index := range names {
-		slug := slugify(names[index].Title)
 		// Distinct names can slugify identically — "Ann Leckie" and "Ann-Leckie" —
 		// and must not end up sharing a page. Names are sorted (see Section.Names),
 		// so which one keeps the unsuffixed slug is stable between builds.
-		unique := slug
-		for suffix := 2; taken[unique]; suffix++ {
-			unique = fmt.Sprintf("%s-%d", slug, suffix)
-		}
-		taken[unique] = true
-		names[index].Slug = unique
+		names[index].Slug = claimSlug(taken, slugify(names[index].Title))
 	}
+}
+
+// claimSlug returns slug, or slug-2, slug-3 and so on if it is taken, and marks
+// whichever it returns as taken.
+func claimSlug(taken map[string]bool, slug string) string {
+	unique := slug
+	for suffix := 2; taken[unique]; suffix++ {
+		unique = fmt.Sprintf("%s-%d", slug, suffix)
+	}
+	taken[unique] = true
+	return unique
 }
 
 // slugify reduces a display name to a lowercase URL segment, replacing every run
@@ -340,6 +364,45 @@ func feedPaths(dir, name string, aliases []string) (link string, all []string) {
 	default:
 		return "", paths
 	}
+}
+
+// bookSlugs gives every book a page directory named after its title. Books
+// whose slugs collide are numbered in order of their path in the library, so a
+// slug only changes when a book whose title slugifies the same way, or to the
+// numbered form, is added or removed ahead of it — never because of a release
+// date or another metadata edit.
+func bookSlugs(books []audiobooks.Audiobook) map[string]string {
+	order := make([]*audiobooks.Audiobook, 0, len(books))
+	for index := range books {
+		order = append(order, &books[index])
+	}
+	slices.SortFunc(order, func(a, b *audiobooks.Audiobook) int {
+		return strings.Compare(a.Path, b.Path)
+	})
+
+	slugs := make(map[string]string, len(books))
+	taken := map[string]bool{}
+	for _, book := range order {
+		slugs[book.Path] = claimSlug(taken, slugify(book.Title))
+	}
+	return slugs
+}
+
+// coverPaths names a thumbnail for every cover in the library. The name is a
+// hash of the cover's path in the library, so it never needs escaping, stays the
+// same between builds, and changes when a book moves, which lets the sweep
+// remove the old one.
+func coverPaths(books []audiobooks.Audiobook) map[string]string {
+	covers := map[string]string{}
+	for index := range books {
+		imagePath := books[index].ImagePath
+		if imagePath == "" {
+			continue
+		}
+		sum := sha256.Sum256([]byte(imagePath))
+		covers[imagePath] = path.Join(coversDir, hex.EncodeToString(sum[:8])+".jpg")
+	}
+	return covers
 }
 
 // without returns the books in none of genres, as a new slice so that filtering

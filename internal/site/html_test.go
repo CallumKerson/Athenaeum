@@ -30,7 +30,7 @@ func dated(title string, release *toml.LocalDate) audiobooks.Audiobook {
 // path the build did not write is a dead end with no server to notice.
 func TestPagesLinkOnlyToFilesThatExist(t *testing.T) {
 	root := t.TempDir()
-	_, err := Build(root, testPlan(t), testRenderer(t), true, testLogger())
+	_, err := Build(root, testPlan(t), testRenderer(t), testOptions(), testLogger())
 	require.NoError(t, err)
 
 	var checked int
@@ -64,7 +64,7 @@ func TestPagesLinkOnlyToFilesThatExist(t *testing.T) {
 func TestEveryFeedHasAPage(t *testing.T) {
 	root := t.TempDir()
 	content := testPlan(t)
-	_, err := Build(root, content, testRenderer(t), true, testLogger())
+	_, err := Build(root, content, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 
 	assert.FileExists(t, filepath.Join(root, indexName))
@@ -105,7 +105,7 @@ func TestAllBooksPageListsBooksExcludedFromTheMainFeed(t *testing.T) {
 		book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, nil, nil),
 	}, Exclusions{MainFeed: []audiobooks.Genre{audiobooks.Erotica}})
 
-	_, err := Build(root, content, testRenderer(t), true, testLogger())
+	_, err := Build(root, content, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 
 	page, err := os.ReadFile(filepath.Join(root, booksDir, indexName))
@@ -118,12 +118,14 @@ func TestAllBooksPageListsBooksExcludedFromTheMainFeed(t *testing.T) {
 // not its own page, and not the pages of names that have no other books.
 func TestPagesLeaveOutGenresExcludedFromTheSite(t *testing.T) {
 	root := t.TempDir()
+	spicy := book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, []string{"N"}, []string{"T"})
+	spicy.Series = &audiobooks.Series{Title: "Steamy"}
 	content := Plan([]audiobooks.Audiobook{
 		book("Clean", []audiobooks.Genre{audiobooks.Fantasy}, []string{"A"}, []string{"N"}, nil),
-		book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, []string{"N"}, []string{"T"}),
+		spicy,
 	}, Exclusions{Site: []audiobooks.Genre{audiobooks.Erotica}})
 
-	_, err := Build(root, content, testRenderer(t), true, testLogger())
+	_, err := Build(root, content, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
 
 	err = filepath.WalkDir(root, func(fullPath string, entry fs.DirEntry, walkErr error) error {
@@ -134,10 +136,13 @@ func TestPagesLeaveOutGenresExcludedFromTheSite(t *testing.T) {
 		require.NoError(t, readErr)
 		assert.NotContains(t, string(page), "Spicy", fullPath)
 		assert.NotContains(t, string(page), "Erotica", fullPath)
+		assert.NotContains(t, string(page), "Steamy", fullPath)
 		return nil
 	})
 	require.NoError(t, err)
 
+	assert.NoDirExists(t, filepath.Join(root, booksDir, "spicy"))
+	assert.NoDirExists(t, filepath.Join(root, seriesDir, "steamy"))
 	assert.NoDirExists(t, filepath.Join(root, genresDir, "erotica"))
 	assert.NoDirExists(t, filepath.Join(root, authorsDir, "b"))
 	assert.NoDirExists(t, filepath.Join(root, tagsDir, "t"))
@@ -164,11 +169,24 @@ func TestBookListsAreNewestFirst(t *testing.T) {
 		return found
 	}
 
-	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"}, titles(allBooksView(content, nil).Books))
+	assert.Equal(
+		t,
+		[]string{"Newest", "Middle", "Oldest", "Undated"},
+		titles(allBooksView(newLibrary(content, nil, nil)).Books),
+	)
 	// Every page that lists books, not just the whole-library one.
 	require.Len(t, content.Authors.Names, 1)
-	assert.Equal(t, []string{"Newest", "Middle", "Oldest", "Undated"},
-		titles(nameView(content, nil, &content.Authors.Names[0]).Books))
+	assert.Equal(
+		t,
+		[]string{"Newest", "Middle", "Oldest", "Undated"},
+		titles(
+			nameView(
+				newLibrary(content, nil, nil),
+				shownSection{Section: &content.Authors},
+				&content.Authors.Names[0],
+			).Books,
+		),
+	)
 }
 
 // The feeds are rendered from the same slices the pages list, and their item
@@ -182,7 +200,7 @@ func TestBuildingPagesDoesNotReorderFeeds(t *testing.T) {
 	before, err := testRenderer(t).Render(content.Main.Books, "Audiobooks", "")
 	require.NoError(t, err)
 
-	_, err = buildHTML(content)
+	_, err = buildHTML(newLibrary(content, nil, nil))
 	require.NoError(t, err)
 
 	after, err := testRenderer(t).Render(content.Main.Books, "Audiobooks", "")
@@ -197,7 +215,7 @@ func TestBookDateMatchesTheFeed(t *testing.T) {
 		dated("Undated", nil),
 	}, Exclusions{})
 
-	books := allBooksView(content, nil).Books
+	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 2)
 
 	assert.Equal(t, "1 Nov 1968", books[0].Date)
@@ -230,7 +248,7 @@ func TestBookSeriesLine(t *testing.T) {
 			audiobook.Series = &audiobooks.Series{Title: "Earthsea", Sequence: sequence}
 
 			content := Plan([]audiobooks.Audiobook{audiobook}, Exclusions{})
-			books := allBooksView(content, nil).Books
+			books := allBooksView(newLibrary(content, nil, nil)).Books
 			require.Len(t, books, 1)
 
 			assert.Equal(t, testCase.expected, books[0].Series)
@@ -249,7 +267,7 @@ func TestBookSearchTextCoversEveryField(t *testing.T) {
 		Tags:      []string{"Hugo Awards"},
 	}}, Exclusions{})
 
-	books := allBooksView(content, nil).Books
+	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 1)
 
 	for _, term := range []string{"earthsea", "le guin", "holdbrook", "fantasy", "hugo"} {
@@ -268,7 +286,7 @@ func TestBookLinksToTheNamesItLists(t *testing.T) {
 			[]string{"Hugo Awards"}),
 	}, Exclusions{})
 
-	books := allBooksView(content, nil).Books
+	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 2)
 	second := books[1]
 	require.Equal(t, "Second", second.Title)
