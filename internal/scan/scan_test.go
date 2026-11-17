@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"bytes"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -200,6 +201,130 @@ func TestLibraryPicksUpMetadataEditsWithWarmCache(t *testing.T) {
 	require.Len(t, books, 1)
 	assert.Equal(t, "After", books[0].Title)
 }
+
+// Added comes from the metadata when it names a date, stored in UTC whatever
+// zone it was written in, and from the .m4b's mtime when it is absent or
+// unusable. An unusable Added is logged and never costs the book itself.
+func TestLibraryReadsAdded(t *testing.T) {
+	modTime := time.Date(2024, time.March, 2, 18, 30, 0, 0, time.UTC)
+	added := time.Date(2020, time.September, 10, 7, 27, 46, 0, time.UTC)
+
+	tests := []struct {
+		name     string
+		metadata string
+		expected time.Time
+		warns    bool
+	}{
+		{
+			name:     "offset datetime with T",
+			metadata: "Added = 2020-09-10T07:27:46+00:00\n",
+			expected: added,
+		},
+		{
+			name:     "offset datetime with a space",
+			metadata: "Added = 2020-09-10 07:27:46+00:00\n",
+			expected: added,
+		},
+		{
+			name:     "offset datetime with Z",
+			metadata: "Added = 2020-09-10T07:27:46Z\n",
+			expected: added,
+		},
+		{
+			name:     "offset datetime in another zone is stored in UTC",
+			metadata: "Added = 2020-09-10T08:27:46+01:00\n",
+			expected: added,
+		},
+		{
+			name:     "local datetime is read as UTC",
+			metadata: "Added = 2020-09-10T07:27:46\n",
+			expected: added,
+		},
+		{
+			name:     "local date is read as midnight UTC",
+			metadata: "Added = 2020-09-10\n",
+			expected: time.Date(2020, time.September, 10, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "local time names no date, so falls back to the m4b's mtime",
+			metadata: "Added = 07:27:46\n",
+			expected: modTime,
+			warns:    true,
+		},
+		{
+			name:     "quoted string falls back to the m4b's mtime",
+			metadata: "Added = \"2020-09-10\"\n",
+			expected: modTime,
+			warns:    true,
+		},
+		{
+			name:     "absent falls back to the m4b's mtime",
+			metadata: "",
+			expected: modTime,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := t.TempDir()
+			m4bPath := filepath.Join(root, "Book.m4b")
+			tomlPath := filepath.Join(root, "Book.toml")
+			require.NoError(t, copyFile(earthseaM4B, m4bPath))
+			require.NoError(t, os.Chtimes(m4bPath, modTime, modTime))
+			require.NoError(t, os.WriteFile(tomlPath, []byte("Title = \"Book\"\n"+testCase.metadata), 0o644))
+			var logs bytes.Buffer
+			logger := slog.New(slog.NewTextHandler(&logs, nil))
+
+			books, err := Library(root, NewCache(), logger)
+
+			require.NoError(t, err)
+			require.Len(t, books, 1)
+			assert.Equal(t, "Book", books[0].Title)
+			assert.Equal(t, testCase.expected, books[0].Added)
+			if testCase.warns {
+				assert.Contains(t, logs.String(), "unusable Added")
+				assert.Contains(t, logs.String(), tomlPath)
+			} else {
+				assert.Empty(t, logs.String())
+			}
+		})
+	}
+}
+
+// A duration from the cache must not stop Added being read, and filling Added
+// in must not disturb the cache, which is keyed on the .m4b's size and mtime.
+func TestLibraryReadsAddedWithWarmCache(t *testing.T) {
+	root := t.TempDir()
+	m4bPath := filepath.Join(root, "Book.m4b")
+	tomlPath := filepath.Join(root, "Book.toml")
+	modTime := time.Date(2024, time.March, 2, 18, 30, 0, 0, time.UTC)
+	require.NoError(t, copyFile(earthseaM4B, m4bPath))
+	require.NoError(t, os.Chtimes(m4bPath, modTime, modTime))
+	require.NoError(t, os.WriteFile(tomlPath, []byte("Title = \"Book\"\n"), 0o644))
+
+	cache := NewCache()
+	books, err := Library(root, cache, testLogger())
+	require.NoError(t, err)
+	require.Len(t, books, 1)
+	assert.Equal(t, modTime, books[0].Added)
+
+	require.NoError(t, os.WriteFile(tomlPath,
+		[]byte("Title = \"Book\"\nAdded = 2020-09-10T07:27:46+00:00\n"), 0o644))
+
+	books, err = Library(root, cache, testLogger())
+	require.NoError(t, err)
+	require.Len(t, books, 1)
+	assert.Equal(t, time.Date(2020, time.September, 10, 7, 27, 46, 0, time.UTC), books[0].Added)
+	assert.Equal(t, 1, cache.Misses)
+	assert.Equal(t, 1, cache.Hits)
+}
+
+var earthseaM4B = filepath.Join(
+	mediaRoot,
+	"Ursula K Le Guin",
+	"Earthsea",
+	"1 A Wizard of Earthsea",
+	"A Wizard of Earthsea.m4b",
+)
 
 func TestCacheLookup(t *testing.T) {
 	modTime := time.Date(2026, time.July, 25, 12, 0, 0, 0, time.UTC)

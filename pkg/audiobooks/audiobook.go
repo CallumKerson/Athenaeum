@@ -11,6 +11,11 @@ import (
 )
 
 // Audiobook - representation of a book.
+//
+// Added is when the book joined the library, in UTC. A scan fills it from the
+// .m4b's modification time when the metadata leaves it out or gets it wrong.
+// It is a time.Time rather than a pointer because go-toml writes a pointer
+// through its TextMarshaler, as a quoted string instead of a TOML datetime.
 type Audiobook struct {
 	Path        string                   `json:"path"                  toml:",omitempty"`
 	Title       string                   `json:"title"`
@@ -18,6 +23,7 @@ type Audiobook struct {
 	Authors     []string                 `json:"authors"`
 	Description *description.Description `json:"description,omitempty" toml:",omitempty"`
 	ReleaseDate *toml.LocalDate          `json:"releaseDate,omitempty" toml:",omitempty"`
+	Added       time.Time                `json:"added,omitzero"        toml:",omitempty"`
 	Genres      []Genre                  `json:"genres,omitempty"      toml:",omitempty"`
 	Series      *Series                  `json:"series,omitempty"      toml:",omitempty"`
 	Narrators   []string                 `json:"narrators"             toml:",omitempty"`
