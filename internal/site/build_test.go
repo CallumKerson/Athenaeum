@@ -269,7 +269,7 @@ func testPlan(t *testing.T) *Content {
 	books, err := scan.Library(mediaRoot, scan.NewCache(), testLogger())
 	require.NoError(t, err)
 	require.NotEmpty(t, books)
-	return Plan(books, []audiobooks.Genre{audiobooks.Erotica})
+	return Plan(books, Exclusions{MainFeed: []audiobooks.Genre{audiobooks.Erotica}})
 }
 
 func buildTestSite(t *testing.T, root string) (Result, error) {

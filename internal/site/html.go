@@ -134,8 +134,7 @@ func buildHTML(content *Content) ([]htmlPage, error) {
 		); err != nil {
 			return nil, err
 		}
-		for index := range section.Names {
-			name := &section.Names[index]
+		for _, name := range pagedNames(section.Section) {
 			if err := add(
 				tpls.books,
 				path.Join(section.Dir, name.Slug, indexName),
@@ -197,7 +196,7 @@ func homeView(content *Content, shown []shownSection) *pageView {
 			Name:  section.Title,
 			Href:  dirHref(rootFromRoot, section.Dir),
 			Note:  section.Blurb,
-			Count: len(section.Names),
+			Count: len(pagedNames(section.Section)),
 		})
 	}
 	return view
@@ -225,16 +224,14 @@ func sectionView(shown []shownSection, section shownSection) *pageView {
 		Nav:         navLinks(shown, rootFromDir),
 		Search:      true,
 		SearchLabel: "Search " + strings.ToLower(section.Title),
-		Entries:     make([]entryView, 0, len(section.Names)),
 	}
-	for index := range section.Names {
-		name := &section.Names[index]
+	for _, name := range pagedNames(section.Section) {
 		view.Entries = append(view.Entries, entryView{
 			Name:     name.Title,
 			Href:     dirHref(rootFromDir, section.Dir, name.Slug),
 			FeedHref: feedHref(rootFromDir, &name.Feed),
 			Search:   strings.ToLower(name.Title),
-			Count:    len(name.Books),
+			Count:    len(name.Listed),
 		})
 	}
 	return view
@@ -248,8 +245,19 @@ func nameView(content *Content, shown []shownSection, name *Name) *pageView {
 		Root:     rootFromSubDir,
 		FeedHref: feedHref(rootFromSubDir, &name.Feed),
 		Nav:      navLinks(shown, rootFromSubDir),
-		Books:    bookViews(content, rootFromSubDir, name.Books),
+		Books:    bookViews(content, rootFromSubDir, name.Listed),
 	}
+}
+
+// pagedNames lists the names in a section that get a page, in section order.
+func pagedNames(section *Section) []*Name {
+	paged := make([]*Name, 0, len(section.Names))
+	for index := range section.Names {
+		if !section.Names[index].Hidden {
+			paged = append(paged, &section.Names[index])
+		}
+	}
+	return paged
 }
 
 func navLinks(shown []shownSection, root string) []linkView {
