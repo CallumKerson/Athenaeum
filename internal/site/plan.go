@@ -54,8 +54,10 @@ type Name struct {
 	// Listed is the books the name's page lists: its feed's books less any in a
 	// genre excluded from the site.
 	Listed []audiobooks.Audiobook
-	// Hidden names get no page and are left out of their section's index. Their
-	// feeds are still published, because existing subscriptions point at them.
+	// Hidden names get no page and are left out of their section's index: a genre
+	// that is itself excluded from the site, or any other name whose books are all
+	// excluded. Their feeds are still published, because existing subscriptions
+	// point at them.
 	Hidden bool
 }
 
@@ -101,18 +103,24 @@ type Content struct {
 //
 // Books are assumed to be sorted already; every feed preserves that order.
 func Plan(books []audiobooks.Audiobook, exclusions Exclusions) *Content {
-	hidden := exclusions.Site
+	excludedFromSite := exclusions.Site
 	return &Content{
-		Books: without(books, hidden),
+		Books: without(books, excludedFromSite),
 		Main:  mainFeed(books, exclusions.MainFeed),
-		Authors: personSection(books, hidden, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
+		Authors: personSection(books, excludedFromSite, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
 			return b.Authors
 		}),
-		Narrators: personSection(books, hidden, narratorsDir, readFormat, func(b *audiobooks.Audiobook) []string {
-			return b.Narrators
-		}),
-		Genres: genreSection(books, hidden),
-		Tags: personSection(books, hidden, tagsDir, plainFormat, func(b *audiobooks.Audiobook) []string {
+		Narrators: personSection(
+			books,
+			excludedFromSite,
+			narratorsDir,
+			readFormat,
+			func(b *audiobooks.Audiobook) []string {
+				return b.Narrators
+			},
+		),
+		Genres: genreSection(books, excludedFromSite),
+		Tags: personSection(books, excludedFromSite, tagsDir, plainFormat, func(b *audiobooks.Audiobook) []string {
 			return b.Tags
 		}),
 	}
@@ -149,7 +157,7 @@ func mainFeed(books []audiobooks.Audiobook, excluded []audiobooks.Genre) Feed {
 // server returned an empty feed rather than a 404 for a valid but unused genre,
 // and an existing subscription to one must not start 404ing. A genre excluded
 // from the site likewise keeps its feed, but is hidden.
-func genreSection(books []audiobooks.Audiobook, hidden []audiobooks.Genre) Section {
+func genreSection(books []audiobooks.Audiobook, excludedFromSite []audiobooks.Genre) Section {
 	genres := audiobooks.AllGenres()
 	names := make([]Name, 0, len(genres))
 	listed := map[string]int{}
@@ -170,8 +178,8 @@ func genreSection(books []audiobooks.Audiobook, hidden []audiobooks.Genre) Secti
 				Books:       matching,
 				Link:        link,
 			},
-			Listed: without(matching, hidden),
-			Hidden: slices.Contains(hidden, genre),
+			Listed: without(matching, excludedFromSite),
+			Hidden: slices.Contains(excludedFromSite, genre),
 		})
 	}
 	return newSection(genresDir, names, listed)
@@ -186,7 +194,7 @@ func genreSection(books []audiobooks.Audiobook, hidden []audiobooks.Genre) Secti
 // empty.
 func personSection(
 	books []audiobooks.Audiobook,
-	hidden []audiobooks.Genre,
+	excludedFromSite []audiobooks.Genre,
 	dir, descriptionFormat string,
 	names func(*audiobooks.Audiobook) []string,
 ) Section {
@@ -237,7 +245,7 @@ func personSection(
 			listed[variant] = len(sectionNames)
 		}
 		link, paths := feedPaths(dir, name, dedupe(aliases))
-		shown := without(grouped[key], hidden)
+		shown := without(grouped[key], excludedFromSite)
 		sectionNames = append(sectionNames, Name{
 			Feed: Feed{
 				Paths:       paths,
@@ -255,6 +263,10 @@ func personSection(
 
 // newSection gives every name its page, then resolves listed, which maps each
 // spelling a book lists to its name's position in names, to that page's slug.
+//
+// Hidden names take part too, deliberately: a name's slug then stays the same
+// whether or not a genre is excluded, so excluding one never moves another
+// name's page. No shown book lists a hidden name, so nothing links to its slug.
 func newSection(dir string, names []Name, listed map[string]int) Section {
 	assignSlugs(names)
 	slugs := make(map[string]string, len(listed))

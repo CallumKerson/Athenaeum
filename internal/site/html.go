@@ -45,7 +45,7 @@ func shownSections(content *Content) []shownSection {
 	return []shownSection{
 		{&content.Authors, "Authors", "Everyone who wrote something in the library."},
 		{&content.Narrators, "Narrators", "Everyone who read something in the library."},
-		{&content.Genres, "Genres", "Every genre Athenaeum knows, including those nothing is filed under yet."},
+		{&content.Genres, "Genres", "Every genre, including those nothing is filed under yet."},
 		{&content.Tags, "Tags", "Whatever the library's own metadata tags books with."},
 	}
 }
