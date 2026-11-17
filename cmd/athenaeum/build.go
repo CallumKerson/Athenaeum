@@ -98,10 +98,15 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 	if err != nil {
 		return err
 	}
-	excludedGenres, err := cfg.ExclusionsFromMainFeed.GetGenres()
+	excludedFromMainFeed, err := cfg.ExclusionsFromMainFeed.GetGenres()
 	if err != nil {
 		return err
 	}
+	excludedFromSite, err := cfg.ExclusionsFromSite.GetGenres()
+	if err != nil {
+		return err
+	}
+	exclusions := site.Exclusions{MainFeed: excludedFromMainFeed, Site: excludedFromSite}
 
 	start := time.Now()
 	books, cache, err := scanLibrary(cfg, flags, logger)
@@ -115,7 +120,7 @@ func runBuild(cmd *cobra.Command, flags *buildFlags) error {
 	if err != nil {
 		return err
 	}
-	result, err := site.Build(cfg.Site.Root, site.Plan(books, excludedGenres), renderer,
+	result, err := site.Build(cfg.Site.Root, site.Plan(books, exclusions), renderer,
 		site.Options{Covers: covers, Sweep: !flags.noSweep}, logger)
 	if err != nil {
 		return err

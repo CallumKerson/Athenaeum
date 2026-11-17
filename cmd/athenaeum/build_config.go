@@ -32,7 +32,8 @@ type BuildConfig struct {
 	Site                   Site
 	Podcast                Podcast
 	ThirdParty             ThirdParty
-	ExclusionsFromMainFeed ExclusionsFromMainFeed
+	ExclusionsFromMainFeed GenreExclusions
+	ExclusionsFromSite     GenreExclusions
 }
 
 // Media is where the audiobook library lives.
@@ -64,13 +65,16 @@ type ThirdParty struct {
 	NotifyOvercast bool
 }
 
-// ExclusionsFromMainFeed names genres that appear in their own feed but not in
-// the main one.
-type ExclusionsFromMainFeed struct {
+// GenreExclusions names genres to leave out of part of the site. Under
+// ExclusionsFromMainFeed their books are left out of the main feed; under
+// ExclusionsFromSite they are left out of the HTML pages, along with any
+// author, narrator or tag with no other books. Either way every feed is still
+// published, so existing subscriptions keep working.
+type GenreExclusions struct {
 	Genres []string
 }
 
-func (e ExclusionsFromMainFeed) GetGenres() ([]audiobooks.Genre, error) {
+func (e GenreExclusions) GetGenres() ([]audiobooks.Genre, error) {
 	genres := make([]audiobooks.Genre, 0, len(e.Genres))
 	for _, genreName := range e.Genres {
 		genre, err := audiobooks.ParseGenre(genreName)

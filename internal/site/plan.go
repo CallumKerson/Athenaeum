@@ -55,6 +55,14 @@ type Name struct {
 	// lowercase-hyphen names that need no escaping and cannot fold together on a
 	// case-insensitive filesystem.
 	Slug string
+	// Listed is the books the name's page lists: its feed's books less any in a
+	// genre excluded from the site.
+	Listed []audiobooks.Audiobook
+	// Hidden names get no page and are left out of their section's index: a genre
+	// that is itself excluded from the site, or any other name whose books are all
+	// excluded. Their feeds are still published, because existing subscriptions
+	// point at them.
+	Hidden bool
 }
 
 // Section is one way of browsing the library, holding a Name per author,
@@ -75,8 +83,9 @@ type Section struct {
 	Slugs map[string]string
 }
 
-// Content is everything a build publishes: the library the HTML pages list, the
-// main feed, and a section for each way of browsing it.
+// Content is everything a build publishes: the library the HTML pages list
+// (less any books excluded from the site), the main feed, and a section for
+// each way of browsing it.
 type Content struct {
 	Books     []audiobooks.Audiobook
 	Main      Feed
@@ -94,25 +103,43 @@ type Content struct {
 	Series []Series
 }
 
+// Exclusions are the genres whose books are left out of the main feed, and out
+// of the HTML pages. They are separate lists because a genre can be unwanted in
+// the main feed yet still worth browsing, or the other way round.
+type Exclusions struct {
+	MainFeed []audiobooks.Genre
+	Site     []audiobooks.Genre
+}
+
 // Plan works out the complete set of feeds and pages to publish for a library.
 //
 // Books are assumed to be sorted already; every feed preserves that order.
-func Plan(books []audiobooks.Audiobook, excludedFromMainFeed []audiobooks.Genre) *Content {
-	authors := personSection(books, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
+//
+// Books in a genre excluded from the site get no page, cover, or place in a
+// series, but every feed still carries them. Book slugs are still worked out
+// from the whole library, so excluding a genre never moves another book's page.
+func Plan(books []audiobooks.Audiobook, exclusions Exclusions) *Content {
+	excludedFromSite := exclusions.Site
+	shown := without(books, excludedFromSite)
+	authors := personSection(books, excludedFromSite, authorsDir, byFormat, func(b *audiobooks.Audiobook) []string {
 		return b.Authors
 	})
 	return &Content{
-		Books:     books,
-		Covers:    coverPaths(books),
+		Books:     shown,
+		Covers:    coverPaths(shown),
 		BookSlugs: bookSlugs(books),
-		Series:    seriesGroups(books, authors.Slugs),
-		Main:      mainFeed(books, excludedFromMainFeed),
+		Series:    seriesGroups(shown, authors.Slugs),
+		Main:      mainFeed(books, exclusions.MainFeed),
 		Authors:   authors,
-		Narrators: personSection(books, narratorsDir, readFormat, func(b *audiobooks.Audiobook) []string {
-			return b.Narrators
-		}),
-		Genres: genreSection(books),
-		Tags: personSection(books, tagsDir, plainFormat, func(b *audiobooks.Audiobook) []string {
+		Narrators: personSection(
+			books,
+			excludedFromSite,
+			narratorsDir,
+			readFormat,
+			func(b *audiobooks.Audiobook) []string { return b.Narrators },
+		),
+		Genres: genreSection(books, excludedFromSite),
+		Tags: personSection(books, excludedFromSite, tagsDir, plainFormat, func(b *audiobooks.Audiobook) []string {
 			return b.Tags
 		}),
 	}
@@ -135,26 +162,21 @@ func feeds(content *Content) []*Feed {
 }
 
 func mainFeed(books []audiobooks.Audiobook, excluded []audiobooks.Genre) Feed {
-	included := make([]audiobooks.Audiobook, 0, len(books))
-	for index := range books {
-		if !hasAnyGenre(&books[index], excluded) {
-			included = append(included, books[index])
-		}
-	}
 	mainPath := path.Join(podcastDir, feedName)
 	return Feed{
 		Paths:       []string{mainPath},
 		Title:       allTitle,
 		Description: allSummary,
-		Books:       included,
+		Books:       without(books, excluded),
 		Link:        mainPath,
 	}
 }
 
 // genreSection holds every defined genre, including those with no books. The
 // server returned an empty feed rather than a 404 for a valid but unused genre,
-// and an existing subscription to one must not start 404ing.
-func genreSection(books []audiobooks.Audiobook) Section {
+// and an existing subscription to one must not start 404ing. A genre excluded
+// from the site likewise keeps its feed, but is hidden.
+func genreSection(books []audiobooks.Audiobook, excludedFromSite []audiobooks.Genre) Section {
 	genres := audiobooks.AllGenres()
 	names := make([]Name, 0, len(genres))
 	listed := map[string]int{}
@@ -167,13 +189,17 @@ func genreSection(books []audiobooks.Audiobook) Section {
 		}
 		link, paths := feedPaths(genresDir, genre.String(), genreAliases(genre))
 		listed[genre.String()] = len(names)
-		names = append(names, Name{Feed: Feed{
-			Paths:       paths,
-			Title:       genre.String(),
-			Description: fmt.Sprintf(plainFormat, genre),
-			Books:       matching,
-			Link:        link,
-		}})
+		names = append(names, Name{
+			Feed: Feed{
+				Paths:       paths,
+				Title:       genre.String(),
+				Description: fmt.Sprintf(plainFormat, genre),
+				Books:       matching,
+				Link:        link,
+			},
+			Listed: without(matching, excludedFromSite),
+			Hidden: slices.Contains(excludedFromSite, genre),
+		})
 	}
 	return newSection(genresDir, names, listed)
 }
@@ -182,9 +208,12 @@ func genreSection(books []audiobooks.Audiobook) Section {
 // server's case- and whitespace-insensitive comparison.
 //
 // Unlike genres, a name with no books gets no file at all — its absence is what
-// produces the 404 the server used to return.
+// produces the 404 the server used to return. One whose books are all in genres
+// excluded from the site keeps its feed but is hidden, since its page would be
+// empty.
 func personSection(
 	books []audiobooks.Audiobook,
+	excludedFromSite []audiobooks.Genre,
 	dir, descriptionFormat string,
 	names func(*audiobooks.Audiobook) []string,
 ) Section {
@@ -235,19 +264,28 @@ func personSection(
 			listed[variant] = len(sectionNames)
 		}
 		link, paths := feedPaths(dir, name, dedupe(aliases))
-		sectionNames = append(sectionNames, Name{Feed: Feed{
-			Paths:       paths,
-			Title:       name,
-			Description: fmt.Sprintf(descriptionFormat, name),
-			Books:       grouped[key],
-			Link:        link,
-		}})
+		shown := without(grouped[key], excludedFromSite)
+		sectionNames = append(sectionNames, Name{
+			Feed: Feed{
+				Paths:       paths,
+				Title:       name,
+				Description: fmt.Sprintf(descriptionFormat, name),
+				Books:       grouped[key],
+				Link:        link,
+			},
+			Listed: shown,
+			Hidden: len(shown) == 0,
+		})
 	}
 	return newSection(dir, sectionNames, listed)
 }
 
 // newSection gives every name its page, then resolves listed, which maps each
 // spelling a book lists to its name's position in names, to that page's slug.
+//
+// Hidden names take part too, deliberately: a name's slug then stays the same
+// whether or not a genre is excluded, so excluding one never moves another
+// name's page. No shown book lists a hidden name, so nothing links to its slug.
 func newSection(dir string, names []Name, listed map[string]int) Section {
 	assignSlugs(names)
 	slugs := make(map[string]string, len(listed))
@@ -365,6 +403,18 @@ func coverPaths(books []audiobooks.Audiobook) map[string]string {
 		covers[imagePath] = path.Join(coversDir, hex.EncodeToString(sum[:8])+".jpg")
 	}
 	return covers
+}
+
+// without returns the books in none of genres, as a new slice so that filtering
+// can never disturb the slice a feed is rendered from.
+func without(books []audiobooks.Audiobook, genres []audiobooks.Genre) []audiobooks.Audiobook {
+	kept := make([]audiobooks.Audiobook, 0, len(books))
+	for index := range books {
+		if !hasAnyGenre(&books[index], genres) {
+			kept = append(kept, books[index])
+		}
+	}
+	return kept
 }
 
 func hasAnyGenre(book *audiobooks.Audiobook, genres []audiobooks.Genre) bool {

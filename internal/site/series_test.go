@@ -25,7 +25,7 @@ func TestPlanGroupsSeriesInReadingOrder(t *testing.T) {
 		inSeries("A Wizard of Earthsea", "Earthsea", 1),
 		inSeries("The Tombs of Atuan", "Earthsea", 2),
 		book("The Left Hand of Darkness", nil, []string{"Ursula K. Le Guin"}, nil, nil),
-	}, nil)
+	}, Exclusions{})
 
 	require.Len(t, content.Series, 1)
 	assert.Equal(t, "earthsea", content.Series[0].Slug)
@@ -47,7 +47,7 @@ func TestPlanSplitsASeriesTitleByAuthor(t *testing.T) {
 	theirs := inSeries("Theirs One", "Chronicles", 1)
 	theirs.Authors = []string{"Someone Else"}
 
-	content := Plan([]audiobooks.Audiobook{theirs, friends, mine, cowritten}, nil)
+	content := Plan([]audiobooks.Audiobook{theirs, friends, mine, cowritten}, Exclusions{})
 
 	require.Len(t, content.Series, 2)
 	assert.Equal(t, []string{"Mine One", "Ours Two", "Friend's Three"}, seriesTitles(&content.Series[0]))
@@ -70,7 +70,7 @@ func TestPlanSplitsASeriesTitleByAuthor(t *testing.T) {
 func TestPlanMatchesSeriesTitlesLikeOtherNames(t *testing.T) {
 	first := inSeries("Leviathan Wakes", "The Expanse", 1)
 	second := inSeries("Caliban's War", "the expanse", 2)
-	content := Plan([]audiobooks.Audiobook{second, first}, nil)
+	content := Plan([]audiobooks.Audiobook{second, first}, Exclusions{})
 
 	require.Len(t, content.Series, 1)
 	assert.Equal(t, "The Expanse", content.Series[0].Title, "the first book's spelling")
@@ -82,7 +82,7 @@ func TestPlanGroupsSeriesBooksWithoutAuthors(t *testing.T) {
 	first.Authors = nil
 	second := inSeries("Two", "Anonymous Tales", 2)
 	second.Authors = nil
-	content := Plan([]audiobooks.Audiobook{first, second}, nil)
+	content := Plan([]audiobooks.Audiobook{first, second}, Exclusions{})
 
 	require.Len(t, content.Series, 1)
 	assert.Equal(t, []string{"One", "Two"}, seriesTitles(&content.Series[0]))
@@ -107,7 +107,7 @@ func TestBuildWritesSeriesPages(t *testing.T) {
 
 func TestBuildWithoutSeriesLeavesOutTheSection(t *testing.T) {
 	root := t.TempDir()
-	content := Plan([]audiobooks.Audiobook{book("Alone", nil, []string{"A"}, nil, nil)}, nil)
+	content := Plan([]audiobooks.Audiobook{book("Alone", nil, []string{"A"}, nil, nil)}, Exclusions{})
 	_, err := Build(root, content, testRenderer(t), Options{}, testLogger())
 	require.NoError(t, err)
 

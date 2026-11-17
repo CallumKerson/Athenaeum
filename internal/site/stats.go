@@ -45,12 +45,14 @@ type statBar struct {
 
 func statsView(lib *library) *pageView {
 	root := rootFromDir
+	authors := len(pagedNames(&lib.Authors))
+	narrators := len(pagedNames(&lib.Narrators))
 	stats := &statsPage{
 		Totals: []statTotal{
 			{strconv.Itoa(len(lib.Books)), plural(len(lib.Books), "book")},
 			{totalHours(lib.Books), "hours of listening"},
-			{strconv.Itoa(len(lib.Authors.Names)), plural(len(lib.Authors.Names), "author")},
-			{strconv.Itoa(len(lib.Narrators.Names)), plural(len(lib.Narrators.Names), "narrator")},
+			{strconv.Itoa(authors), plural(authors, "author")},
+			{strconv.Itoa(narrators), plural(narrators, "narrator")},
 			{strconv.Itoa(len(lib.Series)), "series"},
 		},
 		Genres:    namesByHours(root, &lib.Genres, len(lib.Genres.Names)),
@@ -81,8 +83,8 @@ func namesByHours(root string, section *Section, limit int) []statBar {
 	var names []ranked
 	for index := range section.Names {
 		name := &section.Names[index]
-		if len(name.Books) > 0 {
-			names = append(names, ranked{name, totalDuration(name.Books).Minutes()})
+		if len(name.Listed) > 0 {
+			names = append(names, ranked{name, totalDuration(name.Listed).Minutes()})
 		}
 	}
 	slices.SortStableFunc(names, func(a, b ranked) int { return cmp.Compare(b.minutes, a.minutes) })
@@ -93,8 +95,8 @@ func namesByHours(root string, section *Section, limit int) []statBar {
 		bars = append(bars, statBar{
 			Label: entry.name.Title,
 			Href:  dirHref(root, section.Dir, entry.name.Slug),
-			Value: hoursLabel(totalDuration(entry.name.Books)),
-			Note:  strconv.Itoa(len(entry.name.Books)) + " " + plural(len(entry.name.Books), "book"),
+			Value: hoursLabel(totalDuration(entry.name.Listed)),
+			Note:  strconv.Itoa(len(entry.name.Listed)) + " " + plural(len(entry.name.Listed), "book"),
 			Share: share(entry.minutes, names[0].minutes),
 		})
 	}

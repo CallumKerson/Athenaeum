@@ -40,7 +40,7 @@ func TestHomeViewCountsTheLibrary(t *testing.T) {
 	second.Duration = 20 * time.Hour
 	third := book("The Dispossessed", []audiobooks.Genre{audiobooks.SciFi}, []string{"Ursula K. Le Guin"}, nil, nil)
 	third.Duration = 10 * time.Hour
-	content := Plan([]audiobooks.Audiobook{first, second, third}, nil)
+	content := Plan([]audiobooks.Audiobook{first, second, third}, Exclusions{})
 
 	home := homeView(newLibrary(content, nil, nil)).Home
 

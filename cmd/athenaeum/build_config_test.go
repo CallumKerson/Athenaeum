@@ -34,6 +34,9 @@ NotifyOvercast = true
 
 [ExclusionsFromMainFeed]
 Genres = ["Erotica"]
+
+[ExclusionsFromSite]
+Genres = ["Horror"]
 `), 0o600))
 
 	var out bytes.Buffer
@@ -48,6 +51,7 @@ Genres = ["Erotica"]
 	assert.False(t, cfg.Podcast.Explicit)
 	assert.True(t, cfg.ThirdParty.NotifyOvercast)
 	assert.Equal(t, []string{"Erotica"}, cfg.ExclusionsFromMainFeed.Genres)
+	assert.Equal(t, []string{"Horror"}, cfg.ExclusionsFromSite.Genres)
 	assert.Empty(t, out.String())
 }
 
@@ -147,21 +151,21 @@ func TestDefaultPathsFallBackToHome(t *testing.T) {
 }
 
 func TestGetGenres(t *testing.T) {
-	genres, err := ExclusionsFromMainFeed{Genres: []string{"Erotica", "sci-fi"}}.GetGenres()
+	genres, err := GenreExclusions{Genres: []string{"Erotica", "sci-fi"}}.GetGenres()
 
 	require.NoError(t, err)
 	assert.Equal(t, []audiobooks.Genre{audiobooks.Erotica, audiobooks.SciFi}, genres)
 }
 
 func TestGetGenresEmpty(t *testing.T) {
-	genres, err := ExclusionsFromMainFeed{}.GetGenres()
+	genres, err := GenreExclusions{}.GetGenres()
 
 	require.NoError(t, err)
 	assert.Empty(t, genres)
 }
 
 func TestGetGenresUnknownGenre(t *testing.T) {
-	_, err := ExclusionsFromMainFeed{Genres: []string{"Erotica", "spycraft"}}.GetGenres()
+	_, err := GenreExclusions{Genres: []string{"Erotica", "spycraft"}}.GetGenres()
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "spycraft")

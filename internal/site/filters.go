@@ -54,7 +54,7 @@ func allBooksFilters(lib *library) *bookFilters {
 	filters := &bookFilters{Sorts: bookSorts}
 	for index := range lib.Genres.Names {
 		genre := &lib.Genres.Names[index]
-		if len(genre.Books) > 0 {
+		if len(genre.Listed) > 0 {
 			filters.Genres = append(filters.Genres, genreChip{Name: genre.Title, Slug: genre.Slug})
 		}
 	}

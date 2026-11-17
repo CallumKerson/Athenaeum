@@ -26,7 +26,7 @@ func TestStatsCountTheWholeLibrary(t *testing.T) {
 		released("New", 2019, 30, "Rosamund"),
 		book("Undated", nil, []string{"A"}, nil, nil),
 	}
-	content := Plan(books, nil)
+	content := Plan(books, Exclusions{})
 	stats := statsView(newLibrary(content, nil, nil)).Stats
 
 	assert.Equal(t, statTotal{"4", "books"}, stats.Totals[0])
@@ -75,7 +75,7 @@ func TestStatsRankOnlyTheTopNarratorsWithBooks(t *testing.T) {
 			"Book "+strconv.Itoa(index), 2000, time.Duration(index+1), "Narrator "+strconv.Itoa(index),
 		))
 	}
-	content := Plan(books, nil)
+	content := Plan(books, Exclusions{})
 	content.Narrators.Names = append(content.Narrators.Names, Name{Feed: Feed{Title: "Nobody"}, Slug: "nobody"})
 
 	narrators := statsView(newLibrary(content, nil, nil)).Stats.Narrators

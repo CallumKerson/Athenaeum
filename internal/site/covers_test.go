@@ -40,7 +40,7 @@ var coverPathPattern = regexp.MustCompile(`^covers/[0-9a-f]{16}\.jpg$`)
 func TestPlanNamesAThumbnailForEveryCover(t *testing.T) {
 	content := Plan(
 		[]audiobooks.Audiobook{withCover("One"), withCover("Two"), book("Bare", nil, []string{"Author"}, nil, nil)},
-		nil,
+		Exclusions{},
 	)
 
 	require.Len(t, content.Covers, 2, "a book without a cover gets no thumbnail")
@@ -48,13 +48,16 @@ func TestPlanNamesAThumbnailForEveryCover(t *testing.T) {
 	assert.Regexp(t, coverPathPattern, content.Covers["/Two/Two.jpg"])
 	assert.NotEqual(t, content.Covers["/One/One.jpg"], content.Covers["/Two/Two.jpg"])
 
-	again := Plan([]audiobooks.Audiobook{withCover("Two"), withCover("One")}, nil)
+	again := Plan([]audiobooks.Audiobook{withCover("Two"), withCover("One")}, Exclusions{})
 	assert.Equal(t, content.Covers["/One/One.jpg"], again.Covers["/One/One.jpg"], "stable between builds")
 }
 
 func TestBuildPublishesCoversAndShowsThem(t *testing.T) {
 	root := t.TempDir()
-	content := Plan([]audiobooks.Audiobook{withCover("One"), book("Bare", nil, []string{"Author"}, nil, nil)}, nil)
+	content := Plan(
+		[]audiobooks.Audiobook{withCover("One"), book("Bare", nil, []string{"Author"}, nil, nil)},
+		Exclusions{},
+	)
 
 	_, err := Build(root, content, testRenderer(t), Options{Covers: fakeCovers{}, Sweep: true}, testLogger())
 	require.NoError(t, err)
@@ -70,7 +73,7 @@ func TestBuildPublishesCoversAndShowsThem(t *testing.T) {
 
 func TestBuildLeavesOutACoverThatCannotBeRead(t *testing.T) {
 	root := t.TempDir()
-	content := Plan([]audiobooks.Audiobook{withCover("One"), withCover("Broken")}, nil)
+	content := Plan([]audiobooks.Audiobook{withCover("One"), withCover("Broken")}, Exclusions{})
 	covers := fakeCovers{broken: map[string]bool{"/Broken/Broken.jpg": true}}
 
 	_, err := Build(root, content, testRenderer(t), Options{Covers: covers, Sweep: true}, testLogger())
@@ -86,7 +89,7 @@ func TestBuildWithoutCoversPublishesNone(t *testing.T) {
 	root := t.TempDir()
 	_, err := Build(
 		root,
-		Plan([]audiobooks.Audiobook{withCover("One")}, nil),
+		Plan([]audiobooks.Audiobook{withCover("One")}, Exclusions{}),
 		testRenderer(t),
 		Options{Sweep: true},
 		testLogger(),
@@ -98,14 +101,14 @@ func TestBuildWithoutCoversPublishesNone(t *testing.T) {
 
 func TestBuildSweepsTheThumbnailOfARemovedCover(t *testing.T) {
 	root := t.TempDir()
-	content := Plan([]audiobooks.Audiobook{withCover("One")}, nil)
+	content := Plan([]audiobooks.Audiobook{withCover("One")}, Exclusions{})
 	opts := Options{Covers: fakeCovers{}, Sweep: true}
 	_, err := Build(root, content, testRenderer(t), opts, testLogger())
 	require.NoError(t, err)
 	thumbnail := filepath.Join(root, filepath.FromSlash(content.Covers["/One/One.jpg"]))
 	require.FileExists(t, thumbnail)
 
-	_, err = Build(root, Plan([]audiobooks.Audiobook{book("One", nil, []string{"Author"}, nil, nil)}, nil),
+	_, err = Build(root, Plan([]audiobooks.Audiobook{book("One", nil, []string{"Author"}, nil, nil)}, Exclusions{}),
 		testRenderer(t), opts, testLogger())
 	require.NoError(t, err)
 	assert.NoFileExists(t, thumbnail)

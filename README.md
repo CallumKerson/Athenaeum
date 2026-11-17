@@ -51,6 +51,24 @@ Links between pages are relative, so the site works wherever it is mounted, and
 every page is readable without JavaScript — the search box and the copy-URL
 buttons appear only when there is JavaScript to run them.
 
+### Leaving genres out
+
+Two optional lists keep a genre's books out of part of the site:
+
+```toml
+[ExclusionsFromMainFeed]
+Genres = ["Erotica"]
+
+[ExclusionsFromSite]
+Genres = ["Erotica"]
+```
+
+- `ExclusionsFromMainFeed` leaves the books out of the main feed.
+- `ExclusionsFromSite` leaves them out of the HTML pages, along with the genre's own page and any author, narrator or tag with no other books.
+
+Every feed is still written either way, so existing subscriptions keep working.
+The two lists are independent: the home page links to the main feed, so to keep a genre out of both, list it in both.
+
 ### Serving the site
 
 The site references the audiobook files under `/media/`, so the web server needs to serve the library at that prefix alongside the generated tree.

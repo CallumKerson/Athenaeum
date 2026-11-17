@@ -47,7 +47,7 @@ func shownSections(content *Content) []shownSection {
 	return []shownSection{
 		{&content.Authors, "Authors", "Everyone who wrote something in the library."},
 		{&content.Narrators, "Narrators", "Everyone who read something in the library."},
-		{&content.Genres, "Genres", "Every genre Athenaeum knows, including those nothing is filed under yet."},
+		{&content.Genres, "Genres", "Every genre, including those nothing is filed under yet."},
 		{&content.Tags, "Tags", "Whatever the library's own metadata tags books with."},
 	}
 }
@@ -220,8 +220,7 @@ func buildHTML(lib *library) ([]htmlPage, error) {
 			planned,
 			plannedPage{tpls.entries, path.Join(section.Dir, indexName), sectionView(lib, section)},
 		)
-		for index := range section.Names {
-			name := &section.Names[index]
+		for _, name := range pagedNames(section.Section) {
 			planned = append(planned, plannedPage{
 				tpls.books, path.Join(section.Dir, name.Slug, indexName), nameView(lib, section, name),
 			})
@@ -309,10 +308,10 @@ type genreTile struct {
 
 // homeView describes the home page. It shows the books in the main feed, which
 // its subscribe button is for, so genres kept out of that feed stay off the
-// front page too.
+// front page too, as do genres kept off the site.
 func homeView(lib *library) *pageView {
 	root := rootFromRoot
-	featured := lib.Main.Books
+	featured := onHomePage(lib, lib.Main.Books)
 	listening := totalDuration(featured)
 	home := &homePage{
 		Books:      len(featured),
@@ -328,7 +327,7 @@ func homeView(lib *library) *pageView {
 	}
 	for index := range lib.Genres.Names {
 		genre := &lib.Genres.Names[index]
-		books := inMainFeed(lib, genre.Books)
+		books := onHomePage(lib, genre.Books)
 		if len(books) == 0 {
 			continue
 		}
@@ -379,15 +378,19 @@ func mosaic(lib *library, root string, books []audiobooks.Audiobook) []bookView 
 	return views
 }
 
-// inMainFeed keeps the books that the main feed includes.
-func inMainFeed(lib *library, books []audiobooks.Audiobook) []audiobooks.Audiobook {
-	included := make(map[string]bool, len(lib.Main.Books))
+// onHomePage keeps the books that are both in the main feed and on the site.
+func onHomePage(lib *library, books []audiobooks.Audiobook) []audiobooks.Audiobook {
+	inMainFeed := make(map[string]bool, len(lib.Main.Books))
 	for index := range lib.Main.Books {
-		included[lib.Main.Books[index].Path] = true
+		inMainFeed[lib.Main.Books[index].Path] = true
+	}
+	onSite := make(map[string]bool, len(lib.Books))
+	for index := range lib.Books {
+		onSite[lib.Books[index].Path] = true
 	}
 	var kept []audiobooks.Audiobook
 	for index := range books {
-		if included[books[index].Path] {
+		if inMainFeed[books[index].Path] && onSite[books[index].Path] {
 			kept = append(kept, books[index])
 		}
 	}
@@ -451,13 +454,12 @@ func sectionView(lib *library, section shownSection) *pageView {
 	if section.Section == &lib.Genres {
 		view.Sorts = genreSorts
 	}
-	for index := range section.Names {
-		name := &section.Names[index]
+	for _, name := range pagedNames(section.Section) {
 		view.Entries = append(view.Entries, describeEntry(
 			name.Title,
 			dirHref(rootFromDir, section.Dir, name.Slug),
 			feedHref(rootFromDir, &name.Feed),
-			name.Books,
+			name.Listed,
 		))
 	}
 	return view
@@ -471,8 +473,19 @@ func nameView(lib *library, section shownSection, name *Name) *pageView {
 		Root:     rootFromSubDir,
 		FeedHref: feedHref(rootFromSubDir, &name.Feed),
 		Nav:      navLinks(lib, rootFromSubDir, section.Dir),
-		Books:    bookViews(lib, rootFromSubDir, name.Books),
+		Books:    bookViews(lib, rootFromSubDir, name.Listed),
 	}
+}
+
+// pagedNames lists the names in a section that get a page, in section order.
+func pagedNames(section *Section) []*Name {
+	paged := make([]*Name, 0, len(section.Names))
+	for index := range section.Names {
+		if !section.Names[index].Hidden {
+			paged = append(paged, &section.Names[index])
+		}
+	}
+	return paged
 }
 
 // navLinks links every top-level section from a page whose prefix back to the

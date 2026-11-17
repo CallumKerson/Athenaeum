@@ -29,7 +29,7 @@ func TestPlanGivesEveryBookItsOwnSlug(t *testing.T) {
 	second.Path = "/Frank Herbert/2006/Dune.m4b"
 	other := book("What If? 2", nil, []string{"Randall Munroe"}, nil, nil)
 
-	slugs := Plan([]audiobooks.Audiobook{second, other, first}, nil).BookSlugs
+	slugs := Plan([]audiobooks.Audiobook{second, other, first}, Exclusions{}).BookSlugs
 
 	assert.Equal(t, "dune", slugs[first.Path], "the first path in order keeps the plain slug")
 	assert.Equal(t, "dune-2", slugs[second.Path])
@@ -77,7 +77,7 @@ func TestBookPageEscapesTheDescription(t *testing.T) {
 		Text:   "<p>Fine &lt;script&gt;alert(1)&lt;/script&gt;</p>",
 		Format: description.HTML,
 	}
-	content := Plan([]audiobooks.Audiobook{audiobook}, nil)
+	content := Plan([]audiobooks.Audiobook{audiobook}, Exclusions{})
 
 	view := bookPageView(newLibrary(content, nil, nil), &content.Books[0])
 	require.Equal(t, []string{"Fine <script>alert(1)</script>"}, view.Book.Paragraphs)
@@ -99,7 +99,7 @@ func TestBookPageListsTheSeriesInReadingOrder(t *testing.T) {
 		book("The Left Hand of Darkness", nil, []string{"Ursula K. Le Guin"}, nil, nil),
 		book("Someone Else's Book", nil, []string{"Someone Else"}, nil, nil),
 	}
-	content := Plan(books, nil)
+	content := Plan(books, Exclusions{})
 	lib := newLibrary(content, nil, nil)
 	current := &content.Books[3]
 
@@ -122,7 +122,7 @@ func TestBookPageListsTheSeriesInReadingOrder(t *testing.T) {
 }
 
 func TestBookPageWithoutASeriesListsNone(t *testing.T) {
-	content := Plan([]audiobooks.Audiobook{inSeries("Alone", "Solo", 1)}, nil)
+	content := Plan([]audiobooks.Audiobook{inSeries("Alone", "Solo", 1)}, Exclusions{})
 	view := bookPageView(newLibrary(content, nil, nil), &content.Books[0])
 	assert.Empty(t, view.Book.SeriesBooks, "a series of one has nothing else to show")
 	assert.Empty(t, view.Book.AudioURL, "no renderer, no player")
@@ -144,7 +144,7 @@ func TestBookPageSeriesIsTheAuthorsOwn(t *testing.T) {
 	mineToo := inSeries("Mine Two", "Chronicles", 2)
 	theirs := inSeries("Theirs One", "Chronicles", 1)
 	theirs.Authors = []string{"Someone Else"}
-	content := Plan([]audiobooks.Audiobook{mine, mineToo, theirs}, nil)
+	content := Plan([]audiobooks.Audiobook{mine, mineToo, theirs}, Exclusions{})
 
 	view := bookPageView(newLibrary(content, nil, nil), &content.Books[0])
 

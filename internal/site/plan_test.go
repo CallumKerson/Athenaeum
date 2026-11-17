@@ -36,7 +36,7 @@ func TestPlanExcludesGenresFromMainFeedOnly(t *testing.T) {
 		book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, nil, nil),
 	}
 
-	pages := Plan(books, []audiobooks.Genre{audiobooks.Erotica})
+	pages := Plan(books, Exclusions{MainFeed: []audiobooks.Genre{audiobooks.Erotica}})
 
 	main := feedAt(t, pages, "podcast/feed.rss")
 	require.Len(t, main.Books, 1)
@@ -48,12 +48,52 @@ func TestPlanExcludesGenresFromMainFeedOnly(t *testing.T) {
 	assert.Len(t, feedAt(t, pages, "podcast/authors/B/feed.rss").Books, 1)
 }
 
+func TestPlanHidesGenresExcludedFromTheSiteButKeepsTheirFeeds(t *testing.T) {
+	books := []audiobooks.Audiobook{
+		book("Clean", []audiobooks.Genre{audiobooks.Fantasy}, []string{"A"}, []string{"N"}, nil),
+		book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, []string{"N"}, []string{"T"}),
+		book("Mixed", []audiobooks.Genre{audiobooks.Romance, audiobooks.Erotica}, []string{"A"}, nil, nil),
+	}
+
+	content := Plan(books, Exclusions{Site: []audiobooks.Genre{audiobooks.Erotica}})
+
+	assert.Equal(t, []string{"Clean"}, bookTitles(content.Books))
+	// Only the pages filter: every feed keeps every book.
+	assert.Len(t, feedAt(t, content, "podcast/feed.rss").Books, 3)
+	assert.Len(t, feedAt(t, content, "podcast/genre/Erotica/feed.rss").Books, 2)
+	assert.Len(t, feedAt(t, content, "podcast/authors/B/feed.rss").Books, 1)
+
+	assert.Equal(t, []string{"Clean"}, bookTitles(nameTitled(t, &content.Authors, "A").Listed))
+	assert.Equal(t, []string{"Clean"}, bookTitles(nameTitled(t, &content.Narrators, "N").Listed))
+	assert.True(t, nameTitled(t, &content.Authors, "B").Hidden)
+	assert.True(t, nameTitled(t, &content.Tags, "T").Hidden)
+	assert.True(t, nameTitled(t, &content.Genres, "Erotica").Hidden)
+	// Romance's only book is excluded, but an empty genre keeps its page.
+	assert.False(t, nameTitled(t, &content.Genres, "Romance").Hidden)
+	assert.Empty(t, nameTitled(t, &content.Genres, "Romance").Listed)
+}
+
+func bookTitles(books []audiobooks.Audiobook) []string {
+	found := make([]string, 0, len(books))
+	for index := range books {
+		found = append(found, books[index].Title)
+	}
+	return found
+}
+
+func nameTitled(t *testing.T, section *Section, title string) *Name {
+	t.Helper()
+	index := slices.IndexFunc(section.Names, func(name Name) bool { return name.Title == title })
+	require.GreaterOrEqual(t, index, 0, "no %s in %s", title, section.Dir)
+	return &section.Names[index]
+}
+
 // A valid genre with no books returned an empty feed rather than a 404, so an
 // existing subscription to one must not start failing.
 func TestPlanPublishesEveryGenreEvenWhenEmpty(t *testing.T) {
 	pages := Plan([]audiobooks.Audiobook{
 		book("Only", []audiobooks.Genre{audiobooks.Fantasy}, []string{"A"}, nil, nil),
-	}, nil)
+	}, Exclusions{})
 
 	for _, genre := range audiobooks.AllGenres() {
 		page := feedAt(t, pages, "podcast/genre/"+genre.String()+"/feed.rss")
@@ -67,7 +107,7 @@ func TestPlanPublishesEveryGenreEvenWhenEmpty(t *testing.T) {
 func TestPlanOmitsNamesWithNoBooks(t *testing.T) {
 	pages := Plan([]audiobooks.Audiobook{
 		book("Only", []audiobooks.Genre{audiobooks.Fantasy}, []string{"A"}, nil, nil),
-	}, nil)
+	}, Exclusions{})
 
 	published := map[string]bool{}
 	for _, planned := range feeds(pages) {
@@ -89,7 +129,7 @@ func TestPlanGroupsNameVariants(t *testing.T) {
 		book("Second", nil, []string{"A"}, []string{"full cast"}, nil),
 	}
 
-	pages := Plan(books, nil)
+	pages := Plan(books, Exclusions{})
 
 	page := feedAt(t, pages, "podcast/narrators/Full Cast/feed.rss")
 	assert.Len(t, page.Books, 2)
@@ -107,7 +147,7 @@ func TestPlanPublishesEverySpellingSeen(t *testing.T) {
 	pages := Plan([]audiobooks.Audiobook{
 		book("First", nil, []string{"V.E. Schwab"}, nil, nil),
 		book("Second", nil, []string{"V. E. Schwab"}, nil, nil),
-	}, nil)
+	}, Exclusions{})
 
 	page := feedAt(t, pages, "podcast/authors/V.E. Schwab/feed.rss")
 	assert.Len(t, page.Books, 2)
@@ -123,7 +163,7 @@ func TestPlanPublishesEverySpellingSeen(t *testing.T) {
 func TestPlanCountsABookOncePerFeed(t *testing.T) {
 	pages := Plan([]audiobooks.Audiobook{
 		book("Only", nil, []string{"V.E. Schwab", "V. E. Schwab"}, nil, []string{"tag", "tag"}),
-	}, nil)
+	}, Exclusions{})
 
 	assert.Len(t, feedAt(t, pages, "podcast/authors/V.E. Schwab/feed.rss").Books, 1)
 	assert.Len(t, feedAt(t, pages, "podcast/tags/tag/feed.rss").Books, 1)
@@ -134,7 +174,7 @@ func TestPlanCountsABookOncePerFeed(t *testing.T) {
 func TestPlanAliasesShareCanonicalTitle(t *testing.T) {
 	pages := Plan([]audiobooks.Audiobook{
 		book("Only", nil, []string{"Adrian Tchaikovsky"}, nil, nil),
-	}, nil)
+	}, Exclusions{})
 
 	page := feedAt(t, pages, "podcast/authors/adriantchaikovsky/feed.rss")
 	assert.Equal(t, "Adrian Tchaikovsky", page.Title)
@@ -147,7 +187,7 @@ func TestPlanIsDeterministic(t *testing.T) {
 		book("Second", []audiobooks.Genre{audiobooks.SciFi}, []string{"A"}, []string{"M"}, nil),
 	}
 
-	assert.Equal(t, Plan(books, nil), Plan(books, nil))
+	assert.Equal(t, Plan(books, Exclusions{}), Plan(books, Exclusions{}))
 }
 
 // slugsOf lists each name in a section with the slug of its page.
@@ -163,7 +203,7 @@ func TestPlanAssignsEveryNameAPage(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		book("Only", []audiobooks.Genre{audiobooks.SciFi}, []string{"Ursula K. Le Guin"}, []string{"Full Cast"},
 			[]string{"Hugo Awards"}),
-	}, nil)
+	}, Exclusions{})
 
 	assert.Equal(t, map[string]string{"Ursula K. Le Guin": "ursula-k-le-guin"}, slugsOf(&content.Authors))
 	assert.Equal(t, map[string]string{"Full Cast": "full-cast"}, slugsOf(&content.Narrators))
@@ -182,7 +222,7 @@ func TestPlanGivesCollidingNamesDistinctSlugsInSortedOrder(t *testing.T) {
 		for _, author := range authors {
 			books = append(books, book(author, nil, []string{author}, nil, nil))
 		}
-		content := Plan(books, nil)
+		content := Plan(books, Exclusions{})
 		return slugsOf(&content.Authors)
 	}
 
@@ -202,7 +242,7 @@ func TestPlanGivesEveryNameInASectionADistinctSlug(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		book("First", audiobooks.AllGenres(), colliding, colliding, colliding),
 		book("Second", nil, []string{"Ann  Leckie"}, nil, []string{"ann-leckie"}),
-	}, nil)
+	}, Exclusions{})
 
 	for _, section := range sections(content) {
 		seen := map[string]string{}
@@ -232,7 +272,7 @@ func TestPlanResolvesListedNamesToTheirPages(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		book("First", []audiobooks.Genre{audiobooks.SciFi}, []string{"V.E. Schwab"}, []string{"Full Cast"}, nil),
 		book("Second", nil, []string{"V. E. Schwab", "v.e. schwab"}, []string{"full cast"}, []string{"Tag"}),
-	}, nil)
+	}, Exclusions{})
 
 	pageOf := func(section *Section, listed string) string {
 		t.Helper()
@@ -255,7 +295,7 @@ func TestPlanResolvesListedNamesToTheirPages(t *testing.T) {
 func TestPlanGivesBlankNamesNoPage(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		book("Only", nil, []string{"A"}, []string{"  "}, nil),
-	}, nil)
+	}, Exclusions{})
 
 	assert.Empty(t, content.Narrators.Names)
 	assert.NotContains(t, content.Narrators.Slugs, "  ")
@@ -266,7 +306,7 @@ func TestPlanGivesBlankNamesNoPage(t *testing.T) {
 func TestPlanGivesNamesWithNoFeedPathAPage(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		book("Only", nil, []string{".."}, nil, nil),
-	}, nil)
+	}, Exclusions{})
 
 	require.Len(t, content.Authors.Names, 1)
 	assert.Empty(t, content.Authors.Names[0].Paths)

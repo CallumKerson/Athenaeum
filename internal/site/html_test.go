@@ -84,7 +84,7 @@ func TestEveryFeedHasAPage(t *testing.T) {
 // Every section the plan publishes feeds for must also be shown, in the same
 // order, with a heading and blurb to introduce it.
 func TestEverySectionIsShown(t *testing.T) {
-	content := Plan(nil, nil)
+	content := Plan(nil, Exclusions{})
 	shown := shownSections(content)
 	planned := sections(content)
 
@@ -103,7 +103,7 @@ func TestAllBooksPageListsBooksExcludedFromTheMainFeed(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		book("Clean", []audiobooks.Genre{audiobooks.Fantasy}, []string{"A"}, nil, nil),
 		book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, nil, nil),
-	}, []audiobooks.Genre{audiobooks.Erotica})
+	}, Exclusions{MainFeed: []audiobooks.Genre{audiobooks.Erotica}})
 
 	_, err := Build(root, content, testRenderer(t), Options{Sweep: true}, testLogger())
 	require.NoError(t, err)
@@ -114,6 +114,43 @@ func TestAllBooksPageListsBooksExcludedFromTheMainFeed(t *testing.T) {
 	assert.Contains(t, string(page), "Spicy")
 }
 
+// A genre excluded from the site leaves no trace in the pages: not its books,
+// not its own page, and not the pages of names that have no other books.
+func TestPagesLeaveOutGenresExcludedFromTheSite(t *testing.T) {
+	root := t.TempDir()
+	spicy := book("Spicy", []audiobooks.Genre{audiobooks.Erotica}, []string{"B"}, []string{"N"}, []string{"T"})
+	spicy.Series = &audiobooks.Series{Title: "Steamy"}
+	content := Plan([]audiobooks.Audiobook{
+		book("Clean", []audiobooks.Genre{audiobooks.Fantasy}, []string{"A"}, []string{"N"}, nil),
+		spicy,
+	}, Exclusions{Site: []audiobooks.Genre{audiobooks.Erotica}})
+
+	_, err := Build(root, content, testRenderer(t), Options{Sweep: true}, testLogger())
+	require.NoError(t, err)
+
+	err = filepath.WalkDir(root, func(fullPath string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil || entry.IsDir() || filepath.Ext(fullPath) != ".html" {
+			return walkErr
+		}
+		page, readErr := os.ReadFile(fullPath)
+		require.NoError(t, readErr)
+		assert.NotContains(t, string(page), "Spicy", fullPath)
+		assert.NotContains(t, string(page), "Erotica", fullPath)
+		assert.NotContains(t, string(page), "Steamy", fullPath)
+		return nil
+	})
+	require.NoError(t, err)
+
+	assert.NoDirExists(t, filepath.Join(root, booksDir, "spicy"))
+	assert.NoDirExists(t, filepath.Join(root, seriesDir, "steamy"))
+	assert.NoDirExists(t, filepath.Join(root, genresDir, "erotica"))
+	assert.NoDirExists(t, filepath.Join(root, authorsDir, "b"))
+	assert.NoDirExists(t, filepath.Join(root, tagsDir, "t"))
+	assert.FileExists(t, filepath.Join(root, narratorsDir, "n", indexName))
+	assert.FileExists(t, filepath.Join(root, podcastDir, genresDir, "Erotica", feedName))
+	assert.FileExists(t, filepath.Join(root, podcastDir, authorsDir, "B", feedName))
+}
+
 // Pages lead with the newest book; a book with no release date has nothing to
 // sort on and goes last.
 func TestBookListsAreNewestFirst(t *testing.T) {
@@ -122,7 +159,7 @@ func TestBookListsAreNewestFirst(t *testing.T) {
 		dated("Oldest", &toml.LocalDate{Year: 1968, Month: 11, Day: 1}),
 		dated("Newest", &toml.LocalDate{Year: 2023, Month: 4, Day: 6}),
 		dated("Middle", &toml.LocalDate{Year: 2019, Month: 7, Day: 16}),
-	}, nil)
+	}, Exclusions{})
 
 	titles := func(views []bookView) []string {
 		found := make([]string, 0, len(views))
@@ -158,7 +195,7 @@ func TestBuildingPagesDoesNotReorderFeeds(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		dated("Oldest", &toml.LocalDate{Year: 1968, Month: 11, Day: 1}),
 		dated("Newest", &toml.LocalDate{Year: 2023, Month: 4, Day: 6}),
-	}, nil)
+	}, Exclusions{})
 
 	before, err := testRenderer(t).Render(content.Main.Books, "Audiobooks", "")
 	require.NoError(t, err)
@@ -176,7 +213,7 @@ func TestBookDateMatchesTheFeed(t *testing.T) {
 	content := Plan([]audiobooks.Audiobook{
 		dated("Dated", &toml.LocalDate{Year: 1968, Month: 11, Day: 1}),
 		dated("Undated", nil),
-	}, nil)
+	}, Exclusions{})
 
 	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 2)
@@ -210,7 +247,7 @@ func TestBookSeriesLine(t *testing.T) {
 			audiobook := book("Earthsea", nil, []string{"Ursula K. Le Guin"}, nil, nil)
 			audiobook.Series = &audiobooks.Series{Title: "Earthsea", Sequence: sequence}
 
-			content := Plan([]audiobooks.Audiobook{audiobook}, nil)
+			content := Plan([]audiobooks.Audiobook{audiobook}, Exclusions{})
 			books := allBooksView(newLibrary(content, nil, nil)).Books
 			require.Len(t, books, 1)
 
@@ -228,7 +265,7 @@ func TestBookSearchTextCoversEveryField(t *testing.T) {
 		Narrators: []string{"Kobna Holdbrook-Smith"},
 		Genres:    []audiobooks.Genre{audiobooks.Fantasy},
 		Tags:      []string{"Hugo Awards"},
-	}}, nil)
+	}}, Exclusions{})
 
 	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 1)
@@ -247,7 +284,7 @@ func TestBookLinksToTheNamesItLists(t *testing.T) {
 		book("First", nil, []string{"Ann Leckie"}, nil, nil),
 		book("Second", []audiobooks.Genre{audiobooks.SciFi}, []string{"Ann-Leckie", "ann leckie"}, []string{"  "},
 			[]string{"Hugo Awards"}),
-	}, nil)
+	}, Exclusions{})
 
 	books := allBooksView(newLibrary(content, nil, nil)).Books
 	require.Len(t, books, 2)
