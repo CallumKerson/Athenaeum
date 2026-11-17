@@ -37,6 +37,7 @@ jobs:
       pull-requests: write
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       # The app token, unlike GITHUB_TOKEN, lets the release PR it opens trigger CI
       - name: Create release app token
@@ -95,3 +96,43 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAP_GITHUB_TOKEN: ${{ steps.tap-token.outputs.token }}
+  # Signs a packslip manifest of the release archives, so mise can install with
+  # `packslip:github.com/CallumKerson/Athenaeum` and verify who built them.
+  # Signing runs without release write access; a separate job uploads the bundle.
+  packslip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [release-please, goreleaser]
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: jdx/packslip@9b72b919ecc4deb6ebf3ec7d5359706e35648543 # v1.11.4
+        id: packslip
+        with:
+          tag: ${{ needs.release-please.outputs.tag_name }}
+          download: athenaeum_*.tar.gz
+          bin: athenaeum
+          upload: false
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: packslip
+          path: ${{ steps.packslip.outputs.bundle }}
+          if-no-files-found: error
+  publish-packslip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [release-please, packslip]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: packslip
+      - name: Upload bundle to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: gh release upload "$TAG" packslip.sigstore.json
