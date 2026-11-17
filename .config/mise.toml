@@ -8,7 +8,7 @@ shellcheck = "0.11.0"
 typos = "1.52.0"
 rumdl = "v0.3.2"
 oxfmt = { depends = "aube", "version" = "0.75.0" }
-aube = "v2.9.0"
+aube = "v2.10.0"
 
 [task_config]
 includes = ["tasks"]
