@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.1](https://github.com/CallumKerson/Athenaeum/compare/v2.3.0...v2.3.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update github.com/gomarkdown/markdown digest to 13f9312 ([#330](https://github.com/CallumKerson/Athenaeum/issues/330)) ([014703c](https://github.com/CallumKerson/Athenaeum/commit/014703cd76eb9251685b7c5e5e2b74acf2c8692a))
+* **deps:** update module github.com/shopspring/decimal to v1.6.0 ([#336](https://github.com/CallumKerson/Athenaeum/issues/336)) ([7ab0fbb](https://github.com/CallumKerson/Athenaeum/commit/7ab0fbbead242ade0e2edf928b2391a77ece2d01))
+
 ## [2.3.0](https://github.com/CallumKerson/Athenaeum/compare/v2.2.0...v2.3.0) (2026-11-16)
 
 
