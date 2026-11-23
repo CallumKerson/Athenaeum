@@ -108,7 +108,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: jdx/packslip@9b72b919ecc4deb6ebf3ec7d5359706e35648543 # v1.11.4
+      - uses: jdx/packslip@e0340e0c1d10c90a434de2b90f3a1ba345923564 # v1.11.4
         id: packslip
         with:
           tag: ${{ needs.release-please.outputs.tag_name }}
