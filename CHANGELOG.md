@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/CallumKerson/Athenaeum/compare/v2.4.1...v2.5.0) (2026-11-23)
+
+
+### Features
+
+* read the date a book was added from its metadata ([#345](https://github.com/CallumKerson/Athenaeum/issues/345)) ([4eff999](https://github.com/CallumKerson/Athenaeum/commit/4eff999ddd16b473437a2540fcc1b8f60a2e6d8c))
+
 ## [2.4.1](https://github.com/CallumKerson/Athenaeum/compare/v2.4.0...v2.4.1) (2026-11-17)
 
 
